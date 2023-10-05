@@ -20,7 +20,10 @@ android {
 
     packagingOptions {
         jniLibs.useLegacyPackaging true
+        resources.excludes.add("META-INF/*")
+
     }
+
 }
 
 dependencies {

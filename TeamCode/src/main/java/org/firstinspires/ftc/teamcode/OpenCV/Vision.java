@@ -11,35 +11,38 @@ import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-@TeleOp(name = "April Tag Detection")
+@TeleOp(name = "vision")
 public class Vision extends LinearOpMode {
 
     @Override
-    public void runOpMode(){
+    public void runOpMode() throws InterruptedException {
         AprilTagProcessor tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
                 .setDrawTagID(true)
                 .setDrawTagOutline(true)
                 .build();
+
         VisionPortal visionPortal = new VisionPortal.Builder()
                 .addProcessor(tagProcessor)
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640,480))
+                .setCameraResolution(new Size(640, 480))
                 .build();
 
         waitForStart();
-        while (opModeIsActive()){
-            if(tagProcessor.getDetections().size() > 0){
+
+        while (!isStopRequested() && opModeIsActive()) {
+            if (tagProcessor.getDetections().size() > 0) {
                 AprilTagDetection tag = tagProcessor.getDetections().get(0);
+                telemetry.addData("-",tag.id);
                 telemetry.addData("x", tag.ftcPose.x);
                 telemetry.addData("y", tag.ftcPose.y);
                 telemetry.addData("z", tag.ftcPose.z);
                 telemetry.addData("roll", tag.ftcPose.roll);
                 telemetry.addData("pitch", tag.ftcPose.pitch);
                 telemetry.addData("yaw", tag.ftcPose.yaw);
-
             }
+            telemetry.addData("-", "outside");
             telemetry.update();
 
         }

@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2021 OpenFTC Team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package org.firstinspires.ftc.teamcode.OpenCV;
 
 import org.opencv.calib3d.Calib3d;
@@ -17,7 +38,8 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 
-public class OpenCVPipeline extends OpenCvPipeline {
+class AprilTagDetectionPipeline extends OpenCvPipeline
+{
     private long nativeApriltagPtr;
     private Mat grey = new Mat();
     private ArrayList<AprilTagDetection> detections = new ArrayList<>();
@@ -46,7 +68,7 @@ public class OpenCVPipeline extends OpenCvPipeline {
     private boolean needToSetDecimation;
     private final Object decimationSync = new Object();
 
-    public void OpenCvPipeline(double tagsize, double fx, double fy, double cx, double cy)
+    public AprilTagDetectionPipeline(double tagsize, double fx, double fy, double cx, double cy)
     {
         this.tagsize = tagsize;
         this.tagsizeX = tagsize;
@@ -61,6 +83,8 @@ public class OpenCVPipeline extends OpenCvPipeline {
         // Allocate a native context object. See the corresponding deletion in the finalizer
         nativeApriltagPtr = AprilTagDetectorJNI.createApriltagDetector(AprilTagDetectorJNI.TagFamily.TAG_36h11.string, 3, 3);
     }
+
+
 
     @Override
     public Mat processFrame(Mat input)
@@ -247,10 +271,10 @@ public class OpenCVPipeline extends OpenCvPipeline {
      * Extracts 6DOF pose from a trapezoid, using a camera intrinsics matrix and the
      * original size of the tag.
      *
-     * @param points       the points which form the trapezoid
+     * @param points the points which form the trapezoid
      * @param cameraMatrix the camera intrinsics matrix
-     * @param tagsizeX     the original width of the tag
-     * @param tagsizeY     the original height of the tag
+     * @param tagsizeX the original width of the tag
+     * @param tagsizeY the original height of the tag
      * @return the 6DOF pose of the camera relative to the tag
      */
     Pose poseFromTrapezoid(Point[] points, Mat cameraMatrix, double tagsizeX , double tagsizeY)
