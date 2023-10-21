@@ -20,9 +20,16 @@ public class HorizontalAlignTest extends LinearOpMode {
     private DcMotorEx rightFrontMotor;
     private DcMotorEx rightBackMotor;
     private DcMotorEx leftBackMotor;
+    private HWMap hwMap;
   
     @Override
     public void runOpMode() throws InterruptedException {
+        hwMap = new HWMap(telemetry, hardwareMap);
+
+        leftFrontMotor = hwMap.leftFrontMotor;
+        rightFrontMotor = hwMap.rightFrontMotor;
+        rightBackMotor = hwMap.rightBackMotor;
+        leftBackMotor = hwMap.leftBackMotor;
 
         tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
@@ -57,14 +64,20 @@ public class HorizontalAlignTest extends LinearOpMode {
     }
 
     public void tele(AprilTagDetection tag){
-        telemetry.addData("-", tag.id);
-        telemetry.addData("x", tag.ftcPose.x);
-        telemetry.addData("y", tag.ftcPose.y);
-        telemetry.addData("z", tag.ftcPose.z);
-        telemetry.addData("roll", tag.ftcPose.roll);
-        telemetry.addData("pitch", tag.ftcPose.pitch);
-        telemetry.addData("yaw", tag.ftcPose.yaw);
-        telemetry.addData("-", "outside");
-        telemetry.update();
+        while(true) {
+            if(tagProcessor.getDetections().size() > 0) {
+                telemetry.addData("-", tag.id);
+                telemetry.addData("x", tag.ftcPose.x);
+                telemetry.addData("y", tag.ftcPose.y);
+                telemetry.addData("z", tag.ftcPose.z);
+                telemetry.addData("roll", tag.ftcPose.roll);
+                telemetry.addData("pitch", tag.ftcPose.pitch);
+                telemetry.addData("yaw", tag.ftcPose.yaw);
+                telemetry.addData("-", "outside");
+                telemetry.update();
+            } else{
+                telemetry.clearAll();
+            }
+        }
     }
 }
