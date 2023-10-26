@@ -1,44 +1,45 @@
-package org.firstinspires.ftc.teamcode.Core;
+package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.arcrobotics.ftclib.command.button.GamepadButton;
+import com.arcrobotics.ftclib.gamepad.ButtonReader;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 public class Controller {
 
-    private GamepadEx gamepad1;
-    private GamepadEx gamepad2;
+    public GamepadEx gamepad1;
+    public GamepadEx gamepad2;
 
 
-    public GamepadButton y1;
-    public GamepadButton x1;
-    public GamepadButton a1;
-    public GamepadButton b1;
-    public GamepadButton b2;
-    public GamepadButton a2;
-    public GamepadButton x2;
-    public GamepadButton y2;
-    public GamepadButton gamePad1LBumper;
-    public GamepadButton gamePad1RBumper;
-    public GamepadButton gamePad2LBumper;
-    public GamepadButton gamePad2RBumper;
-    public GamepadButton gamePad1DpadUp;
-    public GamepadButton gamePad1DpadDown;
-    public GamepadButton gamePad1DpadRight;
-    public GamepadButton gamePad1DpadLeft;
-    public GamepadButton gamePad1RightStickButton;
-    public GamepadButton gamePad1LeftStickButton;
-    public GamepadButton gamePad2RightStickButton;
-    public GamepadButton gamePad2LeftStickButton;
+    public ButtonReader y1;
+    public ButtonReader x1;
+    public ButtonReader a1;
+    public ButtonReader b1;
+    public ButtonReader b2;
+    public ButtonReader a2;
+    public ButtonReader x2;
+    public ButtonReader y2;
+    public ButtonReader gamePad1LBumper;
+    public ButtonReader gamePad1RBumper;
+    public ButtonReader gamePad2LBumper;
+    public ButtonReader gamePad2RBumper;
+    public ButtonReader gamePad1DpadUp;
+    public ButtonReader gamePad1DpadDown;
+    public ButtonReader gamePad1DpadRight;
+    public ButtonReader gamePad1DpadLeft;
+    public ButtonReader gamePad1RightStickButton;
+    public ButtonReader gamePad1LeftStickButton;
+    public ButtonReader gamePad2RightStickButton;
+    public ButtonReader gamePad2LeftStickButton;
     public double gamepad1X;
     public double gamepad1Y;
     public double gamepad1Rot;
 
-    public GamepadButton gamePad2DpadLeft;
-    public GamepadButton gamePad2DpadRight;
-    public GamepadButton gamePad2DpadDown;
-    public GamepadButton gamePad2DpadUp;
+    public ButtonReader gamePad2DpadLeft;
+    public ButtonReader gamePad2DpadRight;
+    public ButtonReader gamePad2DpadDown;
+    public ButtonReader gamePad2DpadUp;
     public double gamepad2Rot;
     public double gamepad2X;
     public double gamepad2Y;
@@ -59,21 +60,21 @@ public class Controller {
         gamepad1Y = gamepad1.getLeftY();
         gamepad1Rot = gamepad1.getRightX();
 
-        a1 = new GamepadButton(gamepad1, GamepadKeys.Button.A);
-        b1 = new GamepadButton(gamepad1, GamepadKeys.Button.B);
-        x1 = new GamepadButton(gamepad1, GamepadKeys.Button.X);
-        y1 = new GamepadButton(gamepad1, GamepadKeys.Button.Y);
-        
-        gamePad1LBumper = new GamepadButton(gamepad1, GamepadKeys.Button.LEFT_BUMPER);
-        gamePad1RBumper = new GamepadButton(gamepad1, GamepadKeys.Button.RIGHT_BUMPER);
-        
-        gamePad1DpadUp = new GamepadButton(gamepad1, GamepadKeys.Button.DPAD_UP);
-        gamePad1DpadDown = new GamepadButton(gamepad1, GamepadKeys.Button.DPAD_DOWN);
-        gamePad1DpadLeft = new GamepadButton(gamepad1, GamepadKeys.Button.DPAD_LEFT);
-        gamePad1DpadRight = new GamepadButton(gamepad1, GamepadKeys.Button.DPAD_RIGHT);
-        
-        gamePad1RightStickButton = new GamepadButton(gamepad1, GamepadKeys.Button.RIGHT_STICK_BUTTON);
-        gamePad1LeftStickButton = new GamepadButton(gamepad1, GamepadKeys.Button.LEFT_STICK_BUTTON);
+        a1 = new ButtonReader(gamepad1, GamepadKeys.Button.A);
+        b1 = new ButtonReader(gamepad1, GamepadKeys.Button.B);
+        x1 = new ButtonReader(gamepad1, GamepadKeys.Button.X);
+        y1 = new ButtonReader(gamepad1, GamepadKeys.Button.Y);
+
+        gamePad1LBumper = new ButtonReader(gamepad1, GamepadKeys.Button.LEFT_BUMPER);
+        gamePad1RBumper = new ButtonReader(gamepad1, GamepadKeys.Button.RIGHT_BUMPER);
+
+        gamePad1DpadUp = new ButtonReader(gamepad1, GamepadKeys.Button.DPAD_UP);
+        gamePad1DpadDown = new ButtonReader(gamepad1, GamepadKeys.Button.DPAD_DOWN);
+        gamePad1DpadLeft = new ButtonReader(gamepad1, GamepadKeys.Button.DPAD_LEFT);
+        gamePad1DpadRight = new ButtonReader(gamepad1, GamepadKeys.Button.DPAD_RIGHT);
+
+        gamePad1RightStickButton = new ButtonReader(gamepad1, GamepadKeys.Button.RIGHT_STICK_BUTTON);
+        gamePad1LeftStickButton = new ButtonReader(gamepad1, GamepadKeys.Button.LEFT_STICK_BUTTON);
 
         gamePad1LTrigger = gamepad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         gamePad1RTrigger = gamepad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
@@ -83,21 +84,21 @@ public class Controller {
         gamepad2Y = gamepad2.getLeftY();
         gamepad2Rot = gamepad2.getRightX();
 
-        a2 = new GamepadButton(gamepad2, GamepadKeys.Button.A);
-        b2 = new GamepadButton(gamepad2, GamepadKeys.Button.B);
-        x2 = new GamepadButton(gamepad2, GamepadKeys.Button.X);
-        y2 = new GamepadButton(gamepad2, GamepadKeys.Button.Y);
+        a2 = new ButtonReader(gamepad2, GamepadKeys.Button.A);
+        b2 = new ButtonReader(gamepad2, GamepadKeys.Button.B);
+        x2 = new ButtonReader(gamepad2, GamepadKeys.Button.X);
+        y2 = new ButtonReader(gamepad2, GamepadKeys.Button.Y);
 
-        gamePad2LBumper = new GamepadButton(gamepad2, GamepadKeys.Button.LEFT_BUMPER);
-        gamePad2RBumper = new GamepadButton(gamepad2, GamepadKeys.Button.RIGHT_BUMPER);
+        gamePad2LBumper = new ButtonReader(gamepad2, GamepadKeys.Button.LEFT_BUMPER);
+        gamePad2RBumper = new ButtonReader(gamepad2, GamepadKeys.Button.RIGHT_BUMPER);
 
-        gamePad2DpadUp = new GamepadButton(gamepad2, GamepadKeys.Button.DPAD_UP);
-        gamePad2DpadDown = new GamepadButton(gamepad2, GamepadKeys.Button.DPAD_DOWN);
-        gamePad2DpadLeft = new GamepadButton(gamepad2, GamepadKeys.Button.DPAD_LEFT);
-        gamePad2DpadRight = new GamepadButton(gamepad2, GamepadKeys.Button.DPAD_RIGHT);
+        gamePad2DpadUp = new ButtonReader(gamepad2, GamepadKeys.Button.DPAD_UP);
+        gamePad2DpadDown = new ButtonReader(gamepad2, GamepadKeys.Button.DPAD_DOWN);
+        gamePad2DpadLeft = new ButtonReader(gamepad2, GamepadKeys.Button.DPAD_LEFT);
+        gamePad2DpadRight = new ButtonReader(gamepad2, GamepadKeys.Button.DPAD_RIGHT);
 
-        gamePad2RightStickButton = new GamepadButton(gamepad2, GamepadKeys.Button.RIGHT_STICK_BUTTON);
-        gamePad2LeftStickButton = new GamepadButton(gamepad2, GamepadKeys.Button.LEFT_STICK_BUTTON);
+        gamePad2RightStickButton = new ButtonReader(gamepad2, GamepadKeys.Button.RIGHT_STICK_BUTTON);
+        gamePad2LeftStickButton = new ButtonReader(gamepad2, GamepadKeys.Button.LEFT_STICK_BUTTON);
 
         gamePad2LTrigger = gamepad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         gamePad2RTrigger = gamepad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
