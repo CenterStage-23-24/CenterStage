@@ -24,7 +24,6 @@ public class FieldCentricDrive extends HWMap {
     public double leftFrontPower;
     public double rotationEffectivness = 0.7;
     public double xyEffectivness = 0.9;
-    public float globalPitchAngle;
     private ElapsedTime loopTimer = new ElapsedTime();
 
 
@@ -35,6 +34,7 @@ public class FieldCentricDrive extends HWMap {
         leftFrontMotor = hwMap.getLeftFrontMotor();
         rightBackMotor = hwMap.getRightBackMotor();
         rightFrontMotor = hwMap.getRightFrontMotor();
+        hwMap.initializeIMU();
     }
 
     public void drive(double gamepadX, double gamepadY, double gamepadRot) {
@@ -46,28 +46,18 @@ public class FieldCentricDrive extends HWMap {
         double controllerX = gamepadX * xyEffectivness;
         double controllerY = gamepadY * xyEffectivness;
         double[] controllerVector = {controllerX, controllerY};
-//        telemetry.addData("controllerVector[0]: ", controllerVector[0]);
-//        telemetry.addData("controllerVector[1]: ", controllerVector[1]);
 
         imuMeasure = readFromIMU();
 
         double[] rotatedVector = rotate(controllerVector, imuMeasure);
         double rotatedX = rotatedVector[0];
         double rotatedY = rotatedVector[1];
-//        telemetry.addData("rotatedX: ", rotatedX);
-//        telemetry.addData("rotatedY: ", rotatedY);
-
 
         double theta = Math.atan2(rotatedY, rotatedX);
-//        telemetry.addData("theta: ", theta);
         double power = Math.hypot(rotatedX, rotatedY);
-//        telemetry.addData("power: ", power);
         double sin = Math.sin(theta - Math.PI / 4);
-//        telemetry.addData("sin: ", sin);
         double cos = Math.cos(theta - Math.PI / 4);
-//        telemetry.addData("cos: ", cos);
         double max = Math.max(Math.abs(sin), Math.abs(cos));
-//        telemetry.addData("max: ", max);
 
         leftBackPower = power * sin / max + turn;
         leftFrontPower = power * cos / max + turn;
