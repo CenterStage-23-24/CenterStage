@@ -12,8 +12,8 @@ import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-@Autonomous(name = "HorizontalAlignTest")
-public class HorizontalAlignTest extends LinearOpMode {
+@Autonomous
+public class DropoffTest extends LinearOpMode {
     private AprilTagProcessor tagProcessor;
     private VisionPortal visionPortal;
     private DcMotorEx leftFrontMotor;
@@ -21,7 +21,7 @@ public class HorizontalAlignTest extends LinearOpMode {
     private DcMotorEx rightBackMotor;
     private DcMotorEx leftBackMotor;
     private HWMap hwMap;
-  
+
     @Override
     public void runOpMode() throws InterruptedException {
         hwMap = new HWMap(telemetry, hardwareMap);
@@ -30,6 +30,11 @@ public class HorizontalAlignTest extends LinearOpMode {
         rightFrontMotor = hwMap.rightFrontMotor;
         rightBackMotor = hwMap.rightBackMotor;
         leftBackMotor = hwMap.leftBackMotor;
+
+        double range_t = 20.0;
+        double bearing_t = 20.0;
+        double y_t = 20.0;
+        double yaw_t = 20.0;
 
         tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
@@ -46,6 +51,16 @@ public class HorizontalAlignTest extends LinearOpMode {
 
         waitForStart();
 
+        /*
+        4 things to test:
+        1. CV Drive - driving towards AprilTag using CV nav
+            - CV Values: Range, y
+        2. Distance Sensor Drive - driving towards AprilTag using DS nav
+        3. CV Angular Correction - correcting angle based on CV nav
+            - CV Values: Bearing, Yaw
+        4. Distance Sensor Angular Correction - correcting angle based on DS nav
+
+         */
         drive(0.5);
         while (opModeIsActive()) {
             if (tagProcessor.getDetections().size() > 0) {
@@ -53,10 +68,13 @@ public class HorizontalAlignTest extends LinearOpMode {
                 drive(0.0);
                 tele(tag);
             }
-            else{
-                telemetry.clearAll();
-                telemetry.update();
+            /*
+            if (tagProcessor.getDetections().get(0).ftcPose.range < range_t) {
+                AprilTagDetection tag = tagProcessor.getDetections().get(0);
+                drive(0.0);
+                tele(tag);
             }
+             */
         }
     }
 
@@ -68,14 +86,23 @@ public class HorizontalAlignTest extends LinearOpMode {
     }
 
     public void tele(AprilTagDetection tag){
-        telemetry.addData("-", tag.id);
-        telemetry.addData("x", tag.ftcPose.x);
-        telemetry.addData("y", tag.ftcPose.y);
-        telemetry.addData("z", tag.ftcPose.z);
-        telemetry.addData("roll", tag.ftcPose.roll);
-        telemetry.addData("pitch", tag.ftcPose.pitch);
-        telemetry.addData("yaw", tag.ftcPose.yaw);
-        telemetry.addData("-", "outside");
-        telemetry.update();
+        while(true) {
+            if(tagProcessor.getDetections().size() > 0) {
+                telemetry.addData("-", tag.id);
+                telemetry.addData("x", tag.ftcPose.x);
+                telemetry.addData("y", tag.ftcPose.y);
+                telemetry.addData("z", tag.ftcPose.z);
+                telemetry.addData("roll", tag.ftcPose.roll);
+                telemetry.addData("pitch", tag.ftcPose.pitch);
+                telemetry.addData("yaw", tag.ftcPose.yaw);
+                telemetry.addData("range", tag.ftcPose.range);
+                telemetry.addData("bearing", tag.ftcPose.bearing);
+                telemetry.addData("elevation", tag.ftcPose.elevation);
+                telemetry.addData("-", "outside");
+            } else{
+                telemetry.clearAll();
+            }
+            telemetry.update();
+        }
     }
 }
