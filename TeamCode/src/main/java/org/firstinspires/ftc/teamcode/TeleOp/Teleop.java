@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Core.HWMap;
 public class Teleop extends LinearOpMode {
 
     private Controller controller;
-    private FieldCentricDrive fieldCentricDrive;
+    private FieldCentricDriveAccelerationControl fieldCentricDrive;
 
 
     public void runOpMode() {
@@ -18,7 +18,7 @@ public class Teleop extends LinearOpMode {
 
         try {
             controller = new Controller(gamepad1, gamepad2);
-            fieldCentricDrive = new FieldCentricDrive(telemetry, hardwareMap);
+            fieldCentricDrive = new FieldCentricDriveAccelerationControl(telemetry, hardwareMap);
         } catch (Exception exception) {
             telemetry.addLine("Outside of the while loop:");
             telemetry.addLine(exception.getMessage());
