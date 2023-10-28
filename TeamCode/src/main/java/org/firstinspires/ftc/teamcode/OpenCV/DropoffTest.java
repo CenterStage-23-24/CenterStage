@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -104,5 +105,36 @@ public class DropoffTest extends LinearOpMode {
             }
             telemetry.update();
         }
+    }
+
+    public void alignHeading() {
+        final double leftDistance = hwMap.distanceSensorLeft.getDistance(DistanceUnit.INCH);
+        final double rightDistance = hwMap.distanceSensorRight.getDistance(DistanceUnit.INCH);
+
+        final double ROBOT_WIDTH = 16.0; // Inches
+
+        final double rawCorrectionFactor = Math.atan2(leftDistance - rightDistance, ROBOT_WIDTH);
+        final double correctionFactor = mapValue(rawCorrectionFactor, -Math.PI / 2.0, Math.PI / 2.0, -1.0, 1.0);
+        final double kp = 1.0;
+
+        final double y = 1.0;
+        final double x = 0.0;
+        final double rx = kp * correctionFactor;
+
+        final double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+
+        final double frontLeftPower = (y + x + rx) / denominator;
+        final double backLeftPower = (y - x + rx) / denominator;
+        final double frontRightPower = (y - x - rx) / denominator;
+        final double backRightPower = (y + x - rx) / denominator;
+
+        hwMap.leftFrontMotor.setPower(frontLeftPower);
+        hwMap.leftBackMotor.setPower(backLeftPower);
+        hwMap.rightFrontMotor.setPower(frontRightPower);
+        hwMap.rightBackMotor.setPower(backRightPower);
+    }
+
+    public double mapValue(double input, double inputStart, double inputEnd, double outputStart, double outputEnd) {
+        return outputStart + (outputEnd - outputStart) / (inputEnd - inputStart) * (input - inputStart);
     }
 }
