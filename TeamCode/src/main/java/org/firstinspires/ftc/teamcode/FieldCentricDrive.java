@@ -40,8 +40,8 @@ public class FieldCentricDrive {
 
 
     public FieldCentricDrive(Telemetry telemetry, HardwareMap hardwareMap) {
-        telemetry = telemetry;
-        hardwareMap = hardwareMap;
+        this.telemetry = telemetry;
+        this.hardwareMap = hardwareMap;
     }
 
     public void checkifrobotnottipping() {

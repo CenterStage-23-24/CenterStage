@@ -8,9 +8,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @TeleOp
 public class TeleopMain extends OpMode {
-    public TeleopMain () {
 
-    }
     public enum RobotFSM {
         start,
         cycleFSM,
@@ -20,8 +18,7 @@ public class TeleopMain extends OpMode {
     }
 
     RobotFSM state = RobotFSM.start;
-    Telemetry telemetry;
-    HWMap hardware = new HWMap(telemetry, hardwareMap);
+    HWMap hardware;
     Cycle cycle;
     DroneLaunch drone;
     Hanging hang;
@@ -29,12 +26,20 @@ public class TeleopMain extends OpMode {
 
     @Override
     public void init() {
-        telemetry.addLine("Init");
+
+        telemetry.addData("-", "Init Start"); //This code works fine
         telemetry.update();
-        cycle = new Cycle(hardware.getIntakeMotor(), hardware.getLinearSlidesRight(), hardware.getLinearSlidesLeft(), hardware.getOutakeServoLeft(), hardware.getOutakeServoRight(), gamepad1);
-        DroneLaunch drone = new DroneLaunch();
-        Hanging hang = new Hanging();
-        FieldCentricDrive drive = new FieldCentricDrive(telemetry, hardwareMap);
+
+        hardware = new HWMap(telemetry, hardwareMap); //Tested until here --> error occurs here
+
+        /*
+        //cycle = new Cycle(hardware.getIntakeMotor(), hardware.getLinearSlidesRight(), hardware.getLinearSlidesLeft(), hardware.getOutakeServoLeft(), hardware.getOutakeServoRight(), gamepad1);
+        drone = new DroneLaunch();
+        hang = new Hanging();
+        drive = new FieldCentricDrive(telemetry, hardwareMap);
+        telemetry.addData("-", "Init Done");
+        telemetry.update();
+         */
     }
 
     @Override
