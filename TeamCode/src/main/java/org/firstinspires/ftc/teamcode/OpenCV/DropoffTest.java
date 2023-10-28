@@ -25,31 +25,35 @@ public class DropoffTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        hwMap = new HWMap(telemetry, hardwareMap);
+        try {
+            hwMap = new HWMap(telemetry, hardwareMap);
 
-        leftFrontMotor = hwMap.leftFrontMotor;
-        rightFrontMotor = hwMap.rightFrontMotor;
-        rightBackMotor = hwMap.rightBackMotor;
-        leftBackMotor = hwMap.leftBackMotor;
+            leftFrontMotor = hwMap.leftFrontMotor;
+            rightFrontMotor = hwMap.rightFrontMotor;
+            rightBackMotor = hwMap.rightBackMotor;
+            leftBackMotor = hwMap.leftBackMotor;
 
-        double range_t = 20.0;
-        double bearing_t = 20.0;
-        double y_t = 20.0;
-        double yaw_t = 20.0;
+            /*double range_t = 20.0;
+            double bearing_t = 20.0;
+            double y_t = 20.0;
+            double yaw_t = 20.0;*/
 
-        tagProcessor = new AprilTagProcessor.Builder()
-                .setDrawAxes(true)
-                .setDrawCubeProjection(true)
-                .setDrawTagID(true)
-                .setDrawTagOutline(true)
-                .build();
+            /*tagProcessor = new AprilTagProcessor.Builder()
+                    .setDrawAxes(true)
+                    .setDrawCubeProjection(true)
+                    .setDrawTagID(true)
+                    .setDrawTagOutline(true)
+                    .build();
 
-        visionPortal = new VisionPortal.Builder()
-                .addProcessor(tagProcessor)
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCameraResolution(new Size(640, 480))
-                .build();
-
+            visionPortal = new VisionPortal.Builder()
+                    .addProcessor(tagProcessor)
+                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                    .setCameraResolution(new Size(640, 480))
+                    .build();*/
+        } catch (Exception e) {
+            telemetry.addLine("Bruh I don't care");
+            telemetry.update();
+        }
         waitForStart();
 
         /*
@@ -62,13 +66,22 @@ public class DropoffTest extends LinearOpMode {
         4. Distance Sensor Angular Correction - correcting angle based on DS nav
 
          */
-        drive(0.5);
+
+        // drive(0.5);
         while (opModeIsActive()) {
-            if (tagProcessor.getDetections().size() > 0) {
-                AprilTagDetection tag = tagProcessor.getDetections().get(0);
-                drive(0.0);
-                tele(tag);
+            try {
+                /*if (tagProcessor.getDetections().size() > 0) {
+                    AprilTagDetection tag = tagProcessor.getDetections().get(0);
+                    drive(0.0);
+                    tele(tag);
+                }*/
+            } catch (Exception e) {
+                telemetry.addLine("I don't care");
             }
+
+            alignHeading();
+
+            telemetry.update();
             /*
             if (tagProcessor.getDetections().get(0).ftcPose.range < range_t) {
                 AprilTagDetection tag = tagProcessor.getDetections().get(0);
@@ -87,24 +100,17 @@ public class DropoffTest extends LinearOpMode {
     }
 
     public void tele(AprilTagDetection tag){
-        while(true) {
-            if(tagProcessor.getDetections().size() > 0) {
-                telemetry.addData("-", tag.id);
-                telemetry.addData("x", tag.ftcPose.x);
-                telemetry.addData("y", tag.ftcPose.y);
-                telemetry.addData("z", tag.ftcPose.z);
-                telemetry.addData("roll", tag.ftcPose.roll);
-                telemetry.addData("pitch", tag.ftcPose.pitch);
-                telemetry.addData("yaw", tag.ftcPose.yaw);
-                telemetry.addData("range", tag.ftcPose.range);
-                telemetry.addData("bearing", tag.ftcPose.bearing);
-                telemetry.addData("elevation", tag.ftcPose.elevation);
-                telemetry.addData("-", "outside");
-            } else{
-                telemetry.clearAll();
-            }
-            telemetry.update();
-        }
+        telemetry.addData("-", tag.id);
+        telemetry.addData("x", tag.ftcPose.x);
+        telemetry.addData("y", tag.ftcPose.y);
+        telemetry.addData("z", tag.ftcPose.z);
+        telemetry.addData("roll", tag.ftcPose.roll);
+        telemetry.addData("pitch", tag.ftcPose.pitch);
+        telemetry.addData("yaw", tag.ftcPose.yaw);
+        telemetry.addData("range", tag.ftcPose.range);
+        telemetry.addData("bearing", tag.ftcPose.bearing);
+        telemetry.addData("elevation", tag.ftcPose.elevation);
+        telemetry.addData("-", "outside");
     }
 
     public void alignHeading() {
@@ -117,7 +123,7 @@ public class DropoffTest extends LinearOpMode {
         final double correctionFactor = mapValue(rawCorrectionFactor, -Math.PI / 2.0, Math.PI / 2.0, -1.0, 1.0);
         final double kp = 1.0;
 
-        final double y = 1.0;
+        final double y = 0.0;
         final double x = 0.0;
         final double rx = kp * correctionFactor;
 
@@ -127,6 +133,21 @@ public class DropoffTest extends LinearOpMode {
         final double backLeftPower = (y - x + rx) / denominator;
         final double frontRightPower = (y - x - rx) / denominator;
         final double backRightPower = (y + x - rx) / denominator;
+
+        telemetry.addData("leftDistance:", leftDistance);
+        telemetry.addData("rightDistance:", rightDistance);
+        telemetry.addData("ROBOT_WIDTH:", ROBOT_WIDTH);
+        telemetry.addData("rawCorrectionFactor:", rawCorrectionFactor);
+        telemetry.addData("correctionFactor:", correctionFactor);
+        telemetry.addData("kp:", kp);
+        telemetry.addData("y:", y);
+        telemetry.addData("x:", x);
+        telemetry.addData("rx:", rx);
+        telemetry.addData("denominator:", denominator);
+        telemetry.addData("frontLeftPower:", frontLeftPower);
+        telemetry.addData("backLeftPower:", backLeftPower);
+        telemetry.addData("frontRightPower:", frontRightPower);
+        telemetry.addData("backRightPower:", backRightPower);
 
         hwMap.leftFrontMotor.setPower(frontLeftPower);
         hwMap.leftBackMotor.setPower(backLeftPower);
