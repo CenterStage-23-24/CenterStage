@@ -25,50 +25,45 @@ public class TeleopMain extends OpMode {
     FieldCentricDrive drive;
 
     @Override
-    public void init() {
+    public void init() { //works
 
-        telemetry.addData("-", "Init Start"); //This code works fine
-        telemetry.update();
+        hardware = new HWMap(telemetry, hardwareMap);
 
-        hardware = new HWMap(telemetry, hardwareMap); //Tested until here --> error occurs here
-
-        /*
-        //cycle = new Cycle(hardware.getIntakeMotor(), hardware.getLinearSlidesRight(), hardware.getLinearSlidesLeft(), hardware.getOutakeServoLeft(), hardware.getOutakeServoRight(), gamepad1);
+        cycle = new Cycle(hardware.getIntakeMotor(), hardware.getLinearSlidesRight(), hardware.getLinearSlidesLeft(), hardware.getOutakeServoLeft(), hardware.getOutakeServoRight(), gamepad1);
         drone = new DroneLaunch();
         hang = new Hanging();
         drive = new FieldCentricDrive(telemetry, hardwareMap);
         telemetry.addData("-", "Init Done");
         telemetry.update();
-         */
     }
 
     @Override
     public void loop() {
-        switch (state) {
-            case start:
+        switch (state) { //exit state?
+            case start: //needs more conditionals for other states
                 if (gamepad1.x) {
                     state = RobotFSM.cycleFSM;
                 }
                 break;
-            case cycleFSM:
+            case cycleFSM: //state transition should go back to start
                 cycle.loop();
                 state = RobotFSM.hangingFSM;
                 break;
-            case hangingFSM:
+            case hangingFSM: //state transition should go back to start
                 hang.loop();
                 state = RobotFSM.droneFSM;
                 break;
-            case droneFSM:
+            case droneFSM: //state transition should go back to start
                 drone.loop();
                 state = RobotFSM.failsafe;
                 break;
             case failsafe:
                 state = RobotFSM.start;
                 break;
-            default:
+            default: //would remove this
                 state = RobotFSM.start;
         }
 
-
+        //drivetrain code here
     }
 }

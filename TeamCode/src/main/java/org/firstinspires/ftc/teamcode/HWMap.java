@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -40,8 +41,10 @@ public class HWMap {
     private Servo outakeServoRight;
     //    public Servo linearSlidesServoLeft;
 //    public Servo linearSlidesServoRight;
-    private static AnalogInput axonLeft;
-    private static AnalogInput axonRight;
+    private static CRServo axonServoLeft;
+    private static CRServo axonServoRight;
+    private AnalogInput axonAnalogLeft;
+    private AnalogInput axonAnalogRight;
     private Servo OdoRetractionLeft;
     private Servo OdoRetractionRight;
     private Servo OdoRetractionMiddle;
@@ -57,8 +60,8 @@ public class HWMap {
     private Telemetry telemetry;
     private static double servoOpen = 1.0;
     private double servoClose = 0.0;
-    private static double axonPosLeft = axonLeft.getVoltage()/3.3 * 360;
-    private static double axonPosRight = axonRight.getVoltage()/3.3 * 360;
+    private static double axonPosLeft;
+    private static double axonPosRight;
 
 
     private ElapsedTime timer = new ElapsedTime();
@@ -95,8 +98,12 @@ public class HWMap {
         //Linear Slides Servos
 //        linearSlidesServoLeft = hardwareMap.get(Servo.class, "LSSL");//EH Port 0
 //        linearSlidesServoRight = hardwareMap.get(Servo.class, "LSSR");//EH Port 1
-        axonLeft = hardwareMap.get(AnalogInput.class, "AL"); //EH Port
-        axonRight = hardwareMap.get(AnalogInput.class, "AR"); //EH Port
+        axonServoLeft = hardwareMap.get(CRServo.class, "ASL"); //EH Port
+        axonServoRight = hardwareMap.get(CRServo.class, "ASR"); //EH Port
+        axonAnalogLeft = hardwareMap.get(AnalogInput.class, "AAL"); //EH Port
+        axonAnalogRight = hardwareMap.get(AnalogInput.class, "AAR"); //EH Port
+        axonPosLeft = axonAnalogLeft.getVoltage()/3.3 * 360;
+        axonPosRight = axonAnalogRight.getVoltage()/3.3 * 360;
 
         //Mapping Sensors
         distanceSensorLeft = hardwareMap.get(DistanceSensor.class, "DSL");//EH Port 2
@@ -198,12 +205,20 @@ public class HWMap {
         return outakeServoRight;
     }
 
-    public static AnalogInput getAxonLeft() {
-        return axonLeft;
+    public AnalogInput getAxonAnalogLeft() {
+        return axonAnalogLeft;
     }
 
-    public static AnalogInput getAxonRight() {
-        return axonRight;
+    public AnalogInput getAxonAnalogRight() {
+        return axonAnalogRight;
+    }
+
+    public static CRServo getAxonServoLeft(){
+        return axonServoLeft;
+    }
+
+    public static CRServo getAxonServoRight(){
+        return axonServoRight;
     }
 
     public Servo getOdoRetractionLeft() {

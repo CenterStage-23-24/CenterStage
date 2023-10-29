@@ -28,14 +28,14 @@ public class Cycle {
     private Servo outakeServoRight;
     Gamepad gamepad;
 
+    //Would pass HWMap object directly into this constructor + get all required hardware from it within this constructor
     public Cycle (DcMotorEx intakeMotor, DcMotorEx linearSlidesRight, DcMotorEx linearSlidesLeft, Servo outakeServoLeft, Servo outakeServoRight, Gamepad gamepad) {
-        HWMap hardware = new HWMap(telemetry, hardwareMap);
-        intakeMotor = hardware.getIntakeMotor();
-        linearSlidesRight = hardware.getLinearSlidesRight();
-        linearSlidesLeft = hardware.getLinearSlidesLeft();
-        outakeServoLeft = hardware.getOutakeServoLeft();
-        outakeServoRight = hardware.getOutakeServoRight();
-        gamepad = gamepad;
+        this.intakeMotor = intakeMotor;
+        this.linearSlidesRight = linearSlidesRight;
+        this.linearSlidesLeft = linearSlidesLeft;
+        this.outakeServoLeft = outakeServoLeft;
+        this.outakeServoRight = outakeServoRight;
+        this.gamepad = gamepad;
     }
 
     public void init() {
@@ -43,24 +43,24 @@ public class Cycle {
 
     }
 
-    public void loop() {
+    public void loop() { //needs an exit back to Teleop FSM
         switch (state) {
-            case start:
+            case start: //would move all gamepad conditionals to this state
                 state = cycleFSM.intake;
                 break;
-            case intake:
+            case intake: //will not work - will immediately switch to next state
                 if (gamepad.a) {
                     intakeMotor.setPower(0.5);
                 }
-                state = cycleFSM.ejection;
+                state = cycleFSM.ejection; //state transition should go back to start
                 break;
-            case ejection:
+            case ejection: //will not work - will immediately switch to next state
                 if (gamepad.options) {
                     intakeMotor.setPower(-0.5);
                 }
-                state = cycleFSM.transfer;
+                state = cycleFSM.transfer; //state transition should go back to start
                 break;
-            case transfer:
+            case transfer: //will not work - will immediately switch to next state
                 if (gamepad.y) {
                     linearSlidesLeft.setPower(0.5);
                     linearSlidesRight.setPower(0.5);
@@ -69,18 +69,18 @@ public class Cycle {
                     linearSlidesLeft.setPower(-0.5);
                     linearSlidesRight.setPower(-0.5);
                 }
-                state = cycleFSM.outtake;
+                state = cycleFSM.outtake; //state transition should go back to start
                 break;
-            case outtake:
+            case outtake: //will not work - will immediately switch to next state
                 if (gamepad.left_bumper) {
                     outakeServoLeft.setPosition(0.75);
                 }
                 if (gamepad.right_bumper) {
                     outakeServoRight.setPosition(0.75);
                 }
-                state = cycleFSM.start;
+                state = cycleFSM.start; //need an exit here
                 break;
-            default:
+            default: //would remove this
                 state = cycleFSM.start;
         }
 

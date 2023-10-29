@@ -32,16 +32,21 @@ public class FieldCentricDrive {
     Orientation lastAngle = new Orientation();
     Telemetry telemetry;
     HardwareMap hardwareMap;
-    HWMap hardware = new HWMap(telemetry, hardwareMap);
-    private DcMotorEx rightFrontMotor = hardware.getRightFrontMotor();
-    private DcMotorEx leftFrontMotor = hardware.getLeftFrontMotor();
-    private DcMotorEx rightBackMotor = hardware.getRightBackMotor();
-    private DcMotorEx leftBackMotor = hardware.getLeftBackMotor();
+    HWMap hardware;
+    private DcMotorEx rightFrontMotor;
+    private DcMotorEx leftFrontMotor;
+    private DcMotorEx rightBackMotor;
+    private DcMotorEx leftBackMotor;
 
-
+    //Would replace the hardwareMap parameter with the HWMap object + remove HWMap instantiation inside constructor
     public FieldCentricDrive(Telemetry telemetry, HardwareMap hardwareMap) {
         this.telemetry = telemetry;
         this.hardwareMap = hardwareMap;
+        hardware = new HWMap(telemetry, hardwareMap);
+        rightFrontMotor = hardware.getRightFrontMotor();
+        leftFrontMotor = hardware.getLeftFrontMotor();
+        rightBackMotor = hardware.getRightBackMotor();
+        leftBackMotor = hardware.getLeftBackMotor();
     }
 
     public void checkifrobotnottipping() {

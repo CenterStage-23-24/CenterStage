@@ -17,20 +17,20 @@ public class Hanging {
 
     public void init() {
         HWMap hardware = new HWMap(telemetry, hardwareMap);
-    }
+    } //would turn this into a constructor + pass in hardware object instead of instantiating here
 
-    public  void loop() {
+    public void loop() { //needs an exit
         switch (state) {
-            case start:
+            case start: //would add conditionals here
                 state = hangingFSM.one;
                 break;
-            case one:
+            case one: //state transition should go back to start
                 state = hangingFSM.two;
                 break;
             case two:
                 state = hangingFSM.start;
                 break;
-            default:
+            default: //would remove this
                 state = hangingFSM.start;
         }
 
