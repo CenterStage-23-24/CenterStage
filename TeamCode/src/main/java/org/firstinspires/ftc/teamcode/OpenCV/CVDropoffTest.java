@@ -9,22 +9,32 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @Autonomous
-public class DropoffTest extends LinearOpMode {
-    /*private AprilTagProcessor tagProcessor;
-    private VisionPortal visionPortal;*/
+public class CVDropoffTest extends LinearOpMode {
+    private AprilTagProcessor tagProcessor;
+    private VisionPortal visionPortal;
     private DcMotorEx leftFrontMotor;
     private DcMotorEx rightFrontMotor;
     private DcMotorEx rightBackMotor;
     private DcMotorEx leftBackMotor;
     private HWMap hwMap;
+    double range_t;
+    double bearing_t;
+    double y_t;
+    double yaw_t;
 
-    private double averageError;
-    private double trials;
+    private double avgRange;
+    private double avgBearing;
+    private double avgY;
+    private double avgYaw;
+    int trials;
+    double real_dist;
+
+    private double avgRangeError;
+    private double avgYError;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -36,15 +46,20 @@ public class DropoffTest extends LinearOpMode {
             rightBackMotor = hwMap.rightBackMotor;
             leftBackMotor = hwMap.leftBackMotor;
 
-            averageError = 0.0;
-            trials = 0.0;
+            range_t = 20.0;
+            bearing_t = 20.0;
+            y_t = 20.0;
+            yaw_t = 20.0;
 
-            /*double range_t = 20.0;
-            double bearing_t = 20.0;
-            double y_t = 20.0;
-            double yaw_t = 20.0;*/
+            avgRange = 0.0;
+            avgBearing = 0.0;
+            avgY = 0.0;
+            avgYaw = 0.0;
+            trials = 0;
+            real_dist = 4.75; //Update as needed
 
-            /*tagProcessor = new AprilTagProcessor.Builder()
+
+            tagProcessor = new AprilTagProcessor.Builder()
                     .setDrawAxes(true)
                     .setDrawCubeProjection(true)
                     .setDrawTagID(true)
@@ -55,7 +70,7 @@ public class DropoffTest extends LinearOpMode {
                     .addProcessor(tagProcessor)
                     .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                     .setCameraResolution(new Size(640, 480))
-                    .build();*/
+                    .build();
         } catch (Exception e) {
             telemetry.addLine("Bruh I don't care");
             telemetry.update();
@@ -73,21 +88,19 @@ public class DropoffTest extends LinearOpMode {
 
          */
 
-        // drive(0.5);
-        while (opModeIsActive()) {
+        drive(0.5);
+        while (trials <= 100) {
             try {
-                /*if (tagProcessor.getDetections().size() > 0) {
+                if (tagProcessor.getDetections().size() > 0) {
                     AprilTagDetection tag = tagProcessor.getDetections().get(0);
                     drive(0.0);
                     tele(tag);
-                }*/
+                    calc(tag);
+                }
             } catch (Exception e) {
                 telemetry.addLine("I don't care");
+                telemetry.update();
             }
-
-            alignHeading();
-
-            telemetry.update();
             /*
             if (tagProcessor.getDetections().get(0).ftcPose.range < range_t) {
                 AprilTagDetection tag = tagProcessor.getDetections().get(0);
@@ -95,6 +108,26 @@ public class DropoffTest extends LinearOpMode {
                 tele(tag);
             }
              */
+        }
+        double sumRange = avgRange;
+        double sumY = avgY;
+        double sumRangeError = avgRangeError;
+        double sumYError = avgYError;
+        avgRange = sumRange / trials;
+        avgY = sumY / trials;
+        avgRangeError = sumRangeError / trials;
+        avgYError = sumYError / trials;
+
+        while(opModeIsActive()){
+            telemetry.addData("SUM RANGE: ", sumRange);
+            telemetry.addData("AVG RANGE: ", avgRange);
+            telemetry.addData("SUM Y: ", sumY);
+            telemetry.addData("AVG Y: ", avgY);
+            telemetry.addData("SUM RANGE ERROR: ", sumRangeError);
+            telemetry.addData("AVG RANGE ERROR: ", avgRangeError);
+            telemetry.addData("SUM Y ERROR: ", sumYError);
+            telemetry.addData("AVG Y ERROR: ", avgYError);
+            telemetry.update();
         }
     }
 
@@ -117,60 +150,21 @@ public class DropoffTest extends LinearOpMode {
         telemetry.addData("bearing", tag.ftcPose.bearing);
         telemetry.addData("elevation", tag.ftcPose.elevation);
         telemetry.addData("-", "outside");
+        telemetry.addData("trials: ", trials);
+        telemetry.addData("Sum of Ranges: ", avgRange);
+        telemetry.update();
     }
 
-    public void alignHeading() {
-        final double leftDistance = hwMap.distanceSensorLeft.getDistance(DistanceUnit.INCH);
-        final double rightDistance = hwMap.distanceSensorRight.getDistance(DistanceUnit.INCH);
-
-        trials += 1.0;
-        averageError = (averageError * (trials - 1.0) + (leftDistance - rightDistance)) / trials;
-
-        final double ROBOT_WIDTH = 16.0; // Inches
-
-        final double rawCorrectionFactor = Math.atan2(leftDistance - rightDistance, ROBOT_WIDTH);
-        final double correctionFactor = mapValue(rawCorrectionFactor, -Math.PI / 2.0, Math.PI / 2.0, -1.0, 1.0);
-        final double kp = 1.0;
-
-        final double y = 0.0;
-        final double x = 0.0;
-        final double rx = kp * correctionFactor;
-
-        final double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-
-        final double frontLeftPower = (y + x + rx) / denominator;
-        final double backLeftPower = (y - x + rx) / denominator;
-        final double frontRightPower = (y - x - rx) / denominator;
-        final double backRightPower = (y + x - rx) / denominator;
-
-        telemetry.addData("averageError:", averageError);
-        telemetry.addData("trials:", trials);
-        telemetry.addLine("------------------------");
-        telemetry.addData("leftDistance:", leftDistance);
-        telemetry.addData("rightDistance:", rightDistance);
-        telemetry.addData("ROBOT_WIDTH:", ROBOT_WIDTH);
-        telemetry.addData("rawCorrectionFactor:", rawCorrectionFactor);
-        telemetry.addData("correctionFactor:", correctionFactor);
-        telemetry.addData("kp:", kp);
-        telemetry.addData("y:", y);
-        telemetry.addData("x:", x);
-        telemetry.addData("rx:", rx);
-        telemetry.addData("denominator:", denominator);
-        telemetry.addData("frontLeftPower:", frontLeftPower);
-        telemetry.addData("backLeftPower:", backLeftPower);
-        telemetry.addData("frontRightPower:", frontRightPower);
-        telemetry.addData("backRightPower:", backRightPower);
-
-        if (Math.abs(rx) < 0.05)
-            return;
-
-        hwMap.leftFrontMotor.setPower(frontLeftPower);
-        hwMap.leftBackMotor.setPower(backLeftPower);
-        hwMap.rightFrontMotor.setPower(frontRightPower);
-        hwMap.rightBackMotor.setPower(backRightPower);
-    }
-
-    public double mapValue(double input, double inputStart, double inputEnd, double outputStart, double outputEnd) {
-        return outputStart + (outputEnd - outputStart) / (inputEnd - inputStart) * (input - inputStart);
+    public void calc(AprilTagDetection tag){
+        double range = tag.ftcPose.range;
+        double y = tag.ftcPose.y;
+        telemetry.addData("range", range);
+        telemetry.addData("y", y);
+        telemetry.update();
+        avgRange += range;
+        avgY += y;
+        avgRangeError += range - real_dist;
+        avgYError += y - real_dist;
+        trials += 1;
     }
 }
