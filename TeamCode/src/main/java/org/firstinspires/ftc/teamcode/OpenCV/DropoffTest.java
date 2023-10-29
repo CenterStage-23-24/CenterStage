@@ -15,13 +15,16 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 @Autonomous
 public class DropoffTest extends LinearOpMode {
-    private AprilTagProcessor tagProcessor;
-    private VisionPortal visionPortal;
+    /*private AprilTagProcessor tagProcessor;
+    private VisionPortal visionPortal;*/
     private DcMotorEx leftFrontMotor;
     private DcMotorEx rightFrontMotor;
     private DcMotorEx rightBackMotor;
     private DcMotorEx leftBackMotor;
     private HWMap hwMap;
+
+    private double averageError;
+    private double trials;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -32,6 +35,9 @@ public class DropoffTest extends LinearOpMode {
             rightFrontMotor = hwMap.rightFrontMotor;
             rightBackMotor = hwMap.rightBackMotor;
             leftBackMotor = hwMap.leftBackMotor;
+
+            averageError = 0.0;
+            trials = 0.0;
 
             /*double range_t = 20.0;
             double bearing_t = 20.0;
@@ -117,6 +123,9 @@ public class DropoffTest extends LinearOpMode {
         final double leftDistance = hwMap.distanceSensorLeft.getDistance(DistanceUnit.INCH);
         final double rightDistance = hwMap.distanceSensorRight.getDistance(DistanceUnit.INCH);
 
+        trials += 1.0;
+        averageError = (averageError * (trials - 1.0) + (leftDistance - rightDistance)) / trials;
+
         final double ROBOT_WIDTH = 16.0; // Inches
 
         final double rawCorrectionFactor = Math.atan2(leftDistance - rightDistance, ROBOT_WIDTH);
@@ -134,6 +143,9 @@ public class DropoffTest extends LinearOpMode {
         final double frontRightPower = (y - x - rx) / denominator;
         final double backRightPower = (y + x - rx) / denominator;
 
+        telemetry.addData("averageError:", averageError);
+        telemetry.addData("trials:", trials);
+        telemetry.addLine("------------------------");
         telemetry.addData("leftDistance:", leftDistance);
         telemetry.addData("rightDistance:", rightDistance);
         telemetry.addData("ROBOT_WIDTH:", ROBOT_WIDTH);
@@ -148,6 +160,9 @@ public class DropoffTest extends LinearOpMode {
         telemetry.addData("backLeftPower:", backLeftPower);
         telemetry.addData("frontRightPower:", frontRightPower);
         telemetry.addData("backRightPower:", backRightPower);
+
+        if (Math.abs(rx) < 0.05)
+            return;
 
         hwMap.leftFrontMotor.setPower(frontLeftPower);
         hwMap.leftBackMotor.setPower(backLeftPower);
