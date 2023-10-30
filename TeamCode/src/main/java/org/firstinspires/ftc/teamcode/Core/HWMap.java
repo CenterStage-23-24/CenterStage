@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -34,8 +35,8 @@ public class HWMap {
     private DcMotorEx linearSlidesLeft;
     private DcMotorEx intakeMotor;
     //IMU
-    public static BNO055IMU imu;
-    private static double imuAngle;
+    public BNO055IMU imu;
+    private double imuAngle;
 
     //Servos
     private Servo outakeServoLeft;
@@ -66,6 +67,7 @@ public class HWMap {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
 
+        imu = hardwareMap.get(BNO055IMU.class,"imu");
 
         //Drive Motors
         rightFrontMotor = hardwareMap.get(DcMotorEx.class, "RF"); //CH Port 0
@@ -85,6 +87,7 @@ public class HWMap {
         //Outake Servos
         outakeServoLeft = hardwareMap.get(Servo.class, "OSL"); //EH Port 4
         outakeServoRight = hardwareMap.get(Servo.class, "OSR");//EH Port 5
+
 
         //ODO retraction Servos
         OdoRetractionLeft = hardwareMap.get(Servo.class, "ORL"); //CH Port 0
@@ -120,8 +123,10 @@ public class HWMap {
         rightBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
         linearSlidesRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        linearSlidesLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
     }
 
     @SuppressLint("DefaultLocale")
@@ -135,12 +140,12 @@ public class HWMap {
         telemetry.addData("OPR: ", getOdoReadingRight());
         telemetry.update();
     }
-    public static double readFromIMU() {
+    public double readFromIMU() {
         imuAngle = -imu.getAngularOrientation().firstAngle;
         return imuAngle;
     }
 
-    public static void initializeIMU() {
+    public void initializeIMU() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         imu.initialize(parameters);
