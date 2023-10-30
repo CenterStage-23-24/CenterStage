@@ -1,24 +1,26 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Core.HWMap;
+import org.firstinspires.ftc.teamcode.Core.HWMapFTCLib;
 
 @TeleOp(name = "Tele-op")
 public class Teleop extends LinearOpMode {
 
     private Controller controller;
-    private FieldCentricDriveAccelerationControl fieldCentricDrive;
+    private FieldCentricFTCLib fieldCentricDrive;
 
 
     public void runOpMode() {
         telemetry.clear();
 
         try {
-            controller = new Controller(gamepad1, gamepad2);
-            fieldCentricDrive = new FieldCentricDriveAccelerationControl(telemetry, hardwareMap);
+            controller = new Controller();
+            fieldCentricDrive = new FieldCentricFTCLib(telemetry, hardwareMap);
         } catch (Exception exception) {
             telemetry.addLine("Outside of the while loop:");
             telemetry.addLine(exception.getMessage());
@@ -58,7 +60,7 @@ public class Teleop extends LinearOpMode {
                 gamepadRot = 0;
             }
 
-            fieldCentricDrive.drive(gamepadX, gamepadY, gamepadRot);
+            fieldCentricDrive.drive(gamepadX, gamepadY, gamepadRot, HWMapFTCLib.readFromIMU());
 
         }
     }

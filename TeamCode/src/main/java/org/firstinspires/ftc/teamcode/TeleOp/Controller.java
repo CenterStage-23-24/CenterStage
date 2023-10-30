@@ -48,12 +48,7 @@ public class Controller {
     public double gamePad2RTrigger;
     public double gamePad2LTrigger;
 
-    public Controller(Gamepad gamepad1, Gamepad gamepad2) {
-        this.gamepad1 = new GamepadEx(gamepad1);
-        this.gamepad2 = new GamepadEx(gamepad2);
-    }
-
-    public void update() {
+    public Controller() {
         //Gamepad 1
         gamepad1X = gamepad1.getLeftX();
         gamepad1Y = gamepad1.getLeftY();
@@ -101,6 +96,10 @@ public class Controller {
 
         gamePad2LTrigger = gamepad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         gamePad2RTrigger = gamepad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+    }
+
+    public void update() {
+
 
 
     }

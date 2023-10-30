@@ -2,18 +2,16 @@ package org.firstinspires.ftc.teamcode.Core;
 
 import android.annotation.SuppressLint;
 
+import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.hardware.motors.CRServo;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoController;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -23,20 +21,20 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Other variables like Telemetry and ElapsedTime are also created.
  */
 
-public class HWMap {
+public class HWMapFTCLib {
     // Drive Motors
-    private DcMotorEx leftFrontMotor;
-    private DcMotorEx leftBackMotor;
-    private DcMotorEx rightBackMotor;
-    private DcMotorEx rightFrontMotor;
+    private Motor leftFrontMotor;
+    private Motor leftBackMotor;
+    private Motor rightBackMotor;
+    private Motor rightFrontMotor;
 
     // Mechanism Motors
-    private DcMotorEx linearSlidesRight;
-    private DcMotorEx linearSlidesLeft;
-    private DcMotorEx intakeMotor;
+    private Motor linearSlidesRight;
+    private Motor linearSlidesLeft;
+    private Motor intakeMotor;
     //IMU
-    private BNO055IMU imu;
-    private double imuAngle;
+    private static BNO055IMU imu;
+    private static double imuAngle;
 
     //Servos
     private Servo outakeServoLeft;
@@ -62,32 +60,32 @@ public class HWMap {
 
     public final double servoOpen = 1.0;
     public final double servoClose = 0.0;
-    
-    public HWMap(Telemetry telemetry, HardwareMap hardwareMap) {
+
+    public HWMapFTCLib(Telemetry telemetry, HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
 
-        imu = hardwareMap.get(BNO055IMU.class,"imu");
 
         //Drive Motors
-        rightFrontMotor = hardwareMap.get(DcMotorEx.class, "RF"); //CH Port 0
-        leftFrontMotor = hardwareMap.get(DcMotorEx.class, "LF"); //CH Port 1. The right odo pod accesses this motor's encoder port
-        leftBackMotor = hardwareMap.get(DcMotorEx.class, "LB"); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
-        rightBackMotor = hardwareMap.get(DcMotorEx.class, "RB"); //CH Port 3. The left odo pod accesses this motor's encoder port.
+        rightFrontMotor = hardwareMap.get(Motor.class, "RF"); //CH Port 0
+        leftFrontMotor = hardwareMap.get(Motor.class, "LF"); //CH Port 1. The right odo pod accesses this motor's encoder port
+        leftBackMotor = hardwareMap.get(Motor.class, "LB"); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
+        rightBackMotor = hardwareMap.get(Motor.class, "RB"); //CH Port 3. The left odo pod accesses this motor's encoder port.
 
         //Linear Slides Motors
-        linearSlidesLeft = hardwareMap.get(DcMotorEx.class, "LSL"); //EH Port 2
-        linearSlidesRight = hardwareMap.get(DcMotorEx.class, "LSR"); //EH Port 3
+        linearSlidesLeft = hardwareMap.get(Motor.class, "LSL"); //EH Port 2
+        linearSlidesRight = hardwareMap.get(Motor.class, "LSR"); //EH Port 3
 
         // Intake Motor
-        intakeMotor = hardwareMap.get(DcMotorEx.class, "IM"); //EH Port 0
+        intakeMotor = hardwareMap.get(Motor.class, "IM"); //EH Port 0
 
         //IMU mapped and initialized in SampleMecanumDrive - CH 12C BUS 0
+        imu = hardwareMap.get(BNO055IMU.class,"imu");
+
 
         //Outake Servos
         outakeServoLeft = hardwareMap.get(Servo.class, "OSL"); //EH Port 4
         outakeServoRight = hardwareMap.get(Servo.class, "OSR");//EH Port 5
-
 
         //ODO retraction Servos
         OdoRetractionLeft = hardwareMap.get(Servo.class, "ORL"); //CH Port 0
@@ -99,7 +97,9 @@ public class HWMap {
         axonServoRight = hardwareMap.get(CRServo.class, "ASR");//EH Port 1
         axonAnalogLeft = hardwareMap.get(AnalogInput.class, "AAL"); //EH Port 0
         axonAnalogRight = hardwareMap.get(AnalogInput.class, "AAR"); //EH Port 2
-        //Right will be CW and left will be CCW. Taped servo is CCW
+
+        axonServoLeft.setInverted(true);//Counterclockwise
+        axonServoRight.setInverted(false);//Clockwise
 
         //Mapping Sensors
         distanceSensorLeft = hardwareMap.get(DistanceSensor.class, "DSL");//EH Port 2
@@ -109,24 +109,24 @@ public class HWMap {
 
 
         //Set Motor Direction
-        leftFrontMotor.setDirection(DcMotor.Direction.REVERSE);
-        leftBackMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftFrontMotor.setInverted(true);
+        leftBackMotor.setInverted(true);
 
         //Zero Power Behavior
-        leftBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        leftFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBackMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        leftFrontMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        rightBackMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        rightFrontMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         //Set Motor Mode
-        leftBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightBackMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightFrontMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        linearSlidesRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        linearSlidesLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBackMotor.setRunMode(Motor.RunMode.RawPower);
+        rightBackMotor.setRunMode(Motor.RunMode.RawPower);
+        leftFrontMotor.setRunMode(Motor.RunMode.RawPower);
+        rightFrontMotor.setRunMode(Motor.RunMode.RawPower);
 
-
+        linearSlidesRight.setRunMode(Motor.RunMode.PositionControl);
+        linearSlidesLeft.setRunMode(Motor.RunMode.PositionControl);
+        intakeMotor.setRunMode(Motor.RunMode.RawPower);
     }
 
     @SuppressLint("DefaultLocale")
@@ -140,12 +140,12 @@ public class HWMap {
         telemetry.addData("OPR: ", getOdoReadingRight());
         telemetry.update();
     }
-    public double readFromIMU() {
+    public static double readFromIMU() {
         imuAngle = -imu.getAngularOrientation().firstAngle;
         return imuAngle;
     }
 
-    public void initializeIMU() {
+    public static void initializeIMU() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         imu.initialize(parameters);
@@ -215,31 +215,31 @@ public class HWMap {
         return axonAnalogLeft;
     }
 
-    public DcMotorEx getLinearSlidesRight() {
+    public Motor getLinearSlidesRight() {
         return linearSlidesRight;
     }
 
-    public DcMotorEx getLinearSlidesLeft() {
+    public Motor getLinearSlidesLeft() {
         return linearSlidesLeft;
     }
 
-    public DcMotorEx getIntakeMotor() {
+    public Motor getIntakeMotor() {
         return intakeMotor;
     }
 
-    public DcMotorEx getRightBackMotor() {
+    public Motor getRightBackMotor() {
         return rightBackMotor;
     }
 
-    public DcMotorEx getLeftBackMotor() {
+    public Motor getLeftBackMotor() {
         return leftBackMotor;
     }
 
-    public DcMotorEx getRightFrontMotor() {
+    public Motor getRightFrontMotor() {
         return rightFrontMotor;
     }
 
-    public DcMotorEx getLeftFrontMotor() {
+    public Motor getLeftFrontMotor() {
         return leftFrontMotor;
     }
 
@@ -253,7 +253,4 @@ public class HWMap {
         return leftFrontMotor.getCurrentPosition();
     }
 
-    public BNO055IMU getImu() {
-        return imu;
-    }
 }
