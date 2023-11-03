@@ -16,7 +16,8 @@ public class Cycle {
         intake,
         ejection,
         transfer,
-        outtake
+        outtake,
+        outtakeReverse
     }
 
     cycleFSM state = cycleFSM.start;
@@ -41,7 +42,7 @@ public class Cycle {
     }
 
 
-    public void loop() {
+    public void loop() throws InterruptedException {
         while(true) {
             telemetry.addData("In cycle", 1);
             telemetry.addData("in while loop in cycle", 1);
@@ -52,9 +53,9 @@ public class Cycle {
                         telemetry.addData("a pressed in cycle", 1);
                         state = cycleFSM.intake;
                     }
-                    /*
-                    if (gamepad.options) {
-                        telemetry.addData("options pressed in cycle", 1);
+
+                    if (gamepad.b) {
+                        telemetry.addData("b pressed in cycle", 1);
                         state = cycleFSM.ejection;
                     }
                     if (gamepad.y) {
@@ -65,23 +66,33 @@ public class Cycle {
                         telemetry.addData("left_bumper pressed in cycle", 1);
                         state = cycleFSM.outtake;
                     }
-                     */
+                    if (gamepad.right_bumper) {
+                        state = cycleFSM.outtakeReverse;
+                    }
+
                     break;
                 case intake:
                     telemetry.addData("In intake", 1);
                     intakeMotor.setPower(0.5);
+                    Thread.sleep(5);
+                    intakeMotor.setPower(0);
                     state = cycleFSM.start;
                     break;
-                    /*
+
                 case ejection:
                     telemetry.addData("In ejection", 1);
                     intakeMotor.setPower(-0.5);
+                    Thread.sleep(5);
+                    intakeMotor.setPower(0);
                     state = cycleFSM.start;
                     break;
                 case transfer:
                     telemetry.addData("In transfer", 1);
                     linearSlidesLeft.setPower(0.5);
                     linearSlidesRight.setPower(0.5);
+                    Thread.sleep(5);
+                    linearSlidesLeft.setPower(0);
+                    linearSlidesRight.setPower(0);
                     state = cycleFSM.start;
                     break;
                 case outtake:
@@ -89,8 +100,12 @@ public class Cycle {
                     outakeServoLeft.setPosition(0.75);
                     outakeServoRight.setPosition(0.75);
                     state = cycleFSM.start;
+                    break;
+                case outtakeReverse:
+                    outakeServoLeft.setPosition(0);
+                    outakeServoRight.setPosition(0);
+                    state = cycleFSM.start;
                     return;
-                     */
 
             }
             telemetry.update();
