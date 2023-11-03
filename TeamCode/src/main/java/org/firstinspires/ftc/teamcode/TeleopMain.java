@@ -32,7 +32,6 @@ public class TeleopMain extends OpMode {
 
         hardware = new HWMap(telemetry, hardwareMap);
         state = RobotFSM.start;
-        cycle = new Cycle(hardware, gamepad1, telemetry);
         drone = new DroneLaunch(hardware);
         hang = new Hanging(hardware);
         drive = new FieldCentricDrive(telemetry, hardwareMap);
@@ -42,52 +41,52 @@ public class TeleopMain extends OpMode {
     }
 
     @Override
+    public void start(){
+        cycle = new Cycle(hardware, gamepad1, telemetry);
+    }
+
+    @Override
     public void loop() {
-        boolean inLoop = true;
-            switch (state) { //exit state?
-                case start:
-                    telemetry.addData("in start",1);
-                    if (gamepad1.x) {
-                        telemetry.addData("x pressed",1);
-                        state = RobotFSM.cycleFSM;
-                    }
-                    if (gamepad1.y) {
-                        state = RobotFSM.hangingFSM;
-                        telemetry.addData("y pressed", 1);
-                    }
-                    if (gamepad1.a) {
-                        state = RobotFSM.droneFSM;
-                        telemetry.addData("a pressed", 1);
-                    }
-                    if (gamepad1.b) {
-                        state = RobotFSM.failsafe;
-                        telemetry.addData("b pressed", 1);
-                    }
-                    break;
-
-                case cycleFSM:
-                    telemetry.addData("in cycle state", 1);
-                    cycle.loop();
-                    state = RobotFSM.start;
-                    break;
-                case hangingFSM:
-                    telemetry.addData("in hanging state", 1);
-                    hang.loop();
-                    state = RobotFSM.start;
-                    break;
-                case droneFSM:
-                    telemetry.addData("in drone state", 1);
-                    drone.loop();
-                    state = RobotFSM.start;
-                    break;
-                case failsafe:
-                    telemetry.addData("in failsafe state", 1);
-                    inLoop = false;
-                    state = RobotFSM.start;
-                    break;
-            }
-
-
+        switch (state) { //exit state?
+            case start:
+                telemetry.addData("in start", 1);
+                if (gamepad1.x) {
+                    telemetry.addData("x pressed", 1);
+                    state = RobotFSM.cycleFSM;
+                }
+                if (gamepad1.y) {
+                    state = RobotFSM.hangingFSM;
+                    telemetry.addData("y pressed", 1);
+                }
+                if (gamepad1.a) {
+                    state = RobotFSM.droneFSM;
+                    telemetry.addData("a pressed", 1);
+                }
+                if (gamepad1.b) {
+                    state = RobotFSM.failsafe;
+                    telemetry.addData("b pressed", 1);
+                }
+                break;
+            case cycleFSM:
+                telemetry.addData("in cycle state", 1);
+                cycle.loop();
+                state = RobotFSM.start;
+                break;
+            case hangingFSM:
+                telemetry.addData("in hanging state", 1);
+                hang.loop();
+                state = RobotFSM.start;
+                break;
+            case droneFSM:
+                telemetry.addData("in drone state", 1);
+                drone.loop();
+                state = RobotFSM.start;
+                break;
+            case failsafe:
+                telemetry.addData("in failsafe state", 1);
+                state = RobotFSM.start;
+                break;
+        }
         telemetry.addData("end of Main loop", 1);
         telemetry.update();
         //drivetrain code here

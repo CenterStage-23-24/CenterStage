@@ -108,8 +108,8 @@ public class HWMap {
         //Mapping Sensors
         distanceSensorLeft = hardwareMap.get(DistanceSensor.class, "DSL");//EH Port 2
         distanceSensorRight = hardwareMap.get(DistanceSensor.class, "DSR");//EH Port 0
-        trayLeftCS = hardwareMap.get(ColorSensor.class, "TLCS");//CH Port 2
-        trayRightCS = hardwareMap.get(ColorSensor.class, "TRCS");//CH Port 0
+        //trayLeftCS = hardwareMap.get(ColorSensor.class, "TLCS");//CH Port 2 - UPDATE to correct config
+        //trayRightCS = hardwareMap.get(ColorSensor.class, "TRCS");//CH Port 0
 
 
         //Set Motor Direction
