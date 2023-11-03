@@ -36,7 +36,8 @@ public class Cycle {
         outakeServoRight = hardware.getOutakeServoRight();
         this.gamepad = gamepad; // add control class to program
         this.telemetry = telemetry;
-
+        telemetry.addData("gamepad1: ", gamepad.toString());
+        telemetry.update();
     }
 
 
