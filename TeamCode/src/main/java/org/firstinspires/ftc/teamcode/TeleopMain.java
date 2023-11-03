@@ -29,7 +29,7 @@ public class TeleopMain extends OpMode {
 
     @Override
     public void init() { //works
-
+        cycle = new Cycle(hardware, gamepad1, telemetry);
         hardware = new HWMap(telemetry, hardwareMap);
         state = RobotFSM.start;
         drone = new DroneLaunch(hardware);
@@ -38,11 +38,6 @@ public class TeleopMain extends OpMode {
         failsafe = new Failsafe(hardware);
         telemetry.addData("-", "Init Done");
         telemetry.update();
-    }
-
-    @Override
-    public void start(){
-        cycle = new Cycle(hardware, gamepad1, telemetry);
     }
 
     @Override
