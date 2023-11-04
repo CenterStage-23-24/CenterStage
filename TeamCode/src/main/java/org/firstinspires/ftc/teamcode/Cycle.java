@@ -26,47 +26,48 @@ public class Cycle {
     private DcMotorEx linearSlidesLeft;
     private Servo outakeServoLeft;
     private Servo outakeServoRight;
-    Gamepad gamepad;
+    Controller gamepad1;
     Telemetry telemetry;
 
-    public Cycle (HWMap hardware, Gamepad gamepad, Telemetry telemetry) {
+    public Cycle (HWMap hardware, Controller gamepad1, Telemetry telemetry) {
         intakeMotor = hardware.getIntakeMotor();
         linearSlidesRight = hardware.getLinearSlidesRight();
         linearSlidesLeft = hardware.getLinearSlidesLeft();
         outakeServoLeft = hardware.getOutakeServoLeft();
         outakeServoRight = hardware.getOutakeServoRight();
-        this.gamepad = gamepad; // add control class to program
+        this.gamepad1 = gamepad1; // add control class to program
         this.telemetry = telemetry;
-        telemetry.addData("gamepad1: ", gamepad.toString());
+        //telemetry.addData("gamepad1: ", gamepad.toString());
         telemetry.update();
     }
 
 
     public void loop() throws InterruptedException {
         while(true) {
+            gamepad1.gamepadEx1.readButtons();
             telemetry.addData("In cycle", 1);
             telemetry.addData("in while loop in cycle", 1);
             switch (state) {
                 case start:
                     telemetry.addData("in start in cycle", 1);
-                    if (gamepad.a) {
+                    if (gamepad1.a) {
                         telemetry.addData("a pressed in cycle", 1);
                         state = cycleFSM.intake;
                     }
 
-                    if (gamepad.b) {
+                    if (gamepad1.b) {
                         telemetry.addData("b pressed in cycle", 1);
                         state = cycleFSM.ejection;
                     }
-                    if (gamepad.y) {
+                    if (gamepad1.y) {
                         telemetry.addData("y pressed in cycle", 1);
                         state = cycleFSM.transfer;
                     }
-                    if (gamepad.left_bumper) {
+                    if (gamepad1.LBumper) {
                         telemetry.addData("left_bumper pressed in cycle", 1);
                         state = cycleFSM.outtake;
                     }
-                    if (gamepad.right_bumper) {
+                    if (gamepad1.RBumper) {
                         state = cycleFSM.outtakeReverse;
                     }
 

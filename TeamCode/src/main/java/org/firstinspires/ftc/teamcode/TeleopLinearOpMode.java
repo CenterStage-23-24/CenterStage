@@ -32,7 +32,8 @@ public class TeleopLinearOpMode extends LinearOpMode{
    @Override
    public void runOpMode() throws InterruptedException {
        hardware = new HWMap(telemetry, hardwareMap);
-       cycle = new Cycle(hardware, gamepad1, telemetry);
+       Controller gamepad1Ex1 = new Controller(gamepad1,gamepad2);
+       cycle = new Cycle(hardware, gamepad1Ex1, telemetry);
        state = RobotFSM.start;
        //drone = new DroneLaunch(hardware);
       // hang = new Hanging(hardware);
@@ -46,6 +47,7 @@ public class TeleopLinearOpMode extends LinearOpMode{
        waitForStart();
 
        while(opModeIsActive()){
+           gamepad1Ex1.gamepadEx1.readButtons();
            switch (state) { //exit state?
                case start:
                    telemetry.addData(  "in start", 1);
