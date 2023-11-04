@@ -16,7 +16,8 @@ public class Cycle {
         intake,
         ejection,
         transfer,
-        outtake
+        outtake,
+        outtakeReverse
     }
 
     cycleFSM state = cycleFSM.start;
@@ -36,58 +37,78 @@ public class Cycle {
         outakeServoRight = hardware.getOutakeServoRight();
         this.gamepad = gamepad; // add control class to program
         this.telemetry = telemetry;
-
+        telemetry.addData("gamepad1: ", gamepad.toString());
+        telemetry.update();
     }
 
 
-    public void loop() {
-        telemetry.addData("In cycle",1);
-            telemetry.addData("in while loop in cycle",1);
+    public void loop() throws InterruptedException {
+        while(true) {
+            telemetry.addData("In cycle", 1);
+            telemetry.addData("in while loop in cycle", 1);
             switch (state) {
                 case start:
-                    telemetry.addData("in start in cycle",1);
+                    telemetry.addData("in start in cycle", 1);
                     if (gamepad.a) {
-                        telemetry.addData("a pressed in cycle",1);
+                        telemetry.addData("a pressed in cycle", 1);
                         state = cycleFSM.intake;
                     }
-                    if (gamepad.options) {
-                        telemetry.addData("options pressed in cycle",1);
+
+                    if (gamepad.b) {
+                        telemetry.addData("b pressed in cycle", 1);
                         state = cycleFSM.ejection;
                     }
                     if (gamepad.y) {
-                        telemetry.addData("y pressed in cycle",1);
+                        telemetry.addData("y pressed in cycle", 1);
                         state = cycleFSM.transfer;
                     }
                     if (gamepad.left_bumper) {
-                        telemetry.addData("left_bumper pressed in cycle",1);
+                        telemetry.addData("left_bumper pressed in cycle", 1);
                         state = cycleFSM.outtake;
                     }
+                    if (gamepad.right_bumper) {
+                        state = cycleFSM.outtakeReverse;
+                    }
+
                     break;
                 case intake:
-                    telemetry.addData("In intake",1);
+                    telemetry.addData("In intake", 1);
                     intakeMotor.setPower(0.5);
-                    if(gamepad.x)
-                        state = cycleFSM.start;
-                   break;
+                    Thread.sleep(5);
+                    intakeMotor.setPower(0);
+                    state = cycleFSM.start;
+                    break;
+
                 case ejection:
-                    telemetry.addData("In ejection",1);
+                    telemetry.addData("In ejection", 1);
                     intakeMotor.setPower(-0.5);
+                    Thread.sleep(5);
+                    intakeMotor.setPower(0);
                     state = cycleFSM.start;
                     break;
                 case transfer:
-                    telemetry.addData("In transfer",1);
+                    telemetry.addData("In transfer", 1);
                     linearSlidesLeft.setPower(0.5);
-                        linearSlidesRight.setPower(0.5);
+                    linearSlidesRight.setPower(0.5);
+                    Thread.sleep(5);
+                    linearSlidesLeft.setPower(0);
+                    linearSlidesRight.setPower(0);
                     state = cycleFSM.start;
                     break;
                 case outtake:
-                    telemetry.addData("In outtake",1);
+                    telemetry.addData("In outtake", 1);
                     outakeServoLeft.setPosition(0.75);
-                        outakeServoRight.setPosition(0.75);
+                    outakeServoRight.setPosition(0.75);
                     state = cycleFSM.start;
+                    break;
+                case outtakeReverse:
+                    outakeServoLeft.setPosition(0);
+                    outakeServoRight.setPosition(0);
+                    state = cycleFSM.start;
+                    return;
 
             }
-        telemetry.update();
+            telemetry.update();
         }
-
     }
+}
