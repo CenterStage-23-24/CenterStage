@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -21,21 +22,21 @@ public class Cycle {
     }
 
     cycleFSM state = cycleFSM.start;
-    private DcMotorEx intakeMotor;
-    private DcMotorEx linearSlidesRight;
-    private DcMotorEx linearSlidesLeft;
+    private Motor intakeMotor;
+    private Motor linearSlidesRight;
+    private Motor linearSlidesLeft;
     private Servo outakeServoLeft;
     private Servo outakeServoRight;
-    Controller gamepad1;
+    Controller gamepad;
     Telemetry telemetry;
 
-    public Cycle (HWMap hardware, Controller gamepad1, Telemetry telemetry) {
+    public Cycle (HWMap hardware, Controller gamepad, Telemetry telemetry) {
         intakeMotor = hardware.getIntakeMotor();
         linearSlidesRight = hardware.getLinearSlidesRight();
         linearSlidesLeft = hardware.getLinearSlidesLeft();
         outakeServoLeft = hardware.getOutakeServoLeft();
         outakeServoRight = hardware.getOutakeServoRight();
-        this.gamepad1 = gamepad1; // add control class to program
+        this.gamepad = gamepad; // add control class to program
         this.telemetry = telemetry;
         //telemetry.addData("gamepad1: ", gamepad.toString());
         telemetry.update();
@@ -44,56 +45,56 @@ public class Cycle {
 
     public void loop() throws InterruptedException {
         while(true) {
-            gamepad1.gamepadEx1.readButtons();
+            gamepad.readButtons();
             telemetry.addData("In cycle", 1);
             telemetry.addData("in while loop in cycle", 1);
             switch (state) {
                 case start:
                     telemetry.addData("in start in cycle", 1);
-                    if (gamepad1.a) {
+                    if (gamepad.a) {
                         telemetry.addData("a pressed in cycle", 1);
                         state = cycleFSM.intake;
                     }
 
-                    if (gamepad1.b) {
+                    if (gamepad.b) {
                         telemetry.addData("b pressed in cycle", 1);
                         state = cycleFSM.ejection;
                     }
-                    if (gamepad1.y) {
+                    if (gamepad.y) {
                         telemetry.addData("y pressed in cycle", 1);
                         state = cycleFSM.transfer;
                     }
-                    if (gamepad1.LBumper) {
+                    if (gamepad.leftBumper) {
                         telemetry.addData("left_bumper pressed in cycle", 1);
                         state = cycleFSM.outtake;
                     }
-                    if (gamepad1.RBumper) {
+                    if (gamepad.rightBumper) {
                         state = cycleFSM.outtakeReverse;
                     }
 
                     break;
                 case intake:
                     telemetry.addData("In intake", 1);
-                    intakeMotor.setPower(0.5);
+                    intakeMotor.set(0.5);
                     Thread.sleep(5);
-                    intakeMotor.setPower(0);
+                    intakeMotor.set(0);
                     state = cycleFSM.start;
                     break;
 
                 case ejection:
                     telemetry.addData("In ejection", 1);
-                    intakeMotor.setPower(-0.5);
+                    intakeMotor.set(-0.5);
                     Thread.sleep(5);
-                    intakeMotor.setPower(0);
+                    intakeMotor.set(0);
                     state = cycleFSM.start;
                     break;
                 case transfer:
                     telemetry.addData("In transfer", 1);
-                    linearSlidesLeft.setPower(0.5);
-                    linearSlidesRight.setPower(0.5);
+                    linearSlidesLeft.set(0.5);
+                    linearSlidesRight.set(0.5);
                     Thread.sleep(5);
-                    linearSlidesLeft.setPower(0);
-                    linearSlidesRight.setPower(0);
+                    linearSlidesLeft.set(0);
+                    linearSlidesRight.set(0);
                     state = cycleFSM.start;
                     break;
                 case outtake:

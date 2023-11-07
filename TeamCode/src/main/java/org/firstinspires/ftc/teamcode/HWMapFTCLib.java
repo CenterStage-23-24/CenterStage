@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.CRServo;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.BNO055IMUImpl;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,14 +16,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.opencv.core.Mat;
 
 /**
  * This class contains all the hardware components that are programmed on our robot and are mapped to the robot as well.
  * Other variables like Telemetry and ElapsedTime are also created.
  */
 
-public class HWMap {
+public class HWMapFTCLib {
     // Drive Motors
     private Motor leftFrontMotor;
     private Motor leftBackMotor;
@@ -55,36 +55,39 @@ public class HWMap {
     private DistanceSensor distanceSensorLeft;
     private DistanceSensor distanceSensorRight;
 
-    private final Telemetry telemetry;
+    //Other Variables
+    private HardwareMap hardwareMap;
+    private Telemetry telemetry;
 
     public final double servoOpen = 1.0;
     public final double servoClose = 0.0;
 
-    public static BNO055IMU getImu() {
-        return imu;
-    }
 
-    public HWMap(Telemetry telemetry, HardwareMap hardwareMap) {
-        //Other Variables
+
+    public HWMapFTCLib(Telemetry telemetry, HardwareMap hardwareMap) {
+        this.hardwareMap = hardwareMap;
         this.telemetry = telemetry;
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
-        //Drive Motors
-        rightFrontMotor = new Motor(hardwareMap, "RF", Motor.GoBILDA.RPM_435); //CH Port 0
-        leftFrontMotor = new Motor(hardwareMap, "LF", Motor.GoBILDA.RPM_435);//CH Port 1. The right odo pod accesses this motor's encoder port
-        leftBackMotor = new Motor(hardwareMap, "LB", Motor.GoBILDA.RPM_435); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
-        rightBackMotor = new Motor(hardwareMap, "RB", Motor.GoBILDA.RPM_435);//CH Port 3. The left odo pod accesses this motor's encoder port.
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+        imu.initialize(parameters);
 
+        //Drive Motors
+        rightFrontMotor = hardwareMap.get(Motor.class, "RF"); //CH Port 0
+        leftFrontMotor = hardwareMap.get(Motor.class, "LF"); //CH Port 1. The right odo pod accesses this motor's encoder port
+        leftBackMotor = hardwareMap.get(Motor.class, "LB"); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
+        rightBackMotor = hardwareMap.get(Motor.class, "RB"); //CH Port 3. The left odo pod accesses this motor's encoder port.
 
         //Linear Slides Motors
-        linearSlidesLeft = new Motor(hardwareMap, "LSL", Motor.GoBILDA.RPM_435); //EH Port 2
-        linearSlidesRight = new Motor(hardwareMap, "LSR", Motor.GoBILDA.RPM_435);//EH Port 3
+        linearSlidesLeft = hardwareMap.get(Motor.class, "LSL"); //EH Port 2
+        linearSlidesRight = hardwareMap.get(Motor.class, "LSR"); //EH Port 3
 
         // Intake Motor
-        intakeMotor = new Motor(hardwareMap, "IM", Motor.GoBILDA.RPM_435); //EH Port 0
+        intakeMotor = hardwareMap.get(Motor.class, "IM"); //EH Port 0
 
         //IMU mapped and initialized in SampleMecanumDrive - CH 12C BUS 0
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
+
 
 
         //Outake Servos
@@ -97,12 +100,12 @@ public class HWMap {
         OdoRetractionMiddle = hardwareMap.get(Servo.class, "ORM");//CH Port 2
 
         //Linear Slides Servos
-        axonServoLeft = new CRServo(hardwareMap, "ASL");//EH Port 0
-        axonServoRight = new CRServo(hardwareMap, "ASR");//EH Port 1
+        axonServoLeft = hardwareMap.get(CRServo.class, "ASL");//EH Port 0
+        axonServoRight = hardwareMap.get(CRServo.class, "ASR");//EH Port 1
         axonAnalogLeft = hardwareMap.get(AnalogInput.class, "AAL"); //EH Port 0
         axonAnalogRight = hardwareMap.get(AnalogInput.class, "AAR"); //EH Port 2
 
-        axonServoLeft.setInverted(false);//Counterclockwise
+        axonServoLeft.setInverted(true);//Counterclockwise
         axonServoRight.setInverted(false);//Clockwise
 
         //Mapping Sensors
@@ -144,7 +147,6 @@ public class HWMap {
         telemetry.addData("OPR: ", getOdoReadingRight());
         telemetry.update();
     }
-
     public static double readFromIMU() {
         imuAngle = -imu.getAngularOrientation().firstAngle;
         return imuAngle;
@@ -168,8 +170,8 @@ public class HWMap {
         Telemetry();
     }
 
-    public int voltsToDeg(AnalogInput servoEncoder) {
-        return (int) (servoEncoder.getVoltage() / 3.3 * 360);
+    public double voltsToDeg(AnalogInput servoEncoder){
+        return (servoEncoder.getVoltage()/ 3.3 * 360);
     }
 
     public Servo getOdoRetractionRight() {
@@ -248,18 +250,14 @@ public class HWMap {
         return leftFrontMotor;
     }
 
-    public int getOdoReadingLeft() {
+    public int getOdoReadingLeft(){
         return rightBackMotor.getCurrentPosition();
     }
-
-    public int getOdoReadingPerpendicular() {
+    public int getOdoReadingPerpendicular(){
         return leftBackMotor.getCurrentPosition();
     }
-
-    public int getOdoReadingRight() {
+    public int getOdoReadingRight(){
         return leftFrontMotor.getCurrentPosition();
     }
-
-
 
 }
