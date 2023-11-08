@@ -29,6 +29,8 @@ public class Cycle {
     private Servo outakeServoRight;
     Controller gamepad;
     Telemetry telemetry;
+    boolean pixel1; //Set by left intake CS
+    boolean pixel2; //Set by right intake CS
 
     public Cycle (HWMap hardware, Controller gamepad, Telemetry telemetry) {
         intakeMotor = hardware.getIntakeMotor();
@@ -78,6 +80,12 @@ public class Cycle {
                     intakeMotor.set(0.5);
                     Thread.sleep(5);
                     intakeMotor.set(0);
+
+                    if(pixel1){ //Automated claw close
+                        outakeServoLeft.setPosition(0.75);
+                    } if(pixel2){
+                        outakeServoRight.setPosition(0.75);
+                    }
                     state = cycleFSM.start;
                     break;
 
