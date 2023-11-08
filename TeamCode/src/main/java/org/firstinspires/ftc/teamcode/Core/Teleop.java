@@ -14,6 +14,7 @@ public class Teleop extends LinearOpMode {
 
     private Controller controller;
     private FieldCentricFTCLib fieldCentricDrive;
+    private HWMap hwMap;
 
 
     public void runOpMode() {
@@ -21,7 +22,8 @@ public class Teleop extends LinearOpMode {
 
         try {
             controller = new Controller(gamepad1);
-            fieldCentricDrive = new FieldCentricFTCLib(telemetry, hardwareMap);
+            hwMap = new HWMap(telemetry, hardwareMap);
+            fieldCentricDrive = new FieldCentricFTCLib(telemetry, hardwareMap, hwMap);
         } catch (Exception exception) {
             telemetry.addLine("Outside of the while loop:");
             telemetry.addLine(exception.getMessage());
@@ -55,7 +57,7 @@ public class Teleop extends LinearOpMode {
                 gamepadRot = 0;
             }
 
-            fieldCentricDrive.drive(gamepadX, gamepadY, gamepadRot, HWMapFTCLib.readFromIMU());
+            fieldCentricDrive.drive(gamepadX, gamepadY, gamepadRot, hwMap.readFromIMU());
 
         }
     }

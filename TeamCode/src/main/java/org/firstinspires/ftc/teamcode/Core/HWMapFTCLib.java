@@ -33,8 +33,8 @@ public class HWMapFTCLib {
     private Motor linearSlidesLeft;
     private Motor intakeMotor;
     //IMU
-    private static BNO055IMU imu;
-    private static double imuAngle;
+    private BNO055IMU imu;
+    private double imuAngle;
 
     //Servos
     private Servo outakeServoLeft;
@@ -67,7 +67,7 @@ public class HWMapFTCLib {
 
 
         //Drive Motors
-        rightFrontMotor = hardwareMap.get(Motor.class, "RF"); //CH Port 0
+        //rightFrontMotor = hardwareMap.get(Motor.class, "RF"); //CH Port 0
         leftFrontMotor = hardwareMap.get(Motor.class, "LF"); //CH Port 1. The right odo pod accesses this motor's encoder port
         leftBackMotor = hardwareMap.get(Motor.class, "LB"); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
         rightBackMotor = hardwareMap.get(Motor.class, "RB"); //CH Port 3. The left odo pod accesses this motor's encoder port.
@@ -81,6 +81,7 @@ public class HWMapFTCLib {
 
         //IMU mapped and initialized in SampleMecanumDrive - CH 12C BUS 0
         imu = hardwareMap.get(BNO055IMU.class,"imu");
+        initializeIMU();
 
 
         //Outake Servos
@@ -116,13 +117,13 @@ public class HWMapFTCLib {
         leftBackMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         leftFrontMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightBackMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        rightFrontMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        //rightFrontMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         //Set Motor Mode
         leftBackMotor.setRunMode(Motor.RunMode.RawPower);
         rightBackMotor.setRunMode(Motor.RunMode.RawPower);
         leftFrontMotor.setRunMode(Motor.RunMode.RawPower);
-        rightFrontMotor.setRunMode(Motor.RunMode.RawPower);
+        //rightFrontMotor.setRunMode(Motor.RunMode.RawPower);
 
         linearSlidesRight.setRunMode(Motor.RunMode.PositionControl);
         linearSlidesLeft.setRunMode(Motor.RunMode.PositionControl);
@@ -140,12 +141,12 @@ public class HWMapFTCLib {
         telemetry.addData("OPR: ", getOdoReadingRight());
         telemetry.update();
     }
-    public static double readFromIMU() {
+    public double readFromIMU() {
         imuAngle = -imu.getAngularOrientation().firstAngle;
         return imuAngle;
     }
 
-    public static void initializeIMU() {
+    public void initializeIMU() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         imu.initialize(parameters);

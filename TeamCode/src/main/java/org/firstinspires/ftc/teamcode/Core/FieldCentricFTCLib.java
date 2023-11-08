@@ -9,13 +9,13 @@ import org.firstinspires.ftc.teamcode.Core.HWMapFTCLib;
 
 
 public class FieldCentricFTCLib extends HWMapFTCLib {
-    private HWMapFTCLib hwMap;
+    private HWMap hwMap;
     private Motor leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor;
     private MecanumDrive mecanumDrive;
 
-    public FieldCentricFTCLib(Telemetry telemetry, HardwareMap hardwareMap) {
+    public FieldCentricFTCLib(Telemetry telemetry, HardwareMap hardwareMap, HWMap hwMap) {
         super(telemetry, hardwareMap);
-        hwMap = new HWMapFTCLib(telemetry, hardwareMap);
+        this.hwMap = hwMap;
         leftBackMotor = hwMap.getLeftBackMotor();
         leftFrontMotor = hwMap.getLeftFrontMotor();
         rightBackMotor = hwMap.getRightBackMotor();
