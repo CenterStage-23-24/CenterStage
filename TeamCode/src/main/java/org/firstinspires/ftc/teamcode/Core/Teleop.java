@@ -1,3 +1,4 @@
+//EVERYTHING WORKS
 package org.firstinspires.ftc.teamcode.Core;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -23,6 +24,9 @@ public class Teleop extends LinearOpMode {
         try {
             controller = new Controller(gamepad1);
             hwMap = new HWMap(telemetry, hardwareMap);
+            hwMap.getLeftServo().setPosition(0.7);
+            hwMap.getRightServo().setPosition(0.0);
+            hwMap.getForwardServo().setPosition(0.5);
             fieldCentricDrive = new FieldCentricFTCLib(telemetry, hardwareMap, hwMap);
         } catch (Exception exception) {
             telemetry.addLine("Outside of the while loop:");
