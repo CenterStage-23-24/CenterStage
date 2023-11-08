@@ -23,12 +23,20 @@ import org.opencv.core.Mat;
  */
 
 public class HWMap {
-    // Drive Motors
+    // USE FOR INIT TYPE 3
+    private DcMotorEx leftFrontMotor;
+    private DcMotorEx leftBackMotor;
+    private DcMotorEx rightBackMotor;
+    private DcMotorEx rightFrontMotor;
+    
+    /*
+    USE FOR INIT TYPE 1 + 2
     private Motor leftFrontMotor;
     private Motor leftBackMotor;
     private Motor rightBackMotor;
     private Motor rightFrontMotor;
-
+    */
+    
     //IMU
     private static BNO055IMU imu;
     private static double imuAngle;
@@ -41,13 +49,30 @@ public class HWMap {
     public HWMap(Telemetry telemetry, HardwareMap hardwareMap) {
         //Other Variables
         this.telemetry = telemetry;
-
-
-        //Drive Motors
+        
+        //Drive Motor Init Type 3 - TEST FIRST
+        rightFrontMotor = hardwareMap.get(DcMotorEx.class, "RF"); //CH Port 0
+        leftFrontMotor = hardwareMap.get(DcMotorEx.class, "LF"); //CH Port 1. The right odo pod accesses this motor's encoder port
+        leftBackMotor = hardwareMap.get(DcMotorEx.class, "LB"); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
+        rightBackMotor = hardwareMap.get(DcMotorEx.class, "RB"); //CH Port 3. The left odo pod accesses this motor's encoder port.
+        
+        /*
+        Drive Motor Init Type 1
+        Test Results: Threw error with LF Motor
         rightFrontMotor = new Motor(hardwareMap, "RF", Motor.GoBILDA.RPM_435); //CH Port 0
         leftFrontMotor = new Motor(hardwareMap, "LF", Motor.GoBILDA.RPM_435);//CH Port 1. The right odo pod accesses this motor's encoder port
         leftBackMotor = new Motor(hardwareMap, "LB", Motor.GoBILDA.RPM_435); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
         rightBackMotor = new Motor(hardwareMap, "RB", Motor.GoBILDA.RPM_435);//CH Port 3. The left odo pod accesses this motor's encoder port.
+        */
+
+        /*
+        Drive Motor Init Type 2
+        Test Results: Threw error with RF Motor
+        rightFrontMotor = hardwareMap.get(Motor.class, "RF"); //CH Port 0
+        leftFrontMotor = hardwareMap.get(Motor.class, "LF"); //CH Port 1. The right odo pod accesses this motor's encoder port
+        leftBackMotor = hardwareMap.get(Motor.class, "LB"); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
+        rightBackMotor = hardwareMap.get(Motor.class, "RB"); //CH Port 3. The left odo pod accesses this motor's encoder port.
+        */
 
         //IMU mapped and initialized in SampleMecanumDrive - CH 12C BUS 0
         imu = hardwareMap.get(BNO055IMU.class, "imu");
