@@ -67,17 +67,17 @@ public class HWMapFTCLib {
 
 
         //Drive Motors
-        //rightFrontMotor = hardwareMap.get(Motor.class, "RF"); //CH Port 0
-        leftFrontMotor = hardwareMap.get(Motor.class, "LF"); //CH Port 1. The right odo pod accesses this motor's encoder port
-        leftBackMotor = hardwareMap.get(Motor.class, "LB"); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
-        rightBackMotor = hardwareMap.get(Motor.class, "RB"); //CH Port 3. The left odo pod accesses this motor's encoder port.
+        rightFrontMotor = new Motor(hardwareMap, "RF", Motor.GoBILDA.RPM_435); //CH Port 0
+        leftFrontMotor = new Motor(hardwareMap, "LF", Motor.GoBILDA.RPM_435);//CH Port 1. The right odo pod accesses this motor's encoder port
+        leftBackMotor = new Motor(hardwareMap, "LB", Motor.GoBILDA.RPM_435); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
+        rightBackMotor = new Motor(hardwareMap, "RB", Motor.GoBILDA.RPM_435);//CH Port 3. The left odo pod accesses this motor's encoder port.
 
         //Linear Slides Motors
-        linearSlidesLeft = hardwareMap.get(Motor.class, "LSL"); //EH Port 2
-        linearSlidesRight = hardwareMap.get(Motor.class, "LSR"); //EH Port 3
+        linearSlidesLeft = new Motor(hardwareMap, "LSL", Motor.GoBILDA.RPM_435); //EH Port 2
+        linearSlidesRight = new Motor(hardwareMap, "LSR", Motor.GoBILDA.RPM_435); //EH Port 3
 
         // Intake Motor
-        intakeMotor = hardwareMap.get(Motor.class, "IM"); //EH Port 0
+        intakeMotor = new Motor(hardwareMap, "IM", Motor.GoBILDA.RPM_435); //EH Port 0
 
         //IMU mapped and initialized in SampleMecanumDrive - CH 12C BUS 0
         imu = hardwareMap.get(BNO055IMU.class,"imu");
@@ -108,8 +108,7 @@ public class HWMapFTCLib {
         trayLeftCS = hardwareMap.get(ColorSensor.class, "TLCS");//CH Port 2
         trayRightCS = hardwareMap.get(ColorSensor.class, "TRCS");//CH Port 1
 
-
-        //Set Motor Direction
+        //Set Motor Direction - change according to currently set directions
         leftFrontMotor.setInverted(true);
         leftBackMotor.setInverted(true);
 
@@ -117,13 +116,13 @@ public class HWMapFTCLib {
         leftBackMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         leftFrontMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightBackMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        //rightFrontMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        rightFrontMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
         //Set Motor Mode
         leftBackMotor.setRunMode(Motor.RunMode.RawPower);
         rightBackMotor.setRunMode(Motor.RunMode.RawPower);
         leftFrontMotor.setRunMode(Motor.RunMode.RawPower);
-        //rightFrontMotor.setRunMode(Motor.RunMode.RawPower);
+        rightFrontMotor.setRunMode(Motor.RunMode.RawPower);
 
         linearSlidesRight.setRunMode(Motor.RunMode.PositionControl);
         linearSlidesLeft.setRunMode(Motor.RunMode.PositionControl);
@@ -141,6 +140,7 @@ public class HWMapFTCLib {
         telemetry.addData("OPR: ", getOdoReadingRight());
         telemetry.update();
     }
+    
     public double readFromIMU() {
         imuAngle = -imu.getAngularOrientation().firstAngle;
         return imuAngle;
