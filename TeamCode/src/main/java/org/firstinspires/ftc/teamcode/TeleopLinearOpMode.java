@@ -38,7 +38,7 @@ public class TeleopLinearOpMode extends LinearOpMode {
         gamePad1 = new Controller(gamepad1);
         gamePad2 = new Controller(gamepad2);
         cycle = new Cycle(hardware, gamePad1, telemetry);
-        state = RobotFSM.start;
+        state = RobotFSM.cycleFSM; //CHANGE ONCE TESTING IS DONE
         //drone = new DroneLaunch(hardware);
         // hang = new Hanging(hardware);
         drive = new FieldCentricFTCLib(telemetry, hardwareMap);

@@ -21,7 +21,7 @@ public class Cycle {
         outtakeReverse
     }
 
-    cycleFSM state = cycleFSM.start;
+    cycleFSM state = cycleFSM.transfer; //CHANGE ONCE TESTING IS DONE
     private Motor intakeMotor;
     private Motor linearSlidesRight;
     private Motor linearSlidesLeft;
@@ -98,11 +98,22 @@ public class Cycle {
                     break;
                 case transfer:
                     telemetry.addData("In transfer", 1);
-                    linearSlidesLeft.set(0.5);
-                    linearSlidesRight.set(0.5);
-                    Thread.sleep(5);
+
+                    //PID - currently only testing linearSlidesLeft
+                    linearSlidesLeft.setPositionCoefficient(0.05);
+                    linearSlidesLeft.setTargetPosition(500);
                     linearSlidesLeft.set(0);
-                    linearSlidesRight.set(0);
+                    linearSlidesLeft.setPositionTolerance(10);
+                    while(!linearSlidesLeft.atTargetPosition()){
+                        telemetry.addData("Target Position: ", 500);
+                        telemetry.addData("Current Position: ", linearSlidesLeft.getCurrentPosition());
+                        telemetry.update();
+                        linearSlidesLeft.set(0.5);
+                    }
+                    linearSlidesLeft.stopMotor();
+
+                    //Flip outtake
+
                     state = cycleFSM.start;
                     break;
                 case outtake:
