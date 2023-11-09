@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.Core.HWMapFTCLib;
 public class FieldCentricFTCLib {
     private HWMap hwMap;
     private Motor leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor;
-    //private DcMotorEx leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor;
     private MecanumDrive mecanumDrive;
 
     public FieldCentricFTCLib(Telemetry telemetry, HardwareMap hardwareMap, HWMap hwMap) {
