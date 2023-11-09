@@ -39,10 +39,6 @@ public class HWMap {
     public final double servoOpen = 1.0;
     public final double servoClose = 0.0;
 
-    private Servo leftServo;
-    private Servo rightServo;
-    private Servo forwardServo;
-
     public HWMap(Telemetry telemetry, HardwareMap hardwareMap) {
         this.telemetry = telemetry;
 
@@ -72,14 +68,6 @@ public class HWMap {
         rightBackMotor.setRunMode(Motor.RunMode.RawPower);
         leftFrontMotor.setRunMode(Motor.RunMode.RawPower);
         rightFrontMotor.setRunMode(Motor.RunMode.RawPower);
-
-        leftServo = hardwareMap.get(Servo.class, "LServo");
-        rightServo = hardwareMap.get(Servo.class, "RServo");
-        forwardServo = hardwareMap.get(Servo.class, "FServo");
-
-        leftServo.setPosition(0.7);
-        rightServo.setPosition(0.0);
-        forwardServo.setPosition(0.5);
 
     }
 
@@ -144,18 +132,6 @@ public class HWMap {
 
     public int getOdoReadingRight() {
         return leftFrontMotor.getCurrentPosition();
-    }
-
-    public Servo getLeftServo(){
-        return leftServo;
-    }
-
-    public Servo getRightServo(){
-        return rightServo;
-    }
-
-    public Servo getForwardServo(){
-        return forwardServo;
     }
 
 }

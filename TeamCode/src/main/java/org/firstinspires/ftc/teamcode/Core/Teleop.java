@@ -1,19 +1,18 @@
 //EVERYTHING WORKS
 package org.firstinspires.ftc.teamcode.Core;
 
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Core.HWMap;
-import org.firstinspires.ftc.teamcode.Core.HWMapFTCLib;
 import org.firstinspires.ftc.teamcode.Core.FieldCentricFTCLib;
 
 @TeleOp(name = "Tele-op")
 public class Teleop extends LinearOpMode {
-
-    private Controller controller;
+    public GamepadEx gamepadEx;
     private FieldCentricFTCLib fieldCentricDrive;
     private HWMap hwMap;
 
@@ -22,7 +21,7 @@ public class Teleop extends LinearOpMode {
         telemetry.clear();
 
         try {
-            controller = new Controller(gamepad1);
+            gamepadEx = new GamepadEx(gamepad1);
             hwMap = new HWMap(telemetry, hardwareMap);
             fieldCentricDrive = new FieldCentricFTCLib(telemetry, hardwareMap, hwMap);
         } catch (Exception exception) {
@@ -34,7 +33,6 @@ public class Teleop extends LinearOpMode {
         telemetry.update();
         waitForStart();
         while (opModeIsActive()) {
-            controller.readButtons();
 
 
             //FIELD-CENTERIC_______________________________________________________________________________
@@ -42,18 +40,18 @@ public class Teleop extends LinearOpMode {
             double gamepadY;
             double gamepadRot;
 
-            if (Math.abs(controller.gamepadX) > 0.01) {
-                gamepadX = controller.gamepadX;
+            if (Math.abs(gamepadEx.getLeftX()) > 0.01) {
+                gamepadX = gamepadEx.getLeftX();
             } else {
                 gamepadX = 0;
             }
-            if (Math.abs(controller.gamepadY) > 0.01) {
-                gamepadY = controller.gamepadY;
+            if (Math.abs(gamepadEx.getLeftY()) > 0.01) {
+                gamepadY = gamepadEx.getLeftY();
             } else {
                 gamepadY = 0;
             }
-            if (Math.abs(controller.gamepadRot) > 0.01) {
-                gamepadRot = -controller.gamepadRot;
+            if (Math.abs(gamepadEx.getRightX()) > 0.01) {
+                gamepadRot = -gamepadEx.getRightX();
             } else {
                 gamepadRot = 0;
             }
