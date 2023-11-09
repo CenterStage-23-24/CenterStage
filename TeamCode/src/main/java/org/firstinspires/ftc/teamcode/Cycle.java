@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -22,20 +24,23 @@ public class Cycle {
     }
 
     cycleFSM state = cycleFSM.start;
+
     private Motor intakeMotor;
     private Motor linearSlidesRight;
     private Motor linearSlidesLeft;
     private Servo outakeServoLeft;
     private Servo outakeServoRight;
-    Controller gamepad;
+    private FieldCentricFTCLib fieldCentricDrive;
+    GamepadEx gamepad;
     Telemetry telemetry;
 
-    public Cycle (HWMap hardware, Controller gamepad, Telemetry telemetry) {
+    public Cycle (HWMap hardware, GamepadEx gamepad, Telemetry telemetry, HardwareMap hardwareMap) {
         intakeMotor = hardware.getIntakeMotor();
         linearSlidesRight = hardware.getLinearSlidesRight();
         linearSlidesLeft = hardware.getLinearSlidesLeft();
         outakeServoLeft = hardware.getOutakeServoLeft();
         outakeServoRight = hardware.getOutakeServoRight();
+         fieldCentricDrive = new FieldCentricFTCLib(telemetry,hardwareMap);
         this.gamepad = gamepad; // add control class to program
         this.telemetry = telemetry;
         //telemetry.addData("gamepad1: ", gamepad.toString());
@@ -51,24 +56,24 @@ public class Cycle {
             switch (state) {
                 case start:
                     telemetry.addData("in start in cycle", 1);
-                    if (gamepad.a) {
+                    if (gamepad.getButton(GamepadKeys.Button.A)) {
                         telemetry.addData("a pressed in cycle", 1);
                         state = cycleFSM.intake;
                     }
 
-                    if (gamepad.b) {
+                    if (gamepad.getButton(GamepadKeys.Button.B)) {
                         telemetry.addData("b pressed in cycle", 1);
                         state = cycleFSM.ejection;
                     }
-                    if (gamepad.y) {
+                    if (gamepad.getButton(GamepadKeys.Button.B)) {
                         telemetry.addData("y pressed in cycle", 1);
                         state = cycleFSM.transfer;
                     }
-                    if (gamepad.leftBumper) {
+                    if (gamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
                         telemetry.addData("left_bumper pressed in cycle", 1);
                         state = cycleFSM.outtake;
                     }
-                    if (gamepad.rightBumper) {
+                    if (gamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
                         state = cycleFSM.outtakeReverse;
                     }
 
@@ -111,6 +116,12 @@ public class Cycle {
 
             }
             telemetry.update();
+            //drivetrain code here
+            gamepad.readButtons();
+
+
+            fieldCentricDrive.drive(gamepad);
+
         }
     }
 }

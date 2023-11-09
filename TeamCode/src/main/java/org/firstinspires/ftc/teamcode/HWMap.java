@@ -34,8 +34,8 @@ public class HWMap {
     private Motor linearSlidesLeft;
     private Motor intakeMotor;
     //IMU
-    private static BNO055IMU imu;
-    private static double imuAngle;
+    private BNO055IMU imu;
+    private double imuAngle;
 
     //Servos
     private Servo outakeServoLeft;
@@ -60,7 +60,7 @@ public class HWMap {
     public final double servoOpen = 1.0;
     public final double servoClose = 0.0;
 
-    public static BNO055IMU getImu() {
+    public BNO055IMU getImu() {
         return imu;
     }
 
@@ -68,7 +68,6 @@ public class HWMap {
         //Other Variables
         this.telemetry = telemetry;
 
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
         //Drive Motors
         rightFrontMotor = new Motor(hardwareMap, "RF", Motor.GoBILDA.RPM_435); //CH Port 0
         leftFrontMotor = new Motor(hardwareMap, "LF", Motor.GoBILDA.RPM_435);//CH Port 1. The right odo pod accesses this motor's encoder port
@@ -85,6 +84,7 @@ public class HWMap {
 
         //IMU mapped and initialized in SampleMecanumDrive - CH 12C BUS 0
         imu = hardwareMap.get(BNO055IMU.class, "imu");
+        initializeIMU();
 
 
         //Outake Servos
@@ -145,12 +145,12 @@ public class HWMap {
         telemetry.update();
     }
 
-    public static double readFromIMU() {
+    public double readFromIMU() {
         imuAngle = -imu.getAngularOrientation().firstAngle;
         return imuAngle;
     }
 
-    public static void initializeIMU() {
+    public void initializeIMU() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         imu.initialize(parameters);

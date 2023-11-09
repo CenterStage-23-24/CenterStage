@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -28,16 +30,14 @@ public class TeleopLinearOpMode extends LinearOpMode {
     //Hanging hang;
     FieldCentricFTCLib drive;
     //Failsafe failsafe;
-    private Controller gamePad1;
-    private Controller gamePad2;
+    private GamepadEx gamepad;
     private FieldCentricFTCLib fieldCentricDrive;
 
     @Override
     public void runOpMode() throws InterruptedException {
         hardware = new HWMap(telemetry, hardwareMap);
-        gamePad1 = new Controller(gamepad1);
-        gamePad2 = new Controller(gamepad2);
-        cycle = new Cycle(hardware, gamePad1, telemetry);
+        gamepad = new GamepadEx(gamepad1);
+        cycle = new Cycle(hardware, gamepad, telemetry, hardwareMap);
         state = RobotFSM.start;
         //drone = new DroneLaunch(hardware);
         // hang = new Hanging(hardware);
@@ -49,7 +49,6 @@ public class TeleopLinearOpMode extends LinearOpMode {
         telemetry.update();
 
         try {
-            gamePad1 = new Controller(gamepad1);
             fieldCentricDrive = new FieldCentricFTCLib(telemetry, hardwareMap);
         } catch (Exception exception) {
             telemetry.addLine("Outside of the while loop:");
@@ -60,12 +59,11 @@ public class TeleopLinearOpMode extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            gamePad1.readButtons();
-            gamePad2.readButtons();
+            gamepad.readButtons();
             switch (state) { //exit state?
                 case start:
                     telemetry.addData("in start", 1);
-                    if (gamepad1.x) {
+                    if (gamepad.getButton(GamepadKeys.Button.X)) {
                         telemetry.addData("x pressed", 1);
                         state = RobotFSM.cycleFSM;
                     }
@@ -109,37 +107,9 @@ public class TeleopLinearOpMode extends LinearOpMode {
             telemetry.addData("end of Main loop", 1);
             telemetry.update();
             //drivetrain code here
-            gamePad1.readButtons();
+            gamepad.readButtons();
 
-
-            //FIELD-CENTERIC_______________________________________________________________________________
-            double gamepadX;
-            double gamepadY;
-            double gamepadRot;
-
-            if (Math.abs(gamePad1.gamepadX) > 0.01) {
-                gamepadX = gamePad1.gamepadX;
-            } //else if (Math.abs(gamePad2.gamepad2X) > 0.01) {
-            //gamepadX = controller.gamepad2X; }
-        else{
-            gamepadX = 0;
-        }
-        if (Math.abs(gamePad1.gamepadY) > 0.01) {
-            gamepadY = gamePad1.gamepadY;
-        } // else if (Math.abs(gamePad1.gamepad2Y) > 0.01) {
-            //gamepadY = gamePad1.gamepad2Y; }
-        else {
-            gamepadY = 0;
-        }
-        if (Math.abs(gamePad1.gamepadRot) > 0.01) {
-            gamepadRot = -gamePad1.gamepadRot;
-        } //else if (Math.abs(controller.gamepad2Rot) > 0.01) {
-            //gamepadRot = -controller.gamepad2Rot; }
-        else {
-            gamepadRot = 0;
-        }
-
-        fieldCentricDrive.drive(gamepadX, gamepadY, gamepadRot, HWMapFTCLib.readFromIMU());
+            fieldCentricDrive.drive(gamepad);
 
     }
             }
