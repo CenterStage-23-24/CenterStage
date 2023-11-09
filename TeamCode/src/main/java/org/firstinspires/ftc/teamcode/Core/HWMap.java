@@ -77,6 +77,10 @@ public class HWMap {
         rightServo = hardwareMap.get(Servo.class, "RServo");
         forwardServo = hardwareMap.get(Servo.class, "FServo");
 
+        leftServo.setPosition(0.7);
+        rightServo.setPosition(0.0);
+        forwardServo.setPosition(0.5);
+
     }
 
     @SuppressLint("DefaultLocale")

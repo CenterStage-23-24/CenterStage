@@ -140,7 +140,7 @@ public class HWMapFTCLib {
         telemetry.addData("OPR: ", getOdoReadingRight());
         telemetry.update();
     }
-    
+
     public double readFromIMU() {
         imuAngle = -imu.getAngularOrientation().firstAngle;
         return imuAngle;
