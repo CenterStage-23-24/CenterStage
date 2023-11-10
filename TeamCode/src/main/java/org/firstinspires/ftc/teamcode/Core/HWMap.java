@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.CRServo;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,9 +13,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.opencv.core.Mat;
 
@@ -31,7 +34,7 @@ public class HWMap {
     private Motor rightFrontMotor;
 
     //IMU
-    private static BNO055IMU imu;
+    private static IMU imu;
     private static double imuAngle;
 
     private final Telemetry telemetry;
@@ -48,7 +51,7 @@ public class HWMap {
         rightBackMotor = new Motor(hardwareMap, "RB", Motor.GoBILDA.RPM_435);//CH Port 3. The left odo pod accesses this motor's encoder port.
 
         //IMU mapped and initialized in SampleMecanumDrive - CH 12C BUS 0
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu = hardwareMap.get(IMU.class, "imu");
         initializeIMU();
 
         //Set Motor Direction
@@ -80,13 +83,13 @@ public class HWMap {
     }
 
     public static double readFromIMU() {
-        imuAngle = -imu.getAngularOrientation().firstAngle;
+        imuAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         return imuAngle;
     }
 
     public static void initializeIMU() {
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+        RevHubOrientationOnRobot orientation = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.RIGHT, RevHubOrientationOnRobot.UsbFacingDirection.UP);
+        IMU.Parameters parameters = new IMU.Parameters(orientation);
         imu.initialize(parameters);
     }
 

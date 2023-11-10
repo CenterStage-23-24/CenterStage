@@ -35,28 +35,7 @@ public class Teleop extends LinearOpMode {
         while (opModeIsActive()) {
 
 
-            //FIELD-CENTERIC_______________________________________________________________________________
-            double gamepadX;
-            double gamepadY;
-            double gamepadRot;
-
-            if (Math.abs(gamepadEx.getLeftX()) > 0.01) {
-                gamepadX = gamepadEx.getLeftX();
-            } else {
-                gamepadX = 0;
-            }
-            if (Math.abs(gamepadEx.getLeftY()) > 0.01) {
-                gamepadY = gamepadEx.getLeftY();
-            } else {
-                gamepadY = 0;
-            }
-            if (Math.abs(gamepadEx.getRightX()) > 0.01) {
-                gamepadRot = -gamepadEx.getRightX();
-            } else {
-                gamepadRot = 0;
-            }
-
-            fieldCentricDrive.drive(gamepadX, gamepadY, gamepadRot, hwMap.readFromIMU());
+            fieldCentricDrive.drive(-gamepadEx.getLeftX(), -gamepadEx.getLeftY(), -gamepadEx.getRightX(), HWMap.readFromIMU());
 
         }
     }
