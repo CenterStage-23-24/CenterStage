@@ -25,14 +25,14 @@ public class Cycle {
 
     cycleFSM state = cycleFSM.start;
     private Motor intakeMotor;
-    private Motor linearSlidesRight;
-    private Motor linearSlidesLeft;
     private Servo outakeServoLeft;
     private Servo outakeServoRight;
     private RevColorSensorV3 colorSensorLeft;
     private RevColorSensorV3 colorSensorRight;
     boolean pixelInLeft = false;
     boolean pixelInRight = false;
+    boolean linearSlidesAtPos = true; // Change when Transfer is done
+    boolean axonAtPos = true; //Change when Transfer is done.
     private double gripPixelPos = 0.8;// TEMP: Check for the right value.
     private double releasePixelPos = 0.0;// TEMP: Check for the right value.
 
@@ -44,8 +44,6 @@ public class Cycle {
         this.telemetry = telemetry;
 
         intakeMotor = hwMap.getIntakeMotor();
-        linearSlidesRight = hwMap.getLinearSlidesRight();
-        linearSlidesLeft = hwMap.getLinearSlidesLeft();
         outakeServoLeft = hwMap.getOutakeServoLeft();
         outakeServoRight = hwMap.getOutakeServoRight();
         colorSensorLeft = hwMap.getTrayLeftCS();
@@ -53,7 +51,7 @@ public class Cycle {
     }
 
 
-    public void loop(){
+    public void loop() {
         while (true) {
             gamepad.readButtons();
 
@@ -151,9 +149,11 @@ public class Cycle {
             pixelInRight = false;
         }
         if (gamepad.isDown(GamepadKeys.Button.A)) {
-            if (pixelInLeft && pixelInRight) { //Implement the linear slides constraint after transfer is done, and the motors are ready to run.
+            if (pixelInLeft)
                 outakeServoLeft.setPosition(gripPixelPos);
+            if (pixelInRight)
                 outakeServoRight.setPosition(gripPixelPos);
+            if (pixelInLeft && pixelInRight && linearSlidesAtPos && axonAtPos) {
                 state = cycleFSM.ejection;
             } else {
                 intakeMotor.set(1);
@@ -170,10 +170,4 @@ public class Cycle {
     }
 }
 
-            fieldCentricDrive.drive(gamepad.getLeftX(), gamepad.getLeftY(), gamepad.getRightX(), HWMap.readFromIMU());
 
-            gamepad.readButtons();
-
-        }
-    }
-}

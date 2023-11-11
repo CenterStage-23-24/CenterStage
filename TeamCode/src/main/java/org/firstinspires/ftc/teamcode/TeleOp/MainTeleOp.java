@@ -25,7 +25,7 @@ public class MainTeleOp extends LinearOpMode {
     private Cycle cycle;
     private GamepadEx gamePad1;
     private GamepadEx gamePad2;
-    private FieldCentricFTCLib fieldCentricDrive;
+    private FieldCentricDrive fieldCentricDrive;
 
 
     //Hardware
@@ -37,7 +37,7 @@ public class MainTeleOp extends LinearOpMode {
 
 
         try {
-            fieldCentricDrive = new FieldCentricFTCLib(hwMap);
+            fieldCentricDrive = new FieldCentricDrive(telemetry, hardwareMap);
             hwMap = new org.firstinspires.ftc.teamcode.TeleOp.HWMap(telemetry, hardwareMap);
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
@@ -70,12 +70,14 @@ public class MainTeleOp extends LinearOpMode {
                 case cycleFSM:
                     telemetry.addData("in cycle state", 1);
                     if (gamePad1.wasJustPressed(GamepadKeys.Button.Y)) {
+                        telemetry.addData("-", "Quit Cycle State");
                         state = RobotFSM.start;
                     } else {
                         cycle.loop();
                     }
                     break;
             }
+            telemetry.update();
             fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
             //LeftY is normally supposed to be negative but in the gamepadEx class they do that for us, but leftY is negated.
         }
