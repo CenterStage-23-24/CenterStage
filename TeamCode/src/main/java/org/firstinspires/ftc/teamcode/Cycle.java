@@ -25,30 +25,18 @@ public class Cycle {
 
     cycleFSM state = cycleFSM.start;
 
-    private Motor intakeMotor;
-    private Motor linearSlidesRight;
-    private Motor linearSlidesLeft;
-    private Servo outakeServoLeft;
-    private Servo outakeServoRight;
-    private FieldCentricFTCLib fieldCentricDrive;
     GamepadEx gamepad;
     Telemetry telemetry;
+    DcMotorEx motor;
 
-    public Cycle (HWMap hardware, GamepadEx gamepad, Telemetry telemetry, HardwareMap hardwareMap) {
-        intakeMotor = hardware.getIntakeMotor();
-        linearSlidesRight = hardware.getLinearSlidesRight();
-        linearSlidesLeft = hardware.getLinearSlidesLeft();
-        outakeServoLeft = hardware.getOutakeServoLeft();
-        outakeServoRight = hardware.getOutakeServoRight();
-         fieldCentricDrive = new FieldCentricFTCLib(telemetry,hardwareMap);
+    public Cycle (GamepadEx gamepad, Telemetry telemetry, DcMotorEx motor) {
         this.gamepad = gamepad; // add control class to program
         this.telemetry = telemetry;
-        //telemetry.addData("gamepad1: ", gamepad.toString());
-        telemetry.update();
+        this.motor = motor;
     }
 
 
-    public void loop() throws InterruptedException {
+    public void loop() {
         while(true) {
             gamepad.readButtons();
             telemetry.addData("In cycle", 1);
@@ -60,12 +48,11 @@ public class Cycle {
                         telemetry.addData("a pressed in cycle", 1);
                         state = cycleFSM.intake;
                     }
-
                     if (gamepad.getButton(GamepadKeys.Button.B)) {
                         telemetry.addData("b pressed in cycle", 1);
                         state = cycleFSM.ejection;
                     }
-                    if (gamepad.getButton(GamepadKeys.Button.B)) {
+                    if (gamepad.getButton(GamepadKeys.Button.Y)) {
                         telemetry.addData("y pressed in cycle", 1);
                         state = cycleFSM.transfer;
                     }
@@ -76,51 +63,38 @@ public class Cycle {
                     if (gamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
                         state = cycleFSM.outtakeReverse;
                     }
-
                     break;
                 case intake:
                     telemetry.addData("In intake", 1);
-                    intakeMotor.set(0.5);
-                    Thread.sleep(5);
-                    intakeMotor.set(0);
+                    motor.setPower(0.5);
                     state = cycleFSM.start;
                     break;
-
                 case ejection:
                     telemetry.addData("In ejection", 1);
-                    intakeMotor.set(-0.5);
-                    Thread.sleep(5);
-                    intakeMotor.set(0);
+                    motor.setPower(0);
                     state = cycleFSM.start;
                     break;
                 case transfer:
                     telemetry.addData("In transfer", 1);
-                    linearSlidesLeft.set(0.5);
-                    linearSlidesRight.set(0.5);
-                    Thread.sleep(5);
-                    linearSlidesLeft.set(0);
-                    linearSlidesRight.set(0);
+                    motor.setPower(0.5);
                     state = cycleFSM.start;
                     break;
                 case outtake:
                     telemetry.addData("In outtake", 1);
-                    outakeServoLeft.setPosition(0.75);
-                    outakeServoRight.setPosition(0.75);
+                    motor.setPower(0);
                     state = cycleFSM.start;
                     break;
                 case outtakeReverse:
-                    outakeServoLeft.setPosition(0);
-                    outakeServoRight.setPosition(0);
+                    telemetry.addData("In outtake reverse", 1);
+                    motor.setPower(0);
                     state = cycleFSM.start;
                     return;
 
             }
             telemetry.update();
+
             //drivetrain code here
             gamepad.readButtons();
-
-
-            fieldCentricDrive.drive(gamepad);
 
         }
     }
