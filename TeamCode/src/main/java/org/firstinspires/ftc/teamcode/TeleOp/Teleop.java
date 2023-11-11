@@ -1,26 +1,22 @@
-package org.firstinspires.ftc.teamcode.TeleOp;
+package org.firstinspires.ftc.teamcode.Teleop;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.teamcode.Core.HWMap;
-import org.firstinspires.ftc.teamcode.Core.HWMapFTCLib;
 
 @TeleOp(name = "Tele-op")
 public class Teleop extends LinearOpMode {
 
-    private Controller controller;
-    private FieldCentricFTCLib fieldCentricDrive;
+    private GamepadEx gamePad1;
+    private FieldCentricDrive fieldCentricDrive;
 
 
     public void runOpMode() {
         telemetry.clear();
 
         try {
-            controller = new Controller();
-            fieldCentricDrive = new FieldCentricFTCLib(telemetry, hardwareMap);
+            gamePad1 = new GamepadEx(gamepad1);
+            fieldCentricDrive = new FieldCentricDrive(telemetry, hardwareMap);
         } catch (Exception exception) {
             telemetry.addLine("Outside of the while loop:");
             telemetry.addLine(exception.getMessage());
@@ -30,37 +26,8 @@ public class Teleop extends LinearOpMode {
         telemetry.update();
         waitForStart();
         while (opModeIsActive()) {
-            controller.update();
-
-
-            //FIELD-CENTERIC_______________________________________________________________________________
-            double gamepadX;
-            double gamepadY;
-            double gamepadRot;
-
-            if (Math.abs(controller.gamepad1X) > 0.01) {
-                gamepadX = controller.gamepad1X;
-            } else if (Math.abs(controller.gamepad2X) > 0.01) {
-                gamepadX = controller.gamepad2X;
-            } else {
-                gamepadX = 0;
-            }
-            if (Math.abs(controller.gamepad1Y) > 0.01) {
-                gamepadY = controller.gamepad1Y;
-            } else if (Math.abs(controller.gamepad2Y) > 0.01) {
-                gamepadY = controller.gamepad2Y;
-            } else {
-                gamepadY = 0;
-            }
-            if (Math.abs(controller.gamepad1Rot) > 0.01) {
-                gamepadRot = -controller.gamepad1Rot;
-            } else if (Math.abs(controller.gamepad2Rot) > 0.01) {
-                gamepadRot = -controller.gamepad2Rot;
-            } else {
-                gamepadRot = 0;
-            }
-
-            fieldCentricDrive.drive(gamepadX, gamepadY, gamepadRot, HWMapFTCLib.readFromIMU());
+            gamePad1.readButtons();
+            fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
 
         }
     }

@@ -1,22 +1,22 @@
-package org.firstinspires.ftc.teamcode.TeleOp;
+package org.firstinspires.ftc.teamcode.Backlog;
 
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.teamcode.Core.HWMap;
-
+import org.firstinspires.ftc.teamcode.Teleop.HWMap;
 import java.util.concurrent.TimeUnit;
 
 public class FieldCentricDriveAccelerationControl extends HWMap {
 
-    private HWMap hwMap;
-    private DcMotorEx leftFrontMotor;
-    private DcMotorEx leftBackMotor;
-    private DcMotorEx rightFrontMotor;
-    private DcMotorEx rightBackMotor;
+    private org.firstinspires.ftc.teamcode.Teleop.HWMap hwMap;
+    private Motor leftFrontMotor;
+    private Motor leftBackMotor;
+    private Motor rightFrontMotor;
+    private Motor rightBackMotor;
 
     public double imuMeasure;
     public double leftBackPower;
@@ -37,7 +37,7 @@ public class FieldCentricDriveAccelerationControl extends HWMap {
     private double maxAccelDecelRot = 0.8; // VARIABLE NEEDS TO BE CHANGED: As our robot's motor speeds range from 0 to 1 the robot will accel at (maxAccelDecelRot) of the max speed per second. This is for turning
     public FieldCentricDriveAccelerationControl(Telemetry telemetry, HardwareMap hardwareMap) {
         super(telemetry, hardwareMap);
-        hwMap = new HWMap(telemetry, hardwareMap);
+        hwMap = new org.firstinspires.ftc.teamcode.Teleop.HWMap(telemetry, hardwareMap);
         leftBackMotor = hwMap.getLeftBackMotor();
         leftFrontMotor = hwMap.getLeftFrontMotor();
         rightBackMotor = hwMap.getRightBackMotor();
@@ -98,10 +98,10 @@ public class FieldCentricDriveAccelerationControl extends HWMap {
             rightBackPower /= power + Math.abs(adjustedTurn);
         }
 
-        leftBackMotor.setPower(leftBackPower);
-        leftFrontMotor.setPower(leftFrontPower);
-        rightBackMotor.setPower(rightBackPower);
-        rightFrontMotor.setPower(rightFrontPower);
+        leftBackMotor.set(leftBackPower);
+        leftFrontMotor.set(leftFrontPower);
+        rightBackMotor.set(rightBackPower);
+        rightFrontMotor.set(rightFrontPower);
         accelTimer.reset();
     }
 
