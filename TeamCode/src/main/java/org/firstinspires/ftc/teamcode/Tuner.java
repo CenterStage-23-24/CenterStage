@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -14,42 +15,40 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class Tuner extends LinearOpMode {
     private MotorEx motor;
     private Motor.Encoder encoder;
-    public static double p = 0.0;
+    public static double p = 0.01;
     public static double i = 0.0;
-    public static double d = 0.0;
-    public static int targetPos = 100;
-    private PIDController controller;
+    public static double d = 0.001;
+    public static double f = 0.0;
+    public static int targetPos = 1000;
+    public double output;
+    private PIDFController controller;
 
     @Override
     public void runOpMode(){
         motor = new MotorEx(hardwareMap, "LSL", Motor.GoBILDA.RPM_435);
         encoder = motor.encoder;
         motor.resetEncoder();
-        //motor.setRunMode(Motor.RunMode.PositionControl);
+        motor.setRunMode(Motor.RunMode.RawPower);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        controller = new PIDController(p, i, d);
-        controller.setSetPoint(targetPos);
+        controller = new PIDFController(p, i, d, f);
         telemetry.addData("Ready to Start!", "-");
         telemetry.update();
         waitForStart();
 
-        while(opModeIsActive()){
-            double output = controller.calculate(motor.getCurrentPosition());
-            //double output = controller.calculate(encoder.getCurrentPosition());
-            motor.setVelocity(output);
-            //motor.setTargetPosition(output);
-            //encoder.setVelocity(output);
+        while (opModeIsActive()) {
+            //motor.setTargetPosition((int) output);
+            output = controller.calculate(motor.getCurrentPosition(), targetPos);
+            motor.set(output);
             telemetry.addData("Target Pos: ", targetPos);
-            telemetry.addData("Current Pos: ", encoder.getCurrentPosition());
-            //telemetry.addData("Current Pos: ", motor.getCurrentPosition());
-            telemetry.addData("Velocity: ", encoder.getVelocity())
+            telemetry.addData("Encoder Current Pos: ", encoder.getPosition());
+            telemetry.addData("Motor Current Pos: ", motor.getCurrentPosition());
+            telemetry.addData("Output: ", output);
             telemetry.addData("p: ", p);
             telemetry.addData("i: ", i);
             telemetry.addData("d: ", d);
-            telemetry.addData("output: ", output);
             telemetry.update();
 
-            controller.setPID(p, i, d);
+            controller.setPIDF(p, i, d, f);
         }
     }
 }
