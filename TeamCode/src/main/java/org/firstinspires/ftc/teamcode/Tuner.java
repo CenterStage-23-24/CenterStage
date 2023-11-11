@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp
 public class Tuner extends LinearOpMode {
     private MotorEx motor;
+    private Motor.Encoder encoder;
     public static double p = 0.0;
     public static double i = 0.0;
     public static double d = 0.0;
@@ -22,7 +23,8 @@ public class Tuner extends LinearOpMode {
     @Override
     public void runOpMode(){
         motor = new MotorEx(hardwareMap, "LSL", Motor.GoBILDA.RPM_435);
-        
+        encoder = motor.encoder;
+        motor.resetEncoder();
         //motor.setRunMode(Motor.RunMode.PositionControl);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         controller = new PIDController(p, i, d);
@@ -33,9 +35,14 @@ public class Tuner extends LinearOpMode {
 
         while(opModeIsActive()){
             double output = controller.calculate(motor.getCurrentPosition());
+            //double output = controller.calculate(encoder.getCurrentPosition());
             motor.setVelocity(output);
+            //motor.setTargetPosition(output);
+            //encoder.setVelocity(output);
             telemetry.addData("Target Pos: ", targetPos);
-            telemetry.addData("Current Pos: ", motor.getCurrentPosition());
+            telemetry.addData("Current Pos: ", encoder.getCurrentPosition());
+            //telemetry.addData("Current Pos: ", motor.getCurrentPosition());
+            telemetry.addData("Velocity: ", encoder.getVelocity())
             telemetry.addData("p: ", p);
             telemetry.addData("i: ", i);
             telemetry.addData("d: ", d);
