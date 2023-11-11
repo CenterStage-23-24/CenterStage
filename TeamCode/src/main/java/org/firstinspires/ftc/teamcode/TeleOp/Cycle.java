@@ -2,6 +2,13 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.TeleOp.HWMap;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -12,74 +19,156 @@ public class Cycle {
         intake,
         ejection,
         transfer,
-        outtake,
-        outtakeReverse
+        outake,
+        outakeReverse
     }
 
     cycleFSM state = cycleFSM.start;
+    private Motor intakeMotor;
+    private Motor linearSlidesRight;
+    private Motor linearSlidesLeft;
+    private Servo outakeServoLeft;
+    private Servo outakeServoRight;
+    private RevColorSensorV3 colorSensorLeft;
+    private RevColorSensorV3 colorSensorRight;
+    boolean pixelInLeft = false;
+    boolean pixelInRight = false;
+    private double gripPixelPos = 0.8;// TEMP: Check for the right value.
+    private double releasePixelPos = 0.0;// TEMP: Check for the right value.
 
     GamepadEx gamepad;
     Telemetry telemetry;
-    FieldCentricDrive fieldCentricDrive;
 
-    public Cycle (GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
+    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry) {
         this.gamepad = gamepad; // add control class to program
         this.telemetry = telemetry;
-        this.fieldCentricDrive = fieldCentricDrive;
+
+        intakeMotor = hwMap.getIntakeMotor();
+        linearSlidesRight = hwMap.getLinearSlidesRight();
+        linearSlidesLeft = hwMap.getLinearSlidesLeft();
+        outakeServoLeft = hwMap.getOutakeServoLeft();
+        outakeServoRight = hwMap.getOutakeServoRight();
+        colorSensorLeft = hwMap.getTrayLeftCS();
+        colorSensorRight = hwMap.getTrayRightCS();
     }
 
 
-    public void loop() {
-        while(true) {
+    public void loop(){
+        while (true) {
             gamepad.readButtons();
-            telemetry.addData("In cycle", 1);
-            telemetry.addData("in while loop in cycle", 1);
+
             switch (state) {
                 case start:
                     telemetry.addData("in start in cycle", 1);
-                    if (gamepad.getButton(GamepadKeys.Button.A)) {
+                    if (gamepad.isDown(GamepadKeys.Button.A)) {
                         telemetry.addData("a pressed in cycle", 1);
                         state = cycleFSM.intake;
                     }
-                    if (gamepad.getButton(GamepadKeys.Button.B)) {
+                    if (gamepad.isDown(GamepadKeys.Button.B)) {
                         telemetry.addData("b pressed in cycle", 1);
                         state = cycleFSM.ejection;
                     }
-                    if (gamepad.getButton(GamepadKeys.Button.Y)) {
+                    if (gamepad.isDown(GamepadKeys.Button.Y)) {
                         telemetry.addData("y pressed in cycle", 1);
                         state = cycleFSM.transfer;
                     }
-                    if (gamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
+                    if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                         telemetry.addData("left_bumper pressed in cycle", 1);
-                        state = cycleFSM.outtake;
+                        state = cycleFSM.outake;
                     }
-                    if (gamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)) {
-                        state = cycleFSM.outtakeReverse;
+                    if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                        state = cycleFSM.outakeReverse;
                     }
+
                     break;
                 case intake:
-                    telemetry.addData("In intake", 1);
-                    state = cycleFSM.start;
+                    if (gamepad.wasJustReleased(GamepadKeys.Button.A)) {
+                        state = cycleFSM.start;
+                    } else {
+                        Intake();
+                    }
                     break;
                 case ejection:
-                    telemetry.addData("In ejection", 1);
-                    state = cycleFSM.start;
+                    Ejection();
                     break;
                 case transfer:
-                    telemetry.addData("In transfer", 1);
-                    state = cycleFSM.start;
+                    //Transfer
                     break;
-                case outtake:
+                case outake:
                     telemetry.addData("In outtake", 1);
+                    outakeServoLeft.setPosition(0.75);
+                    outakeServoRight.setPosition(0.75);
                     state = cycleFSM.start;
                     break;
-                case outtakeReverse:
-                    telemetry.addData("In outtake reverse", 1);
+                case outakeReverse:
+                    outakeServoLeft.setPosition(0);
+                    outakeServoRight.setPosition(0);
                     state = cycleFSM.start;
                     return;
 
             }
             telemetry.update();
+        }
+    }
+
+    private void Intake() {
+        double csLeftDistance = colorSensorLeft.getDistance(DistanceUnit.MM);
+        double csRightDistance = colorSensorRight.getDistance(DistanceUnit.MM);
+        if (csLeftDistance <= 30) {
+            if (colorSensorLeft.green() > (colorSensorLeft.red() * 2)) {
+                telemetry.addData("-", "Green pixel detected in the left compartment");
+                pixelInLeft = true;
+            } else if ((colorSensorLeft.blue() < colorSensorLeft.red()) && (colorSensorLeft.blue() < colorSensorLeft.green())) {
+                telemetry.addData("-", "Yellow pixel detected in the left compartment");
+                pixelInLeft = true;
+            } else if ((colorSensorLeft.blue() > colorSensorLeft.red()) && (colorSensorLeft.blue() > colorSensorLeft.green())) {
+                telemetry.addData("-", "Purple pixel detected in the left compartment");
+                pixelInLeft = true;
+            } else if (colorSensorLeft.green() >= 300) {
+                telemetry.addData("-", "White pixel detected in the left compartment");
+                pixelInLeft = true;
+            }
+        } else {
+            telemetry.addData("-", "Nothing in the left compartment");
+            pixelInLeft = false;
+        }
+        if (csRightDistance <= 28) {
+            if (colorSensorRight.green() > (colorSensorRight.red() * 2)) {
+                telemetry.addData("-", "Green pixel detected in the right compartment");
+                pixelInRight = true;
+            } else if ((colorSensorRight.blue() < colorSensorRight.red()) && (colorSensorRight.blue() < colorSensorRight.green())) {
+                telemetry.addData("-", "Yellow pixel detected in the right compartment");
+                pixelInRight = true;
+            } else if ((colorSensorRight.blue() > colorSensorRight.red()) && (colorSensorRight.blue() > colorSensorRight.green())) {
+                telemetry.addData("-", "Purple pixel detected in the right compartment");
+                pixelInRight = true;
+            } else if (colorSensorRight.green() > 300) {
+                telemetry.addData("-", "White pixel detected in the right compartment");
+                pixelInRight = true;
+            }
+        } else {
+            telemetry.addData("-", "Nothing in right compartment");
+            pixelInRight = false;
+        }
+        if (gamepad.isDown(GamepadKeys.Button.A)) {
+            if (pixelInLeft && pixelInRight) { //Implement the linear slides constraint after transfer is done, and the motors are ready to run.
+                outakeServoLeft.setPosition(gripPixelPos);
+                outakeServoRight.setPosition(gripPixelPos);
+                state = cycleFSM.ejection;
+            } else {
+                intakeMotor.set(1);
+            }
+        }
+    }
+
+    private void Ejection() {
+        if (gamepad.isDown(GamepadKeys.Button.A)) {
+            intakeMotor.set(-0.4);
+        } else {
+            intakeMotor.set(0);
+        }
+    }
+}
 
             fieldCentricDrive.drive(gamepad.getLeftX(), gamepad.getLeftY(), gamepad.getRightX(), HWMap.readFromIMU());
 
