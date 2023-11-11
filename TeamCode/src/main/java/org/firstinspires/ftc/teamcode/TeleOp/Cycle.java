@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -20,10 +20,12 @@ public class Cycle {
 
     GamepadEx gamepad;
     Telemetry telemetry;
+    FieldCentricDrive fieldCentricDrive;
 
-    public Cycle (GamepadEx gamepad, Telemetry telemetry) {
+    public Cycle (GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
         this.gamepad = gamepad; // add control class to program
         this.telemetry = telemetry;
+        this.fieldCentricDrive = fieldCentricDrive;
     }
 
 
@@ -79,7 +81,8 @@ public class Cycle {
             }
             telemetry.update();
 
-            //drivetrain code here
+            fieldCentricDrive.drive(gamepad.getLeftX(), gamepad.getLeftY(), gamepad.getRightX(), HWMap.readFromIMU());
+
             gamepad.readButtons();
 
         }

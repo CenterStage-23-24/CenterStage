@@ -1,10 +1,12 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.TeleOp.Cycle;
 
 @TeleOp
 public class TeleopLinearOpMode extends LinearOpMode {
@@ -16,13 +18,15 @@ public class TeleopLinearOpMode extends LinearOpMode {
 
     RobotFSM state;
     Cycle cycle;
+    FieldCentricDrive fieldCentricDrive;
     private GamepadEx gamepad;
 
     @Override
     public void runOpMode() {
         try {
             gamepad = new GamepadEx(gamepad1);
-            cycle = new Cycle(gamepad, telemetry);
+            fieldCentricDrive = new FieldCentricDrive(telemetry, hardwareMap);
+            cycle = new Cycle(gamepad, telemetry, fieldCentricDrive);
             state = RobotFSM.start;
             telemetry.addData("-", "Init Done");
             telemetry.update();
@@ -52,7 +56,9 @@ public class TeleopLinearOpMode extends LinearOpMode {
             }
             telemetry.addData("end of Main loop", 1);
             telemetry.update();
-            //drivetrain code here
+
+            fieldCentricDrive.drive(gamepad.getLeftX(), gamepad.getLeftY(), gamepad.getRightX(), HWMap.readFromIMU());
+
             gamepad.readButtons();
         }
     }
