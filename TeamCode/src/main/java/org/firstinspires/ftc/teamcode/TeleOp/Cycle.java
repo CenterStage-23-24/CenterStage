@@ -29,25 +29,28 @@ public class Cycle {
     private Servo outakeServoRight;
     private RevColorSensorV3 colorSensorLeft;
     private RevColorSensorV3 colorSensorRight;
+    private FieldCentricDrive fieldCentricDrive;
     boolean pixelInLeft = false;
     boolean pixelInRight = false;
-    boolean linearSlidesAtPos = true; // Change when Transfer is done
-    boolean axonAtPos = true; //Change when Transfer is done.
+    boolean linearSlidesAtPos = true; // Change to the linear slides threshold when Transfer is done
+    boolean axonAtPos = true; //Change to axon threshold when Transfer is done.
     private double gripPixelPos = 0.8;// TEMP: Check for the right value.
     private double releasePixelPos = 0.0;// TEMP: Check for the right value.
 
     GamepadEx gamepad;
     Telemetry telemetry;
 
-    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry) {
+    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
         this.gamepad = gamepad; // add control class to program
         this.telemetry = telemetry;
+        this.fieldCentricDrive = fieldCentricDrive;
 
         intakeMotor = hwMap.getIntakeMotor();
         outakeServoLeft = hwMap.getOutakeServoLeft();
         outakeServoRight = hwMap.getOutakeServoRight();
         colorSensorLeft = hwMap.getTrayLeftCS();
         colorSensorRight = hwMap.getTrayRightCS();
+
     }
 
 
@@ -87,7 +90,7 @@ public class Cycle {
                     }
                     break;
                 case ejection:
-                    Ejection();
+                    //Ejection
                     break;
                 case transfer:
                     //Transfer
@@ -106,10 +109,26 @@ public class Cycle {
 
             }
             telemetry.update();
+            gamepad.readButtons();
+            fieldCentricDrive.drive(gamepad.getLeftX(), gamepad.getLeftY(), gamepad.getRightX(), HWMap.readFromIMU());
+
         }
     }
 
     private void Intake() {
+        detectPixels();
+        if (pixelInLeft)
+            outakeServoLeft.setPosition(gripPixelPos);
+        if (pixelInRight)
+            outakeServoRight.setPosition(gripPixelPos);
+        if (pixelInLeft && pixelInRight && linearSlidesAtPos && axonAtPos) {
+            intakeMotor.set(-0.4);
+        } else {
+            intakeMotor.set(1);
+        }
+    }
+
+    private void detectPixels() {
         double csLeftDistance = colorSensorLeft.getDistance(DistanceUnit.MM);
         double csRightDistance = colorSensorRight.getDistance(DistanceUnit.MM);
         if (csLeftDistance <= 30) {
@@ -148,26 +167,8 @@ public class Cycle {
             telemetry.addData("-", "Nothing in right compartment");
             pixelInRight = false;
         }
-        if (gamepad.isDown(GamepadKeys.Button.A)) {
-            if (pixelInLeft)
-                outakeServoLeft.setPosition(gripPixelPos);
-            if (pixelInRight)
-                outakeServoRight.setPosition(gripPixelPos);
-            if (pixelInLeft && pixelInRight && linearSlidesAtPos && axonAtPos) {
-                state = cycleFSM.ejection;
-            } else {
-                intakeMotor.set(1);
-            }
-        }
     }
 
-    private void Ejection() {
-        if (gamepad.isDown(GamepadKeys.Button.A)) {
-            intakeMotor.set(-0.4);
-        } else {
-            intakeMotor.set(0);
-        }
-    }
 }
 
 

@@ -42,7 +42,7 @@ public class MainTeleOp extends LinearOpMode {
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
 
-            cycle = new Cycle(hwMap, gamePad1, telemetry);
+            cycle = new Cycle(hwMap, gamePad1, telemetry, fieldCentricDrive);
             state = RobotFSM.start;
 
             outakeServoLeft = hwMap.getOutakeServoLeft();
