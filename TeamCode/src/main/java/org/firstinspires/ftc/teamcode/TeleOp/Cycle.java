@@ -10,7 +10,6 @@ import org.firstinspires.ftc.teamcode.TeleOp.HWMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Cycle {
@@ -171,3 +170,10 @@ public class Cycle {
     }
 }
 
+            fieldCentricDrive.drive(gamepad.getLeftX(), gamepad.getLeftY(), gamepad.getRightX(), HWMap.readFromIMU());
+
+            gamepad.readButtons();
+
+        }
+    }
+}
