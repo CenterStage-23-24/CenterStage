@@ -2,15 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.internal.opmode.TelemetryImpl;
 
 public class Cycle {
 
@@ -27,12 +20,10 @@ public class Cycle {
 
     GamepadEx gamepad;
     Telemetry telemetry;
-    DcMotorEx motor;
 
-    public Cycle (GamepadEx gamepad, Telemetry telemetry, DcMotorEx motor) {
+    public Cycle (GamepadEx gamepad, Telemetry telemetry) {
         this.gamepad = gamepad; // add control class to program
         this.telemetry = telemetry;
-        this.motor = motor;
     }
 
 
@@ -66,27 +57,22 @@ public class Cycle {
                     break;
                 case intake:
                     telemetry.addData("In intake", 1);
-                    motor.setPower(0.5);
                     state = cycleFSM.start;
                     break;
                 case ejection:
                     telemetry.addData("In ejection", 1);
-                    motor.setPower(0);
                     state = cycleFSM.start;
                     break;
                 case transfer:
                     telemetry.addData("In transfer", 1);
-                    motor.setPower(0.5);
                     state = cycleFSM.start;
                     break;
                 case outtake:
                     telemetry.addData("In outtake", 1);
-                    motor.setPower(0);
                     state = cycleFSM.start;
                     break;
                 case outtakeReverse:
                     telemetry.addData("In outtake reverse", 1);
-                    motor.setPower(0);
                     state = cycleFSM.start;
                     return;
 

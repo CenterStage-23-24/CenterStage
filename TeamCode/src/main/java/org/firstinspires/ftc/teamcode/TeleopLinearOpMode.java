@@ -3,15 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @TeleOp
 public class TeleopLinearOpMode extends LinearOpMode {
@@ -24,14 +17,12 @@ public class TeleopLinearOpMode extends LinearOpMode {
     RobotFSM state;
     Cycle cycle;
     private GamepadEx gamepad;
-    DcMotorEx motor;
 
     @Override
     public void runOpMode() {
         try {
-            motor = hardwareMap.get(DcMotorEx.class, "IM");
             gamepad = new GamepadEx(gamepad1);
-            cycle = new Cycle(gamepad, telemetry, motor);
+            cycle = new Cycle(gamepad, telemetry);
             state = RobotFSM.start;
             telemetry.addData("-", "Init Done");
             telemetry.update();
