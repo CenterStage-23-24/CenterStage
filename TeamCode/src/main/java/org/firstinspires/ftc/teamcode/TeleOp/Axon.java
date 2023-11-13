@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -23,19 +24,20 @@ public class Axon extends LinearOpMode {
     private AnalogInput leftEncoder;
     private AxonClass leftAxon;
     private PIDController pidController;
-    public static double p = 0.001, i = 0.0, d = 0.0;
-    public static double targetPos = 0;
+    public static double p = 0.008, i = 0.0, d = 0.00035;
+    public static double targetPos = 50;
 
     @Override
     public void runOpMode() {
         try {
             hwMap = new HWMap(telemetry, hardwareMap);
 
-            leftServo = hwMap.getAxonServoLeft();
-            leftEncoder = hwMap.getAxonAnalogLeft();
+            leftServo = hwMap.getAxonServoRight();
+            leftEncoder = hwMap.getAxonAnalogRight();
 
             pidController = new PIDController(p, i, d);
             leftAxon = new AxonClass(leftServo, leftEncoder, false);
+            telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         } catch (Exception e) {
             telemetry.addData("-", e.getMessage());
@@ -59,6 +61,7 @@ public class Axon extends LinearOpMode {
             telemetry.addData("Delta: ", delta);
             telemetry.addData("Sign: ", sign);
             telemetry.addData("Error: ", error);
+            telemetry.update();
         }
     }
 
