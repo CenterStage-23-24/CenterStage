@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.util.Range;
 import com.acmerobotics.dashboard.FtcDashboard;
+
 import org.checkerframework.checker.units.qual.A;
 
 import java.net.CacheRequest;
@@ -18,24 +19,23 @@ import java.net.CacheRequest;
 @TeleOp
 public class Axon extends LinearOpMode {
     private HWMap hwMap;
-    private GamepadEx gamePad1;
-    private CRServo servo;
-    private AnalogInput encoder;
-    private AxonClass axon;
+    private CRServo leftServo;
+    private AnalogInput leftEncoder;
+    private AxonClass leftAxon;
     private PIDController pidController;
-    public static double p = 0.0009, i = 0, d = 0.0000;
-    public static int targetPos = 10;
+    public static double p = 0.001, i = 0.0, d = 0.0;
+    public static double targetPos = 0;
 
     @Override
     public void runOpMode() {
         try {
             hwMap = new HWMap(telemetry, hardwareMap);
-            gamePad1 = new GamepadEx(gamepad1);
 
-            servo = hwMap.getAxonServoLeft();
-            encoder = hwMap.getAxonAnalogLeft();
+            leftServo = hwMap.getAxonServoLeft();
+            leftEncoder = hwMap.getAxonAnalogLeft();
+
             pidController = new PIDController(p, i, d);
-            axon = new AxonClass(servo, encoder, false, pidController);
+            leftAxon = new AxonClass(leftServo, leftEncoder, false);
 
         } catch (Exception e) {
             telemetry.addData("-", e.getMessage());
@@ -43,23 +43,26 @@ public class Axon extends LinearOpMode {
         }
         waitForStart();
         while (opModeIsActive()) {
-            double measuredPos = axon.getPos();
-            //double difference = targetPos - measuredPos;
-            //int direction = (int) ((measuredPos-targetPos) / Math.abs(measuredPos-targetPos));
-            //int deg = (int) (Math.min(Math.abs(difference), 360 - Math.abs(difference)));
-            double error = Math.min(Math.abs(targetPos - measuredPos), 360 - Math.abs(targetPos - measuredPos));
+            pidController.setPID(p, i, d);
+            double measuredPos = leftAxon.getPos();
 
-            double calcedpower = axon.setPos(error);
+            double delta = Math.min(normalizeRadiansTau(targetPos - measuredPos), 360 - normalizeRadiansTau(targetPos - measuredPos));
+            int sign = (int) (-(Math.signum(normalizeRadiansTau(targetPos - measuredPos) - (360 - normalizeRadiansTau(targetPos - measuredPos)))));
+            double error = delta * sign;
 
-            telemetry.addData("Power: ", calcedpower);
-            telemetry.addData("Left Deg.", axon.getPos());
-            telemetry.addData("Target Pos", targetPos);
+            double power = pidController.calculate(0, error);
+            leftAxon.setPower(power);
+
+            telemetry.addData("Power: ", power);
+            telemetry.addData("Measured Pos: ", measuredPos);
+            telemetry.addData("Target Pos: ", targetPos);
+            telemetry.addData("Delta: ", delta);
+            telemetry.addData("Sign: ", sign);
             telemetry.addData("Error: ", error);
-            telemetry.update();
         }
     }
 
-    public double normalizeRadiansTau(double angle){
-        return (angle + (Math.PI * 2)) % (Math.PI * 2);
+    public double normalizeRadiansTau(double angle) {
+        return (angle + 360) % 360;
     }
 }

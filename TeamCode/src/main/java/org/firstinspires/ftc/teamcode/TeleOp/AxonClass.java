@@ -8,31 +8,18 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class AxonClass {
     private CRServo axon;
     private AnalogInput encoder;
-    private boolean inverse;
-    private PIDController pidController;
     private double measuredPos;
-    private double error = 0 , lastError = 0;
-    private double integralSum = 0;
-    private ElapsedTime timer = new ElapsedTime();
-    public AxonClass(CRServo axon, AnalogInput encoder, boolean inverse, PIDController pidController) {
+    private double sign = 1;
+    public AxonClass(CRServo axon, AnalogInput encoder, boolean inverse) {
         this.axon = axon;
         this.encoder = encoder;
-        this.inverse = inverse;
-        this.pidController = pidController;
+        if (inverse) {
+            sign = -1;
+        }
     }
 
-    public double setPos(double targetPos) {
-        double power = pidController.calculate(0, targetPos);
-        axon.set(power);
-        return power;
-    }
-
-    public void setPID(double p, double i, double d) {
-        pidController.setPID(p, i, d);
-    }
-
-    public double[] getPID() {
-        return new double[]{pidController.getP(), pidController.getI(), pidController.getD()};
+    public void setPower(double power){
+        axon.set(power * sign);
     }
 
     public double getPos() {
