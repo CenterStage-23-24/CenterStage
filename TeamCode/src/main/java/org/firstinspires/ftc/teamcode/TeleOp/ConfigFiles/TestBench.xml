@@ -7,8 +7,7 @@
             <goBILDA5202SeriesMotor name="LSR" port="3" />
             <ContinuousRotationServo name="ASL" port="0" />
             <ContinuousRotationServo name="ASR" port="2" />
-            <Servo name="OSL" port="4" />
-            <Servo name="OSR" port="5" />
++
             <AnalogInput name="AAL" port="0" />
             <AnalogInput name="AAR" port="2" />
             <RevColorSensorV3 name="TLCS" port="0" bus="1" />

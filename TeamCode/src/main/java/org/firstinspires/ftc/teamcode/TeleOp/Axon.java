@@ -32,11 +32,11 @@ public class Axon extends LinearOpMode {
         try {
             hwMap = new HWMap(telemetry, hardwareMap);
 
-            leftServo = hwMap.getAxonServoRight();
-            leftEncoder = hwMap.getAxonAnalogRight();
+            leftServo = hwMap.getAxonServoLeft();
+            leftEncoder = hwMap.getAxonAnalogLeft();
 
             pidController = new PIDController(p, i, d);
-            leftAxon = new AxonClass(leftServo, leftEncoder, false);
+            leftAxon = new AxonClass(leftServo, leftEncoder, false, true);
             telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         } catch (Exception e) {

@@ -10,11 +10,15 @@ public class AxonClass {
     private AnalogInput encoder;
     private double measuredPos;
     private double sign = 1;
-    public AxonClass(CRServo axon, AnalogInput encoder, boolean inverse) {
+    private double encoderOffset = 0.0;
+    public AxonClass(CRServo axon, AnalogInput encoder, boolean inversePower, boolean inverseEncoder) {
         this.axon = axon;
         this.encoder = encoder;
-        if (inverse) {
+        if (inversePower) {
             sign = -1;
+        }
+        if (inverseEncoder) {
+            encoderOffset = 360;
         }
     }
 
@@ -23,7 +27,7 @@ public class AxonClass {
     }
 
     public double getPos() {
-        return encoder.getVoltage() / 3.3 * 360;
+        return Math.abs(encoderOffset - (encoder.getVoltage() / 3.3 * 360));
     }
 
 
