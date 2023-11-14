@@ -15,10 +15,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class Tuner extends LinearOpMode {
     private MotorEx motor;
     private Motor.Encoder encoder;
-    public static double p = 0.01;
-    public static double i = 0.0;
-    public static double d = 0.001;
-    public static double f = 0.0;
+    public static double p = 0.013;
+    public static double i = 0.01;
+    public static double d = 0.0007;
+    public static double f = 0.0005;
     public static int targetPos = 1000;
     public double output;
     private PIDFController controller;
