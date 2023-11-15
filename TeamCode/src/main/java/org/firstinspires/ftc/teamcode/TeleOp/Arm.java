@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Arm {
-    public static double p = 0.0056, i = 0.003, d = 0.015, a = 0.07;
+    public static double p = 0.006, i = 0.003, d = 0.015, a = 0.07;
     private HWMap hwMap;
     private CRServo leftServo;
     private CRServo rightServo;

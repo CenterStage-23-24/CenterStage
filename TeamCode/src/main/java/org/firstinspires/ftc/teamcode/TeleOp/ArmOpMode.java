@@ -32,14 +32,14 @@ public class ArmOpMode extends LinearOpMode {
     // and that to get from intakePos to depositPos, you need to increase your position
 
     // Basic PID coefficients
-    public static double p = 0.0056, i = 0.003, d = 0.015;
+    public static double p = 0.006, i = 0.003, d = 0.015;
 
     // a is a feedforward coefficient used to counteract the torque applied to the arm by gravity
     // a * sin(θ) gives the power needed to counteract gravity, θ is distance from vertically pointing down
     // a is used in place of m * g * r as those remain constant, and its easier to tune a single coefficient
     public static double a = 0.07;
 
-    public static final double intakePos = 120; // Angle for Intaking pixels
+    public static final double intakePos = 117; // Angle for Intaking pixels
     public final double depositPos = normalizeRadiansTau(intakePos + 150); // Angle for depositing pixels, is 150 degrees from intake
     public static double intakeOffset = 60; // Degrees that the intake position is from vertically facing down
     public final double safeError = 10; // Position can be +- this many degrees from target for safe transfer
