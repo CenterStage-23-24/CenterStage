@@ -5,11 +5,11 @@ Test OpMode for developing the following features:
 3. Arm Alignment with backdrop
 4. Dropoff of pixels
 
-Integrates all delivery mechanisms into one procedure with the following steps:
-1. Slide goes up + arm moves to deposit pos (slide-arm automation occurs here)
-2. Height selected - driver controlled
-3. Arm aligns with backdrop + drops off pixels
-4. Arm goes back to intake pos + slides go down (slide-arm automation occurs here)
+Integrates all delivery mechanisms into one procedure with the following stages:
+STAGE 1: Slide goes up + arm moves to deposit pos (slide-arm automation occurs here)
+STAGE 2: Height selected - driver controlled
+STAGE 3: Arm aligns with backdrop + drops off pixels
+STAGE 4: Arm goes back to intake pos + slides go down (slide-arm automation occurs here)
  */
 package org.firstinspires.ftc.teamcode.TeleOp;
 
@@ -22,8 +22,9 @@ import com.acmerobotics.dashboard.FtcDashboard;
 @TeleOp
 public class Delivery extends LinearOpMode {
     //Constants for facilitating arm + slide movement -> need configuration
-    public static double clearingHeight = 100; //slide height at which arm is allowed to move to deposit pos
-    public static double rowIncrement = 10; //height increment for each row on backdrop
+    public static int clearingHeight = 100; //slide height at which arm is allowed to move to deposit pos
+    public static int rowIncrement = 10; //height increment for each row on backdrop
+    public static int startHeight = 200; //starting height on backdrop
 
     private HWMap hwMap;
     private Arm arm;
@@ -32,8 +33,19 @@ public class Delivery extends LinearOpMode {
     
     @Override
     public void runOpMode(){
+        hwMap = new HWMap(telemetry, hardwareMap);
+        arm = new Arm(hwMap);
+        claws = new Claws();
+        slides = new Slides(hwMap);
+        waitForStart();
+
         while(opModeIsActive()){
-            hwMap = new HWMap(telemetry, hardwareMap);
+            if(gamepad1.a) {
+                //STAGE 1
+                slides.pid(clearingHeight);
+                arm.goToDeposit();
+                slides.pid(clearingHeight);
+            }
             
         }
     }

@@ -23,8 +23,8 @@ public class Arm {
     private AxonClass rightAxon;
     private PIDController pidController;
 
-    public Arm(Telemetry telemetry, HardwareMap hardwareMap) {
-        hwMap = new HWMap(telemetry, hardwareMap);
+    public Arm(HWMap hwMap) {
+        this.hwMap = hwMap;
         leftServo = hwMap.getAxonServoLeft();
         rightServo = hwMap.getAxonServoRight();
         leftEncoder = hwMap.getAxonAnalogLeft();
