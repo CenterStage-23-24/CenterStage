@@ -17,6 +17,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 @TeleOp
@@ -24,18 +25,21 @@ public class Delivery extends LinearOpMode {
     //Constants for facilitating arm + slide movement -> need configuration
     public static int clearingHeight = 100; //slide height at which arm is allowed to move to deposit pos
     public static int rowIncrement = 10; //height increment for each row on backdrop
-    public static int startHeight = 200; //starting height on backdrop
+    public static int extendHeight = 200; //starting height on backdrop - up position
+    public static int retractHeight = 0; //height of slides at down position
 
     private HWMap hwMap;
     private Arm arm;
-    private Claws claws;
+    private Servo leftClaw;
+    private Servo rightClaw;
     private Slides slides;
     
     @Override
     public void runOpMode(){
         hwMap = new HWMap(telemetry, hardwareMap);
         arm = new Arm(hwMap);
-        claws = new Claws();
+        leftClaw = hwMap.getOutakeServoLeft();
+        rightClaw = hwMap.getOutakeServoRight();
         slides = new Slides(hwMap);
         waitForStart();
 
@@ -44,7 +48,24 @@ public class Delivery extends LinearOpMode {
                 //STAGE 1
                 slides.pid(clearingHeight);
                 arm.goToDeposit();
-                slides.pid(clearingHeight);
+                slides.pid(extendHeight);
+
+                sleep(1000);
+
+                //STAGE 2
+                slides.pid(extendHeight + rowIncrement);
+
+                sleep(1000);
+
+                //STAGE 3
+                leftClaw.setPosition(0.5);
+                rightClaw.setPosition(0.5);
+
+                sleep(1000);
+
+                //STAGE 4
+                arm.goToIntake();
+                slides.pid(retractHeight);
             }
             
         }

@@ -133,6 +133,9 @@ public class HWMap {
         linearSlidesLeft.setRunMode(Motor.RunMode.PositionControl);
         intakeMotor.setRunMode(Motor.RunMode.RawPower);
 
+        linearSlidesRight.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        linearSlidesLeft.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+
         //Mecanum Drive Initialization
         mecanumDrive = new MecanumDrive(leftFrontMotor, rightFrontMotor, leftBackMotor, rightBackMotor);
         mecanumDrive.setRightSideInverted(false);

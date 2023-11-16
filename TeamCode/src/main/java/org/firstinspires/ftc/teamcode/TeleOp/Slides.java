@@ -37,5 +37,7 @@ public class Slides {
             LSL.set(output);
             LSR.set(output);
         }
+        LSL.set(0);
+        LSR.set(0);
     }
 }
