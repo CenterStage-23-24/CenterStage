@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -12,6 +13,8 @@ public class TransferIntegration extends LinearOpMode {
     private GamepadEx gamePad1;
     private Servo leftClaw;
     private Servo rightClaw;
+    private Motor linearSlidesRight;
+    private Motor linearSlidesLeft;
     private Arm arm;
 
     private double p = 0.0056, i = 0.003, d = 0.015;
@@ -30,6 +33,8 @@ public class TransferIntegration extends LinearOpMode {
 
             leftClaw = hwMap.getOutakeServoLeft();
             rightClaw = hwMap.getOutakeServoRight();
+            linearSlidesRight = hwMap.getLinearSlidesRight();
+            linearSlidesLeft = hwMap.getLinearSlidesLeft();
         } catch (Exception e) {
             telemetry.addData("-", e.getMessage());
             telemetry.update();

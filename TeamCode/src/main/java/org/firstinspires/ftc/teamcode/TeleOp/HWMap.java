@@ -66,20 +66,17 @@ public class HWMap {
 
     private final Telemetry telemetry;
 
-    public final double servoOpen = 1.0;
+    public final double servoOpen = 0.5;
     public final double servoClose = 0.0;
-
     public HWMap(Telemetry telemetry, HardwareMap hardwareMap) {
         //Other Variables
         this.telemetry = telemetry;
-
 
         //Drive Motors
         rightFrontMotor = new Motor(hardwareMap, "RF", Motor.GoBILDA.RPM_435); //CH Port 0
         leftFrontMotor = new Motor(hardwareMap, "LF", Motor.GoBILDA.RPM_435);//CH Port 1. The right odo pod accesses this motor's encoder port
         leftBackMotor = new Motor(hardwareMap, "LB", Motor.GoBILDA.RPM_435); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
         rightBackMotor = new Motor(hardwareMap, "RB", Motor.GoBILDA.RPM_435);//CH Port 3. The left odo pod accesses this motor's encoder port.
-
 
         //Linear Slides Motors
         linearSlidesLeft = new Motor(hardwareMap, "LSL", Motor.GoBILDA.RPM_435); //EH Port 2

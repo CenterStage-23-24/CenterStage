@@ -22,8 +22,10 @@ public class Arm {
     private AxonClass leftAxon;
     private AxonClass rightAxon;
     private PIDController pidController;
+    private Telemetry telemetry;
 
     public Arm(Telemetry telemetry, HardwareMap hardwareMap) {
+        this.telemetry = telemetry;
         hwMap = new HWMap(telemetry, hardwareMap);
         leftServo = hwMap.getAxonServoLeft();
         rightServo = hwMap.getAxonServoRight();
@@ -46,32 +48,33 @@ public class Arm {
     public static final double intakePos = 117; // Angle for Intaking pixels
     public final double depositPos = normalizeRadiansTau(intakePos + 150); // Angle for depositing pixels, is 150 degrees from intake
     public static double intakeOffset = 60; // Degrees that the intake position is from vertically facing down
-    public final double safeError = 10; // Position can be +- this many degrees from target for safe transfer
-    public final double safeIntake = normalizeRadiansTau(intakePos - safeError); // Safe range to start transfer from intake pos
-    public final double safeRange = 150 + (2 * safeError); // the range of the safe values from safeIntake, will end at depositPos + safeError
+    private final double safeError = 10; // Position can be +- this many degrees from target for safe transfer
+    private final double safeIntake = normalizeRadiansTau(intakePos - safeError); // Safe range to start transfer from intake pos
+    private final double safeRange = 150 + (2 * safeError); // the range of the safe values from safeIntake, will end at depositPos + safeError
 
     public static double targetPos = intakePos;
+    private double measuredPos = 0;
 
     //Temp Vars for testing
-    public static double powerCap = 1.0;
+    private final double powerCap = 1.0;
 
     // Finds the smallest distance between 2 angles, input and output in degrees
-    public double angleDelta(double angle1, double angle2) {
+    private double angleDelta(double angle1, double angle2) {
         return Math.min(normalizeRadiansTau(angle1 - angle2), 360 - normalizeRadiansTau(angle1 - angle2));
     }
 
     // Finds the direction of the smallest distance between 2 angles
-    public double angleDeltaSign(double position, double target) {
+    private double angleDeltaSign(double position, double target) {
         return -(Math.signum(normalizeRadiansTau(target - position) - (360 - normalizeRadiansTau(target - position))));
     }
 
     // Converts angle from degrees to radians
-    public double toRadians(double degrees) {
+    private double toRadians(double degrees) {
         return degrees * Math.PI / 180;
     }
 
     // Takes input angle in degrees, returns that angle in the range of 0-360
-    public double normalizeRadiansTau(double angle) {
+    private double normalizeRadiansTau(double angle) {
         return (angle + 360) % 360;
     }
 
@@ -84,7 +87,7 @@ public class Arm {
     }
 
     public void updatePos() {
-        double measuredPos = leftAxon.getPos();
+        measuredPos = leftAxon.getPos();
 
         double delta = angleDelta(measuredPos, targetPos);
         double sign = angleDeltaSign(measuredPos, targetPos);
@@ -105,14 +108,21 @@ public class Arm {
         // Setting servo powers, one servo should have a true value for inverse when its created so we can set positive powers to both
         leftAxon.setPower(power);
         rightAxon.setPower(power);
-//        telemetry.addData("Power: ", power);
-//        telemetry.addData("Measured Pos Left: ", measuredPos);
-//        telemetry.addData("Measured Pos Right: ", rightAxon.getPos());
-//        telemetry.addData("Target Pos: ", targetPos);
-//        telemetry.addData("Delta: ", delta);
-//        telemetry.addData("Sign: ", sign);
-//        telemetry.addData("Error: ", error);
-//        telemetry.addData("Deg from vert: ", degreesFromVert);
 
+        // Telemetry
+        telemetry.addData("Power: ", power);
+        telemetry.addData("Measured Pos Left: ", measuredPos);
+        telemetry.addData("Measured Pos Right: ", rightAxon.getPos());
+        telemetry.addData("Target Pos: ", targetPos);
+        telemetry.addData("Delta: ", delta);
+        telemetry.addData("Sign: ", sign);
+        telemetry.addData("Error: ", error);
+        telemetry.addData("Deg from vert: ", degreesFromVert);
     }
+
+    public boolean axonAtPos(double targetPos, double buffer) {
+
+        return targetPos >= measuredPos + buffer && targetPos <= measuredPos + buffer;
+    }
+
 }

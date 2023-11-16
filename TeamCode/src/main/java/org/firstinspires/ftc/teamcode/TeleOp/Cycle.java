@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.TeleOp.HWMap;
@@ -20,9 +21,9 @@ public class Cycle {
         ejection,
         transfer,
         outake,
-        outakeReverse
     }
 
+    private Arm arm;
     cycleFSM state = cycleFSM.start;
     private Motor intakeMotor;
     private Servo outakeServoLeft;
@@ -33,16 +34,20 @@ public class Cycle {
     boolean pixelInLeft = false;
     boolean pixelInRight = false;
     boolean linearSlidesAtPos = true; // Change to the linear slides threshold when Transfer is done
-    boolean axonAtPos = true; //Change to axon threshold when Transfer is done.
-    private double gripPixelPos = 0.8;// TEMP: Check for the right value.
-    private double releasePixelPos = 0.0;// TEMP: Check for the right value.
+    private double gripPixelPos = 0.0;// TEMP: Check for the right value.
+    private double releasePixelPos = 0.5;// TEMP: Check for the right value.
+    private final double buffer = 5;
+    private final double outakeSpeed = -0.4, intakeSpeed = 1.0;
+
 
     GamepadEx gamepad;
     Telemetry telemetry;
+    HardwareMap hardwareMap;
 
-    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
+    public Cycle(HWMap hwMap, HardwareMap hardwareMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
         this.gamepad = gamepad; // add control class to program
         this.telemetry = telemetry;
+        this.hardwareMap = hardwareMap;
         this.fieldCentricDrive = fieldCentricDrive;
 
         intakeMotor = hwMap.getIntakeMotor();
@@ -50,7 +55,7 @@ public class Cycle {
         outakeServoRight = hwMap.getOutakeServoRight();
         colorSensorLeft = hwMap.getTrayLeftCS();
         colorSensorRight = hwMap.getTrayRightCS();
-
+        arm = new Arm(telemetry, hardwareMap);
     }
 
 
@@ -71,15 +76,14 @@ public class Cycle {
                     }
                     if (gamepad.isDown(GamepadKeys.Button.Y)) {
                         telemetry.addData("y pressed in cycle", 1);
-                        state = cycleFSM.transfer;
+                        //Will uncomment after slides have been tested
+                        //state = cycleFSM.transfer;
                     }
                     if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                         telemetry.addData("left_bumper pressed in cycle", 1);
                         state = cycleFSM.outake;
                     }
-                    if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-                        state = cycleFSM.outakeReverse;
-                    }
+
 
                     break;
                 case intake:
@@ -90,26 +94,32 @@ public class Cycle {
                     }
                     break;
                 case ejection:
-                    //Ejection
+                    state = cycleFSM.start;
                     break;
                 case transfer:
-                    //Transfer
+                    arm.goToDeposit();
+                    arm.updatePos();
+                    if(arm.axonAtPos(arm.depositPos, buffer)){
+                        state = cycleFSM.outake;
+                    }else{
+                        telemetry.addData("-", "Not at position to deposit");
+                    }
+                    intakeMotor.set(outakeSpeed);
+                    if (gamepad.wasJustPressed(GamepadKeys.Button.B))
+                        state = cycleFSM.start;
                     break;
                 case outake:
-                    telemetry.addData("In outtake", 1);
-                    outakeServoLeft.setPosition(0.75);
-                    outakeServoRight.setPosition(0.75);
-                    state = cycleFSM.start;
+                    telemetry.addData("-", "Ready to deposit");
+                    if (gamepad.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
+                        outakeServoLeft.setPosition(releasePixelPos);
+                        outakeServoRight.setPosition(releasePixelPos);
+                    }
+                    intakeMotor.set(outakeSpeed);
+                    if (gamepad.wasJustPressed(GamepadKeys.Button.B))
+                        state = cycleFSM.start;
                     break;
-                case outakeReverse:
-                    outakeServoLeft.setPosition(0);
-                    outakeServoRight.setPosition(0);
-                    state = cycleFSM.start;
-                    return;
-
             }
             telemetry.update();
-            gamepad.readButtons();
             fieldCentricDrive.drive(gamepad.getLeftX(), gamepad.getLeftY(), gamepad.getRightX(), HWMap.readFromIMU());
 
         }
@@ -117,14 +127,17 @@ public class Cycle {
 
     private void Intake() {
         detectPixels();
+        boolean axonAtPos = arm.axonAtPos(arm.intakePos, buffer);
         if (pixelInLeft)
             outakeServoLeft.setPosition(gripPixelPos);
         if (pixelInRight)
             outakeServoRight.setPosition(gripPixelPos);
         if (pixelInLeft && pixelInRight && linearSlidesAtPos && axonAtPos) {
-            intakeMotor.set(-0.4);
+            intakeMotor.set(outakeSpeed);
+            //Enable state change after the slides have been added.
+            //state = cycleFSM.transfer;
         } else {
-            intakeMotor.set(1);
+            intakeMotor.set(intakeSpeed);
         }
     }
 

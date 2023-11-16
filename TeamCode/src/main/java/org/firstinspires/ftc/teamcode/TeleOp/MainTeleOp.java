@@ -31,9 +31,11 @@ public class MainTeleOp extends LinearOpMode {
     //Hardware
     private Servo outakeServoLeft;
     private Servo outakeServoRight;
+    private double openPos = 0.5;
+    private double closePos = 0.0;
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
 
 
         try {
@@ -42,7 +44,7 @@ public class MainTeleOp extends LinearOpMode {
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
 
-            cycle = new Cycle(hwMap, gamePad1, telemetry, fieldCentricDrive);
+            cycle = new Cycle(hwMap, hardwareMap, gamePad1, telemetry, fieldCentricDrive);
             state = RobotFSM.start;
 
             outakeServoLeft = hwMap.getOutakeServoLeft();
@@ -52,8 +54,8 @@ public class MainTeleOp extends LinearOpMode {
             telemetry.addLine(exception.getMessage());
             telemetry.update();
         }
-        outakeServoLeft.setPosition(0);
-        outakeServoRight.setPosition(0);
+        outakeServoLeft.setPosition(openPos);
+        outakeServoRight.setPosition(openPos);
         waitForStart();
 
         while (opModeIsActive()) {
@@ -69,7 +71,7 @@ public class MainTeleOp extends LinearOpMode {
                     break;
                 case cycleFSM:
                     telemetry.addData("in cycle state", 1);
-                    if (gamePad1.wasJustPressed(GamepadKeys.Button.Y)) {
+                    if (gamePad1.wasJustPressed(GamepadKeys.Button.B)) {
                         telemetry.addData("-", "Quit Cycle State");
                         state = RobotFSM.start;
                     } else {
