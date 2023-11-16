@@ -68,21 +68,18 @@ public class Cycle {
                     telemetry.addData("in start in cycle", 1);
                     if (gamepad.isDown(GamepadKeys.Button.A)) {
                         telemetry.addData("a pressed in cycle", 1);
-                        state = cycleFSM.intake;
+                        //state = cycleFSM.intake;
                     }
                     if (gamepad.isDown(GamepadKeys.Button.B)) {
                         telemetry.addData("b pressed in cycle", 1);
-                        state = cycleFSM.ejection;
+                        //state = cycleFSM.ejection;
                     }
                     if (gamepad.isDown(GamepadKeys.Button.Y)) {
                         telemetry.addData("y pressed in cycle", 1);
                         //Will uncomment after slides have been tested
                         //state = cycleFSM.transfer;
                     }
-                    if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
-                        telemetry.addData("left_bumper pressed in cycle", 1);
-                        state = cycleFSM.outake;
-                    }
+
 
 
                     break;
