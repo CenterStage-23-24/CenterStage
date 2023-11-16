@@ -65,10 +65,12 @@ public class Cycle {
 
             switch (state) {
                 case start:
+                    //This is the starting state and when one of the buttons is pressed the FSM will move to its correspodins state. 
+                    //For example, if a is pressed it will move to the intake state.
                     telemetry.addData("in start in cycle", 1);
                     if (gamepad.isDown(GamepadKeys.Button.A)) {
                         telemetry.addData("a pressed in cycle", 1);
-                        //state = cycleFSM.intake;
+                        state = cycleFSM.intake;
                     }
                     if (gamepad.isDown(GamepadKeys.Button.B)) {
                         telemetry.addData("b pressed in cycle", 1);
@@ -79,9 +81,6 @@ public class Cycle {
                         //Will uncomment after slides have been tested
                         //state = cycleFSM.transfer;
                     }
-
-
-
                     break;
                 case intake:
                     if (gamepad.wasJustReleased(GamepadKeys.Button.A)) {
@@ -124,14 +123,15 @@ public class Cycle {
 
     private void Intake() {
         detectPixels();
-        boolean axonAtPos = arm.axonAtPos(arm.intakePos, buffer);
+        boolean axonAtPos = arm.axonAtPos(arm.depositPos, buffer);
         if (pixelInLeft)
             outakeServoLeft.setPosition(gripPixelPos);
         if (pixelInRight)
             outakeServoRight.setPosition(gripPixelPos);
         if (pixelInLeft && pixelInRight && linearSlidesAtPos && axonAtPos) {
             intakeMotor.set(outakeSpeed);
-            //Enable state change after the slides have been added.
+            //Enable state change after the slides have been added. 
+            //DON'T THINK I WANT TO IMPLEMENT THE STATE CHANGE IN HERE, BUT LEFT IT JUST IN CASE.
             //state = cycleFSM.transfer;
         } else {
             intakeMotor.set(intakeSpeed);
