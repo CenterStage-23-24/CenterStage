@@ -7,24 +7,22 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.TeleOp.HWMap;
-
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Cycle {
 
-    public enum cycleFSM {
+    public enum CycleFSM {
         start,
         intake,
         ejection,
         transfer,
-        outake,
+        outtake,
     }
 
     private Arm arm;
-    cycleFSM state = cycleFSM.start;
+    CycleFSM state = CycleFSM.intake;
     private Motor intakeMotor;
     private Servo outakeServoLeft;
     private Servo outakeServoRight;
@@ -33,11 +31,10 @@ public class Cycle {
     private FieldCentricDrive fieldCentricDrive;
     boolean pixelInLeft = false;
     boolean pixelInRight = false;
-    boolean linearSlidesAtPos = true; // Change to the linear slides threshold when Transfer is done
     private double gripPixelPos = 0.0;// TEMP: Check for the right value.
     private double releasePixelPos = 0.5;// TEMP: Check for the right value.
     private final double buffer = 5;
-    private final double outakeSpeed = -0.4, intakeSpeed = 1.0;
+    private final double ejectSpeed = -0.4, intakeSpeed = 1.0;
 
 
     GamepadEx gamepad;
@@ -68,10 +65,6 @@ public class Cycle {
                     //This is the starting state and when one of the buttons is pressed the FSM will move to its corresponding state.
                     //For example, if a is pressed it will move to the intake state.
                     telemetry.addData("in start in cycle", 1);
-                    if (gamepad.isDown(GamepadKeys.Button.A)) {
-                        telemetry.addData("a pressed in cycle", 1);
-                        state = cycleFSM.intake;
-                    }
                     if (gamepad.isDown(GamepadKeys.Button.B)) {
                         telemetry.addData("b pressed in cycle", 1);
                         //state = cycleFSM.ejection;
@@ -81,38 +74,37 @@ public class Cycle {
                         //Will uncomment after slides have been tested
                         //state = cycleFSM.transfer;
                     }
+                    if(!gamepad.isDown(GamepadKeys.Button.DPAD_DOWN))
+                        state = CycleFSM.intake;
                     break;
                 case intake:
-                    if (gamepad.wasJustReleased(GamepadKeys.Button.A)) {
-                        state = cycleFSM.start;
-                    } else {
-                        Intake();
-                    }
+                    Intake();
                     break;
                 case ejection:
-                    state = cycleFSM.start;
+                    intakeMotor.set(ejectSpeed);
+                    state = CycleFSM.start;
                     break;
                 case transfer:
                     arm.goToDeposit();
                     arm.updatePos();
-                    if(arm.axonAtPos(arm.depositPos, buffer)){
-                        state = cycleFSM.outake;
-                    }else{
+                    if (arm.axonAtPos(arm.depositPos, buffer)) {
+                        state = CycleFSM.outtake;
+                    } else {
                         telemetry.addData("-", "Not at position to deposit");
                     }
-                    intakeMotor.set(outakeSpeed);
+                    intakeMotor.set(ejectSpeed);
                     if (gamepad.wasJustPressed(GamepadKeys.Button.B))
-                        state = cycleFSM.start;
+                        state = CycleFSM.start;
                     break;
-                case outake:
+                case outtake:
                     telemetry.addData("-", "Ready to deposit");
                     if (gamepad.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
                         outakeServoLeft.setPosition(releasePixelPos);
                         outakeServoRight.setPosition(releasePixelPos);
                     }
-                    intakeMotor.set(outakeSpeed);
+                    intakeMotor.set(ejectSpeed);
                     if (gamepad.wasJustPressed(GamepadKeys.Button.B))
-                        state = cycleFSM.start;
+                        state = CycleFSM.start;
                     break;
             }
             telemetry.update();
@@ -124,17 +116,19 @@ public class Cycle {
     private void Intake() {
         detectPixels();
         boolean axonAtPos = arm.axonAtPos(arm.depositPos, buffer);
+        boolean linearSlidesAtPos = true; // Change to the linear slides threshold when Transfer is done
         if (pixelInLeft)
             outakeServoLeft.setPosition(gripPixelPos);
         if (pixelInRight)
             outakeServoRight.setPosition(gripPixelPos);
-        if (pixelInLeft && pixelInRight && linearSlidesAtPos && axonAtPos) {
-            intakeMotor.set(outakeSpeed);
-            //Enable state change after the slides have been added. 
+        if ((!pixelInLeft || !pixelInRight) && linearSlidesAtPos && axonAtPos) {
+            intakeMotor.set(intakeSpeed);
+        } else {
+            intakeMotor.set(ejectSpeed);
+            //Enable state change after the slides have been added.
             //DON'T THINK I WANT TO IMPLEMENT THE STATE CHANGE IN HERE, BUT LEFT IT JUST IN CASE.
             //state = cycleFSM.transfer;
-        } else {
-            intakeMotor.set(intakeSpeed);
+
         }
     }
 

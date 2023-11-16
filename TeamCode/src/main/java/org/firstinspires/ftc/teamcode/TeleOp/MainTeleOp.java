@@ -44,7 +44,7 @@ public class MainTeleOp extends LinearOpMode {
             gamePad2 = new GamepadEx(gamepad2);
 
             cycle = new Cycle(hwMap, hardwareMap, gamePad1, telemetry, fieldCentricDrive);
-            state = RobotFSM.start;
+            state = RobotFSM.cycleFSM;
 
             outakeServoLeft = hwMap.getOutakeServoLeft();
             outakeServoRight = hwMap.getOutakeServoRight();
@@ -63,10 +63,8 @@ public class MainTeleOp extends LinearOpMode {
             switch (state) { //exit state?
                 case start:
                     telemetry.addData("in start", 1);
-                    if (gamePad1.wasJustPressed(GamepadKeys.Button.X)) {
-                        telemetry.addData("x pressed", 1);
+                    if(!gamePad1.isDown(GamepadKeys.Button.DPAD_UP))
                         state = RobotFSM.cycleFSM;
-                    }
                     break;
                 case cycleFSM:
                     telemetry.addData("in cycle state", 1);

@@ -68,6 +68,7 @@ public class HWMap {
 
     public final double servoOpen = 0.5;
     public final double servoClose = 0.0;
+
     public HWMap(Telemetry telemetry, HardwareMap hardwareMap) {
         //Other Variables
         this.telemetry = telemetry;
@@ -162,9 +163,6 @@ public class HWMap {
         imu.resetYaw();
     }
 
-    public Servo getOdoRetractionRight() {
-        return OdoRetractionRight;
-    }
 
     public DistanceSensor getDistanceSensorRight() {
         return distanceSensorRight;
@@ -182,8 +180,12 @@ public class HWMap {
         return trayLeftCS;
     }
 
-    public Servo getOdoRetractionLeft() {
-        return OdoRetractionLeft;
+    public Servo getOutakeServoRight() {
+        return outakeServoRight;
+    }
+
+    public Servo getOutakeServoLeft() {
+        return outakeServoLeft;
     }
 
     public CRServo getAxonServoRight() {
@@ -192,14 +194,6 @@ public class HWMap {
 
     public CRServo getAxonServoLeft() {
         return axonServoLeft;
-    }
-
-    public Servo getOutakeServoRight() {
-        return outakeServoRight;
-    }
-
-    public Servo getOutakeServoLeft() {
-        return outakeServoLeft;
     }
 
     public AnalogInput getAxonAnalogRight() {
