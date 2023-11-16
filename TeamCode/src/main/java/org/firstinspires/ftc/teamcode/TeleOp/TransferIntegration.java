@@ -29,7 +29,7 @@ public class TransferIntegration extends LinearOpMode {
             hwMap = new HWMap(telemetry, hardwareMap);
             gamePad1 = new GamepadEx(gamepad1);
 
-            arm = new Arm(telemetry, hardwareMap);
+            arm = new Arm(hwMap, telemetry);
 
             leftClaw = hwMap.getOutakeServoLeft();
             rightClaw = hwMap.getOutakeServoRight();

@@ -24,9 +24,8 @@ public class Arm {
     private PIDController pidController;
     private Telemetry telemetry;
 
-    public Arm(Telemetry telemetry, HardwareMap hardwareMap) {
+    public Arm(HWMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
-        hwMap = new HWMap(telemetry, hardwareMap);
         leftServo = hwMap.getAxonServoLeft();
         rightServo = hwMap.getAxonServoRight();
         leftEncoder = hwMap.getAxonAnalogLeft();
@@ -111,8 +110,7 @@ public class Arm {
 
         // Telemetry
         telemetry.addData("Power: ", power);
-        telemetry.addData("Measured Pos Left: ", measuredPos);
-        telemetry.addData("Measured Pos Right: ", rightAxon.getPos());
+        telemetry.addData("Measured Pos: ", measuredPos);
         telemetry.addData("Target Pos: ", targetPos);
         telemetry.addData("Delta: ", delta);
         telemetry.addData("Sign: ", sign);
@@ -121,7 +119,7 @@ public class Arm {
     }
 
     public boolean axonAtPos(double targetPos, double buffer) {
-        return (targetPos >= (measuredPos - buffer)) && (targetPos <= (measuredPos + buffer));
+        return (((targetPos + buffer) >= measuredPos) && ((targetPos - buffer) <= measuredPos));
     }
 
 }

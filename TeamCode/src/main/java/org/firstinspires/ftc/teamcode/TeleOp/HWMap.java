@@ -121,6 +121,9 @@ public class HWMap {
         rightBackMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         rightFrontMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
 
+        linearSlidesLeft.setInverted(false);
+        linearSlidesRight.setInverted(true);
+
         //Set Motor Mode
         leftBackMotor.setRunMode(Motor.RunMode.RawPower);
         rightBackMotor.setRunMode(Motor.RunMode.RawPower);
