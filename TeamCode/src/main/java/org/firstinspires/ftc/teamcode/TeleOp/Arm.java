@@ -121,8 +121,7 @@ public class Arm {
     }
 
     public boolean axonAtPos(double targetPos, double buffer) {
-
-        return targetPos >= measuredPos - buffer && targetPos <= measuredPos + buffer;
+        return (targetPos >= (measuredPos - buffer)) && (targetPos <= (measuredPos + buffer));
     }
 
 }

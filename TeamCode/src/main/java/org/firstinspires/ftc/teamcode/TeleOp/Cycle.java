@@ -65,7 +65,7 @@ public class Cycle {
 
             switch (state) {
                 case start:
-                    //This is the starting state and when one of the buttons is pressed the FSM will move to its correspodins state. 
+                    //This is the starting state and when one of the buttons is pressed the FSM will move to its corresponding state.
                     //For example, if a is pressed it will move to the intake state.
                     telemetry.addData("in start in cycle", 1);
                     if (gamepad.isDown(GamepadKeys.Button.A)) {

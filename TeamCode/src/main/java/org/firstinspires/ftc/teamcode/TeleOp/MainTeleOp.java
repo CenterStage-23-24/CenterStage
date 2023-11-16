@@ -32,7 +32,6 @@ public class MainTeleOp extends LinearOpMode {
     private Servo outakeServoLeft;
     private Servo outakeServoRight;
     private double openPos = 0.5;
-    private double closePos = 0.0;
 
     @Override
     public void runOpMode() {
