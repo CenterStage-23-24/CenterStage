@@ -68,7 +68,7 @@ public class Cycle {
                     telemetry.addData("in start in cycle", 1);
                     if (gamepad.isDown(GamepadKeys.Button.B)) {
                         telemetry.addData("b pressed in cycle", 1);
-                        state = CycleFSM.outtake;
+                        //state = CycleFSM.outtake;
                     }
                     if (gamepad.isDown(GamepadKeys.Button.Y)) {
                         telemetry.addData("y pressed in cycle", 1);
