@@ -22,7 +22,8 @@ public class Slides {
     private int targetPos;
     private HWMap hwMap;
     private Telemetry telemetry;
-    public Slides(HWMap hwMap, Telemetry telemetry){
+
+    public Slides(HWMap hwMap, Telemetry telemetry) {
         this.hwMap = hwMap;
         this.telemetry = telemetry;
         LSL = hwMap.getLinearSlidesLeft();
@@ -36,7 +37,7 @@ public class Slides {
         controller = new PIDFController(p, i, d, f);
     }
 
-    public void pid(){
+    public void pid() {
         double output = controller.calculate(LSL.getCurrentPosition(), targetPos);
         LSL.set(output);
         LSR.set(output);
@@ -77,21 +78,19 @@ public class Slides {
          */
     }
 
-    public void setTargetPos(int targetPos){
+    public void setTargetPos(int targetPos) {
         this.targetPos = targetPos;
     }
 
-    public boolean atPos(){
-
+    public boolean atPos() {
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
     }
-    public int mmToTicks(double mm){
-        double diameterOfSpool = 46.0;
-        double angleOfSlides = 60.0;
-        double cmDiagonal = cm/sin(angleOfSlides);
-        double rotations = cmDiagonal/(Math.PI * diameter * 0.5);// The 0.5 is due to the gear ratio. 
-        double ticks = rotations * LSL.getCPR();
+
+    public int mmToTicks(double cm) {
+        double diameterOfSpool = 4.6;
+        double ratio = 37.0 / 24.0;
+        double ticks = (cm / (Math.PI * diameterOfSpool)) * ratio * LSL.getCPR();  // The 2 is due to the gear ratio.
         return (int) ticks;
-            
+
     }
 }

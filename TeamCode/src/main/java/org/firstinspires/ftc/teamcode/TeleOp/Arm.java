@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Arm {
-    public static double p = 0.006, i = 0.003, d = 0.015, a = 0.07;
+    public static double p = 0.00518, i = 0.003, d = 0.015, a = 0.07;
     private HWMap hwMap;
     private CRServo leftServo;
     private CRServo rightServo;
@@ -44,7 +44,7 @@ public class Arm {
     // a is a feedforward coefficient used to counteract the torque applied to the arm by gravity
     // a * sin(θ) gives the power needed to counteract gravity, θ is distance from vertically pointing down
     // a is used in place of m * g * r as those remain constant, and its easier to tune a single coefficient
-    public static final double intakePos = 117; // Angle for Intaking pixels
+    public static final double intakePos = 115; // Angle for Intaking pixels
     public final double depositPos = normalizeRadiansTau(intakePos + 150); // Angle for depositing pixels, is 150 degrees from intake
     public static double intakeOffset = 60; // Degrees that the intake position is from vertically facing down
     private final double safeError = 10; // Position can be +- this many degrees from target for safe transfer

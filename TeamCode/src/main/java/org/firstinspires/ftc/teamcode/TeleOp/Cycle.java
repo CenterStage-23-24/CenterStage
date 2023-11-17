@@ -1,11 +1,14 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -15,10 +18,10 @@ public class Cycle {
 
     public enum CycleFSM {
         start,
-        intake,
-        ejection,
-        transfer,
-        outtake,
+        extend,
+        retract,
+        outtakeLeft,
+        outtakeRight
     }
 
     private Arm arm;
@@ -32,13 +35,18 @@ public class Cycle {
     private FieldCentricDrive fieldCentricDrive;
     boolean pixelInLeft = false;
     boolean pixelInRight = false;
-    private double gripPixelPos = 0.0;// TEMP: Check for the right value.
-    private double releasePixelPos = 0.5;// TEMP: Check for the right value.
+    private double leftGripPixelPos = 0;
+    private double rightGripPixelPos = 1;
+    private double leftReleasePixelPos = 0.5;
+    private double rightReleasePixelPos = 0.5;
     private final double buffer = 20;
     private final double ejectSpeed = -0.4, intakeSpeed = 1.0;
     private boolean stopRequested = false;
     private boolean toTransfer = false;
+    ElapsedTime bufferTime = new ElapsedTime();
 
+    private double startTS;
+    private double finalTS;
 
     GamepadEx gamepad;
     Telemetry telemetry;
@@ -57,6 +65,11 @@ public class Cycle {
         colorSensorRight = hwMap.getTrayRightCS();
         slides = new Slides(hwMap, telemetry);
         arm = new Arm(hwMap, telemetry);
+        arm.goToIntake();
+        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetry.addData("-", Arm.targetPos);
+        telemetry.update();
+        bufferTime.reset();
     }
 
 
@@ -69,49 +82,65 @@ public class Cycle {
                     //This is the starting state and when one of the buttons is pressed the FSM will move to its corresponding state.
                     //For example, if a is pressed it will move to the intake state.
                     telemetry.addData("in start in cycle", 1);
-                    if (gamepad.isDown(GamepadKeys.Button.B)) {
-                        telemetry.addData("b pressed in cycle", 1);
-                        state = CycleFSM.outtake;
+                    if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                        telemetry.addData("Left-Bumper pressed in cycle", 1);
+                        state = CycleFSM.outtakeLeft;
+                    }
+                    if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                        telemetry.addData("Left-Bumper in cycle", 1);
+                        state = CycleFSM.outtakeRight;
                     }
                     if (gamepad.isDown(GamepadKeys.Button.Y)) {
                         telemetry.addData("y pressed in cycle", 1);
-                        //Will uncomment after slides have been tested
-                        state = CycleFSM.transfer;
+                        state = CycleFSM.extend;
                     }
-                    if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-                        state = CycleFSM.outtake;
+                    if (gamepad.isDown(GamepadKeys.Button.A)) {
+                        startTS = bufferTime.milliseconds();
+                        telemetry.addData("b pressed in cycle", 1);
+                        state = CycleFSM.retract;
                     }
                     break;
-                case ejection:
-                    intakeMotor.set(ejectSpeed);
-                    state = CycleFSM.start;
-                    break;
-                case transfer:
+                case extend:
                     toTransfer = true;
-                    slides.setTargetPos(1000);
+                    slides.setTargetPos(slides.mmToTicks(50));
                     if (slides.atPos()) {
                         arm.goToDeposit();
                         state = CycleFSM.start;
                     }
                     telemetry.addData("atPos?", slides.atPos());
                     break;
-                case outtake:
-                    telemetry.addData("-", "Ready to deposit");
-                    if (gamepad.wasJustPressed(GamepadKeys.Button.RIGHT_BUMPER)) {
-                        outakeServoLeft.setPosition(releasePixelPos);
-                        outakeServoRight.setPosition(1 - releasePixelPos);
-                        toTransfer = false;
+                case outtakeLeft:
+                    telemetry.addData("-", "Ready to deposit left");
+                    outakeServoLeft.setPosition(leftReleasePixelPos);
+                    toTransfer = true;
+                    state = CycleFSM.start;
+                    break;
+                case outtakeRight:
+                    telemetry.addData("-", "Ready to deposit right");
+                    outakeServoRight.setPosition(rightReleasePixelPos);
+                    toTransfer = true;
+                    state = CycleFSM.start;
+                    break;
+                case retract:
+                    toTransfer = true;
+                    arm.goToIntake();
+                    boolean armAtPos = arm.axonAtPos(Arm.intakePos, buffer);
+                    if (armAtPos && waits()) {
+                        slides.setTargetPos(0);
+                        if (slides.atPos()) {
+                            toTransfer = false;
+                            state = CycleFSM.start;
+                        }
                     }
-                    if (gamepad.wasJustPressed(GamepadKeys.Button.B))
-                        state = CycleFSM.start;
                     break;
             }
             Intake();//Intake is out here because DRIVE TEAM wants the intake to run regardless
+            telemetry.addData("OSL", outakeServoLeft.getPosition());
+            telemetry.addData("OSR", outakeServoRight.getPosition());
             telemetry.update();
             fieldCentricDrive.drive(gamepad.getLeftX(), gamepad.getLeftY(), gamepad.getRightX(), HWMap.readFromIMU());
             slides.pid();
             arm.updatePos();
-
         }
     }
 
@@ -120,16 +149,19 @@ public class Cycle {
             stopRequested = !stopRequested;
 
         if (!stopRequested) {
-            detectPixels();
-            boolean axonAtPos = arm.axonAtPos(Arm.intakePos, buffer);
-            boolean linearSlidesAtPos = slides.atPos(); // Change to the linear slides threshold when Transfer is done
-            if (pixelInLeft)
-                outakeServoLeft.setPosition(gripPixelPos);
-            if (pixelInRight)
-                outakeServoRight.setPosition(gripPixelPos);
-            if ((!pixelInLeft || !pixelInRight) && !toTransfer) {
-                intakeMotor.set(intakeSpeed);
-                telemetry.addData("power: ", intakeSpeed);
+            if (!toTransfer) {
+                detectPixels();
+                if (pixelInLeft)
+                    outakeServoLeft.setPosition(leftGripPixelPos);
+                if (pixelInRight)
+                    outakeServoRight.setPosition(rightGripPixelPos);
+                if ((!pixelInLeft || !pixelInRight)) {
+                    intakeMotor.set(intakeSpeed);
+                    telemetry.addData("power: ", intakeSpeed);
+                } else {
+                    intakeMotor.set(ejectSpeed);
+                    telemetry.addData("power: ", ejectSpeed);
+                }
             } else {
                 intakeMotor.set(ejectSpeed);
                 telemetry.addData("power: ", ejectSpeed);
@@ -182,6 +214,14 @@ public class Cycle {
         }
     }
 
+    private boolean waits() {
+        finalTS = bufferTime.milliseconds();
+        if (finalTS - startTS == 750) {
+            return true;
+        }
+        return false;
+
+    }
 }
 
 
