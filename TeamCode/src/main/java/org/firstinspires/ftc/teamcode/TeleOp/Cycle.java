@@ -216,10 +216,7 @@ public class Cycle {
 
     private boolean waits() {
         finalTS = bufferTime.milliseconds();
-        if (finalTS - startTS == 750) {
-            return true;
-        }
-        return false;
+        return (finalTS - startTS) >= 750;//600
 
     }
 }
