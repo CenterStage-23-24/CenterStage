@@ -85,4 +85,13 @@ public class Slides {
 
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
     }
+    public int mmToTicks(double mm){
+        double diameterOfSpool = 46.0;
+        double angleOfSlides = 60.0;
+        double cmDiagonal = cm/sin(angleOfSlides);
+        double rotations = cmDiagonal/(Math.PI * diameter * 0.5);// The 0.5 is due to the gear ratio. 
+        double ticks = rotations * LSL.getCPR();
+        return (int) ticks;
+            
+    }
 }
