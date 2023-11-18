@@ -82,9 +82,10 @@ public class Cycle {
             gamepad.readButtons();
 
             double buffer = 20;
+            int height = 50;
+
             switch (state) {
                 case start:
-
                     //Outtake Left
                     telemetry.addData("in start in cycle", 1);
                     if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
@@ -114,7 +115,7 @@ public class Cycle {
 
                 case extend:
                     toTransfer = true;
-                    slides.setTargetPos(slides.mmToTicks(50));
+                    slides.setTargetPos(slides.mmToTicks(height));
                     if (slides.atPos()) {
                         arm.goToDeposit();
                         state = CycleFSM.start;
@@ -141,7 +142,8 @@ public class Cycle {
                     arm.goToIntake();
                     boolean armAtPos = arm.axonAtPos(Arm.intakePos, buffer);
                     if (armAtPos && delay()) {
-                        slides.setTargetPos(0);
+                        height = 0;
+                        slides.setTargetPos(height);
                         if (slides.atPos()) {
                             toTransfer = false;
                             state = CycleFSM.start;
@@ -166,16 +168,18 @@ public class Cycle {
 
         if (!stopRequested) {
             double ejectSpeed = -0.4;
+            double leftGripPixelPos = 0;
+            double rightGripPixelPos = 1;
+            double intakeSpeed = 1.0;
+
+
             if (!toTransfer) {
                 detectPixels();
-                double leftGripPixelPos = 0;
                 if (pixelInLeft)
                     outakeServoLeft.setPosition(leftGripPixelPos);
-                double rightGripPixelPos = 1;
                 if (pixelInRight)
                     outakeServoRight.setPosition(rightGripPixelPos);
                 if ((!pixelInLeft || !pixelInRight)) {
-                    double intakeSpeed = 1.0;
                     intakeMotor.set(intakeSpeed);
                     telemetry.addData("power: ", intakeSpeed);
                 } else {
@@ -196,7 +200,9 @@ public class Cycle {
     private void detectPixels() {
         double csLeftDistance = colorSensorLeft.getDistance(DistanceUnit.MM);
         double csRightDistance = colorSensorRight.getDistance(DistanceUnit.MM);
-        if (csLeftDistance <= 30) {
+        final int distance = 28;
+        final int greenThreshold = 300;
+        if (csLeftDistance <= distance) {
             if (colorSensorLeft.green() > (colorSensorLeft.red() * 2)) {
                 telemetry.addData("-", "Green pixel detected in the left compartment");
                 pixelInLeft = true;
@@ -206,7 +212,7 @@ public class Cycle {
             } else if ((colorSensorLeft.blue() > colorSensorLeft.red()) && (colorSensorLeft.blue() > colorSensorLeft.green())) {
                 telemetry.addData("-", "Purple pixel detected in the left compartment");
                 pixelInLeft = true;
-            } else if (colorSensorLeft.green() >= 300) {
+            } else if (colorSensorLeft.green() >= greenThreshold) {
                 telemetry.addData("-", "White pixel detected in the left compartment");
                 pixelInLeft = true;
             }
@@ -214,7 +220,7 @@ public class Cycle {
             telemetry.addData("-", "Nothing in the left compartment");
             pixelInLeft = false;
         }
-        if (csRightDistance <= 28) {
+        if (csRightDistance <= distance) {
             if (colorSensorRight.green() > (colorSensorRight.red() * 2)) {
                 telemetry.addData("-", "Green pixel detected in the right compartment");
                 pixelInRight = true;
@@ -224,7 +230,7 @@ public class Cycle {
             } else if ((colorSensorRight.blue() > colorSensorRight.red()) && (colorSensorRight.blue() > colorSensorRight.green())) {
                 telemetry.addData("-", "Purple pixel detected in the right compartment");
                 pixelInRight = true;
-            } else if (colorSensorRight.green() > 300) {
+            } else if (colorSensorRight.green() >= greenThreshold) {
                 telemetry.addData("-", "White pixel detected in the right compartment");
                 pixelInRight = true;
             }
@@ -236,7 +242,8 @@ public class Cycle {
 
     private boolean delay() {
         double finalTS = bufferTime.milliseconds();
-        return (finalTS - startTS) >= 750;//600
+        int ms = 750;//600
+        return (finalTS - startTS) >= ms;
     }
 }
 
