@@ -39,27 +39,26 @@ public class Cycle {
     private FieldCentricDrive fieldCentricDrive;
     boolean pixelInLeft = false;
     boolean pixelInRight = false;
-    private double leftGripPixelPos = 0;
-    private double rightGripPixelPos = 1;
-    private double leftReleasePixelPos = 0.5;
-    private double rightReleasePixelPos = 0.5;
+    private final double leftGripPixelPos = 0;
+    private final double rightGripPixelPos = 1;
+    private final double leftReleasePixelPos = 0.5;
+    private final double rightReleasePixelPos = 0.5;
     private final double buffer = 20;
     private final double ejectSpeed = -0.4, intakeSpeed = 1.0;
     private boolean stopRequested = false;
     private boolean toTransfer = false;
-    ElapsedTime bufferTime = new ElapsedTime();
+    private ElapsedTime bufferTime = new ElapsedTime();
 
     private double startTS;
     private double finalTS;
 
-    GamepadEx gamepad;
-    Telemetry telemetry;
-    HardwareMap hardwareMap;
+    private GamepadEx gamepad;
+    private Telemetry telemetry;
+    private HardwareMap hardwareMap;
 
-    public Cycle(HWMap hwMap, HardwareMap hardwareMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
+    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
         this.gamepad = gamepad;
         this.telemetry = telemetry;
-        this.hardwareMap = hardwareMap;
         this.fieldCentricDrive = fieldCentricDrive;
 
         intakeMotor = hwMap.getIntakeMotor();
@@ -67,13 +66,21 @@ public class Cycle {
         outakeServoRight = hwMap.getOutakeServoRight();
         colorSensorLeft = hwMap.getTrayLeftCS();
         colorSensorRight = hwMap.getTrayRightCS();
+
         slides = new Slides(hwMap, telemetry);
         arm = new Arm(hwMap, telemetry);
+
+        //Forces arm to init to intake pos when targetPos is initialized to outtakePos
         arm.goToIntake();
+
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        telemetry.addData("-", Arm.targetPos);
-        telemetry.update();
         bufferTime.reset();
+
+        outakeServoLeft.setPosition(leftReleasePixelPos);
+        outakeServoRight.setPosition(rightReleasePixelPos);
+
+        telemetry.addData("INIT: ", "Cycle");
+        telemetry.update();
     }
 
 
@@ -83,27 +90,34 @@ public class Cycle {
 
             switch (state) {
                 case start:
-                    //This is the starting state and when one of the buttons is pressed the FSM will move to its corresponding state.
-                    //For example, if a is pressed it will move to the intake state.
+
+                    //Outtake Left
                     telemetry.addData("in start in cycle", 1);
                     if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                         telemetry.addData("Left-Bumper pressed in cycle", 1);
                         state = CycleFSM.outtakeLeft;
                     }
+
+                    //Outtake Right
                     if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                         telemetry.addData("Left-Bumper in cycle", 1);
                         state = CycleFSM.outtakeRight;
                     }
+
+                    //Extend
                     if (gamepad.isDown(GamepadKeys.Button.Y)) {
                         telemetry.addData("y pressed in cycle", 1);
                         state = CycleFSM.extend;
                     }
+
+                    //Retract
                     if (gamepad.isDown(GamepadKeys.Button.A)) {
                         startTS = bufferTime.milliseconds();
                         telemetry.addData("b pressed in cycle", 1);
                         state = CycleFSM.retract;
                     }
                     break;
+
                 case extend:
                     toTransfer = true;
                     slides.setTargetPos(slides.mmToTicks(50));
@@ -113,18 +127,21 @@ public class Cycle {
                     }
                     telemetry.addData("atPos?", slides.atPos());
                     break;
+
                 case outtakeLeft:
                     telemetry.addData("-", "Ready to deposit left");
                     outakeServoLeft.setPosition(leftReleasePixelPos);
                     toTransfer = true;
                     state = CycleFSM.start;
                     break;
+
                 case outtakeRight:
                     telemetry.addData("-", "Ready to deposit right");
                     outakeServoRight.setPosition(rightReleasePixelPos);
                     toTransfer = true;
                     state = CycleFSM.start;
                     break;
+
                 case retract:
                     toTransfer = true;
                     arm.goToIntake();
@@ -138,17 +155,18 @@ public class Cycle {
                     }
                     break;
             }
-            Intake();//Intake is out here because DRIVE TEAM wants the intake to run regardless
-            telemetry.addData("OSL", outakeServoLeft.getPosition());
-            telemetry.addData("OSR", outakeServoRight.getPosition());
-            telemetry.update();
+
+            //Intake is out here because DRIVE TEAM wants the intake to run regardless
+            intake();
+
             fieldCentricDrive.drive(gamepad.getLeftX(), gamepad.getLeftY(), gamepad.getRightX(), HWMap.readFromIMU());
             slides.pid();
             arm.updatePos();
+            telemetry.update();
         }
     }
 
-    private void Intake() {
+    private void intake() {
         if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
             stopRequested = !stopRequested;
 
@@ -221,7 +239,6 @@ public class Cycle {
     private boolean waits() {
         finalTS = bufferTime.milliseconds();
         return (finalTS - startTS) >= 750;//600
-
     }
 }
 
