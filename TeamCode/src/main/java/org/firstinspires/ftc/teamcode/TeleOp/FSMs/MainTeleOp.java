@@ -5,9 +5,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.TeleOp.FSMs.Cycle;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 
@@ -20,7 +18,6 @@ public class MainTeleOp extends LinearOpMode {
     }
 
     private RobotFSM state;
-    private HWMap hwMap;
     private Cycle cycle;
     private GamepadEx gamePad1;
     private GamepadEx gamePad2;
@@ -30,8 +27,8 @@ public class MainTeleOp extends LinearOpMode {
     public void runOpMode() {
 
         try {
-            fieldCentricDrive = new FieldCentricDrive(telemetry, hardwareMap);
-            hwMap = new HWMap(telemetry, hardwareMap);
+            HWMap hwMap = new HWMap(hardwareMap);
+            fieldCentricDrive = new FieldCentricDrive(hwMap);
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
 

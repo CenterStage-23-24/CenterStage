@@ -23,21 +23,19 @@ public class Tuner extends LinearOpMode {
     public static double d = 0.0007;
     public static double f = 0.0005;
     public static int tolerance = 50;
-    private PIDFController controller;
     public static int targetPos;
-    private HWMap hwMap;
     private Telemetry telemetry;
 
     @Override
     public void runOpMode(){
-        this.hwMap = new HWMap(telemetry, hardwareMap);
+        HWMap hwMap = new HWMap(hardwareMap);
         LSL = hwMap.getLinearSlidesLeft();
         LSR = hwMap.getLinearSlidesRight();
         LSL.resetEncoder();
         LSR.resetEncoder();
         LSL.setRunMode(Motor.RunMode.RawPower);
         LSR.setRunMode(Motor.RunMode.RawPower);
-        controller = new PIDFController(p, i, d, f);
+        PIDFController controller = new PIDFController(p, i, d, f);
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         targetPos = mmToTicks(50);
         waitForStart();

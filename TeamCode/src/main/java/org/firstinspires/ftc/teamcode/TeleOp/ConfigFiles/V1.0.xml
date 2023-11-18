@@ -11,8 +11,8 @@
             <Servo name="OSR" port="5" />
             <AnalogInput name="AAL" port="0" />
             <AnalogInput name="AAR" port="2" />
-            <RevColorSensorV3 name="TLCS" port="0" bus="2" />
             <RevColorSensorV3 name="TRCS" port="0" bus="1" />
+            <RevColorSensorV3 name="TLCS" port="0" bus="2" />
         </LynxModule>
         <LynxModule name="Control Hub" port="173">
             <goBILDA5202SeriesMotor name="RF" port="0" />

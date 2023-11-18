@@ -10,37 +10,28 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 
 @Config
 public class Arm {
+    // Basic PID coefficients
+    // a is a feedforward coefficient used to counteract the torque applied to the arm by gravity
+    // a * sin(θ) gives the power needed to counteract gravity, θ is distance from vertically pointing down
+    // a is used in place of m * g * r as those remain constant, and its easier to tune a single coefficient
     public static double p = 0.00518, i = 0.003, d = 0.015, a = 0.07;
-    private HWMap hwMap;
-    private CRServo leftServo;
-    private CRServo rightServo;
-    private AnalogInput leftEncoder;
-    private AnalogInput rightEncoder;
-    private AxonClass leftAxon;
-    private AxonClass rightAxon;
-    private PIDController pidController;
-    private Telemetry telemetry;
+    private final AxonClass leftAxon;
+    private final AxonClass rightAxon;
+    private final PIDController pidController;
+    private final Telemetry telemetry;
 
     public Arm(HWMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
-        leftServo = hwMap.getAxonServoLeft();
-        rightServo = hwMap.getAxonServoRight();
-        leftEncoder = hwMap.getAxonAnalogLeft();
-        rightEncoder = hwMap.getAxonAnalogRight();
+        final CRServo leftServo = hwMap.getAxonServoLeft();
+        final CRServo rightServo = hwMap.getAxonServoRight();
+        final AnalogInput leftEncoder = hwMap.getAxonAnalogLeft();
+        final AnalogInput rightEncoder = hwMap.getAxonAnalogRight();
         leftAxon = new AxonClass(leftServo, leftEncoder, true, true);
         rightAxon = new AxonClass(rightServo, rightEncoder, false, false);
         pidController = new PIDController(p, i, d);
     }
 
 
-    // All code is written on the assumption that positive power -> increased position magnitude
-    // and that to get from intakePos to depositPos, you need to increase your position
-
-    // Basic PID coefficients
-
-    // a is a feedforward coefficient used to counteract the torque applied to the arm by gravity
-    // a * sin(θ) gives the power needed to counteract gravity, θ is distance from vertically pointing down
-    // a is used in place of m * g * r as those remain constant, and its easier to tune a single coefficient
     public static final double intakePos = 115; // Angle for Intaking pixels
     public final double depositPos = normalizeRadiansTau(intakePos + 150); // Angle for depositing pixels, is 150 degrees from intake
     public static double intakeOffset = 60; // Degrees that the intake position is from vertically facing down
@@ -52,7 +43,6 @@ public class Arm {
     private double measuredPos = 0;
 
     //Temp Vars for testing
-    private final double powerCap = 1.0;
 
     // Finds the smallest distance between 2 angles, input and output in degrees
     private double angleDelta(double angle1, double angle2) {
@@ -85,6 +75,7 @@ public class Arm {
     public void updatePos() {
         measuredPos = leftAxon.getPos();
 
+        //This is the error between measured position and target position.
         double delta = angleDelta(measuredPos, targetPos);
         double sign = angleDeltaSign(measuredPos, targetPos);
         // Distance between measured and target position * the sign of that distance
@@ -98,23 +89,20 @@ public class Arm {
         double feedForward = -a * Math.sin(toRadians(degreesFromVert)); // Calculating power
         power += feedForward; // Adding feedforward to power
 
-        // Capping the power
-        power = Math.min(Math.abs(power), powerCap) * Math.signum(power);
+        //Applying the sign to the power
+        power = Math.abs(power) * Math.signum(power);
 
         // Setting servo powers, one servo should have a true value for inverse when its created so we can set positive powers to both
         leftAxon.setPower(power);
         rightAxon.setPower(power);
 
         // Telemetry
-        telemetry.addData("Power: ", power);
         telemetry.addData("Measured Pos: ", measuredPos);
         telemetry.addData("Target Pos: ", targetPos);
         telemetry.addData("Delta: ", delta);
         telemetry.addData("Sign: ", sign);
-        telemetry.addData("Error: ", error);
-        telemetry.addData("Deg from vert: ", degreesFromVert);
     }
-
+    //This method returns TRUE if the axons are within the buffered range of the target position or it will return FALSE.
     public boolean axonAtPos(double targetPos, double buffer) {
         return (((targetPos + buffer) >= measuredPos) && ((targetPos - buffer) <= measuredPos));
     }

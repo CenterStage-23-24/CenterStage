@@ -52,7 +52,7 @@ public class ArmTuner extends LinearOpMode {
     @Override
     public void runOpMode() {
         try {
-            hwMap = new HWMap(telemetry, hardwareMap);
+            hwMap = new HWMap(hardwareMap);
 
             leftServo = hwMap.getAxonServoLeft();
             rightServo = hwMap.getAxonServoRight();

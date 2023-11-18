@@ -1,29 +1,18 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
-import android.annotation.SuppressLint;
 
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.CRServo;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.opencv.core.Mat;
 
 /**
  * This class contains all the hardware components that are programmed on our robot and are mapped to the robot as well.
@@ -32,47 +21,38 @@ import org.opencv.core.Mat;
 
 public class HWMap {
     // Drive Motors
-    private Motor leftFrontMotor;
-    private Motor leftBackMotor;
-    private Motor rightBackMotor;
-    private Motor rightFrontMotor;
-    private MecanumDrive mecanumDrive;
+    private final Motor leftFrontMotor;
+    private final Motor leftBackMotor;
+    private final Motor rightBackMotor;
+    private final Motor rightFrontMotor;
+    private final MecanumDrive mecanumDrive;
 
     // Mechanism Motors
-    private Motor linearSlidesRight;
-    private Motor linearSlidesLeft;
-    private Motor intakeMotor;
+    private final Motor linearSlidesRight;
+    private final Motor linearSlidesLeft;
+    private final Motor intakeMotor;
     //IMU
     private static IMU imu;
-    private static double imuAngle;
 
     //Servos
-    private Servo outakeServoLeft;
-    private Servo outakeServoRight;
-    private CRServo axonServoLeft;
-    private CRServo axonServoRight;
-    private AnalogInput axonAnalogLeft;
-    private AnalogInput axonAnalogRight;
+    private final Servo outtakeServoLeft;
+    private final Servo outtakeServoRight;
+    private final CRServo axonServoLeft;
+    private final CRServo axonServoRight;
+    private final AnalogInput axonAnalogLeft;
+    private final AnalogInput axonAnalogRight;
     private Servo OdoRetractionLeft;
     private Servo OdoRetractionRight;
     private Servo OdoRetractionMiddle;
 
     //Sensors
 
-    private RevColorSensorV3 trayLeftCS;
-    private RevColorSensorV3 trayRightCS;
-    private DistanceSensor distanceSensorLeft;
-    private DistanceSensor distanceSensorRight;
+    private final RevColorSensorV3 trayLeftCS;
+    private final RevColorSensorV3 trayRightCS;
+    private final DistanceSensor distanceSensorLeft;
+    private final DistanceSensor distanceSensorRight;
 
-    private final Telemetry telemetry;
-
-    public final double servoOpen = 0.5;
-    public final double servoClose = 0.0;
-
-    public HWMap(Telemetry telemetry, HardwareMap hardwareMap) {
-        //Other Variables
-        this.telemetry = telemetry;
-
+    public HWMap(HardwareMap hardwareMap) {
         //Drive Motors
         rightFrontMotor = new Motor(hardwareMap, "RF", Motor.GoBILDA.RPM_435); //CH Port 0
         leftFrontMotor = new Motor(hardwareMap, "LF", Motor.GoBILDA.RPM_435);//CH Port 1. The right odo pod accesses this motor's encoder port
@@ -90,9 +70,9 @@ public class HWMap {
         imu = hardwareMap.get(IMU.class, "imu");
         initializeIMU();
 
-        //Outake Servos
-        outakeServoLeft = hardwareMap.get(Servo.class, "OSL"); //EH Port 4
-        outakeServoRight = hardwareMap.get(Servo.class, "OSR");//EH Port 5
+        //Outtake Servos
+        outtakeServoLeft = hardwareMap.get(Servo.class, "OSL"); //EH Port 4
+        outtakeServoRight = hardwareMap.get(Servo.class, "OSR");//EH Port 5
 
         //ODO retraction Servos
         OdoRetractionLeft = hardwareMap.get(Servo.class, "ORL"); //CH Port 0
@@ -101,7 +81,7 @@ public class HWMap {
 
         //Linear Slides Servos
         axonServoLeft = new CRServo(hardwareMap, "ASL");//EH Port 0
-        axonServoRight = new CRServo(hardwareMap, "ASR");//EH Port 1
+        axonServoRight = new CRServo(hardwareMap, "ASR");//EH Port 2
         axonAnalogLeft = hardwareMap.get(AnalogInput.class, "AAL"); //EH Port 0
         axonAnalogRight = hardwareMap.get(AnalogInput.class, "AAR"); //EH Port 2
 
@@ -109,11 +89,11 @@ public class HWMap {
         axonServoRight.setInverted(false);//Clockwise
 
         //Mapping Sensors
-        distanceSensorLeft = hardwareMap.get(DistanceSensor.class, "DSL");//EH Port 2
-        distanceSensorRight = hardwareMap.get(DistanceSensor.class, "DSR");//EH Port 0
-        trayLeftCS = hardwareMap.get(RevColorSensorV3.class, "TLCS");//CH Port 2
-        trayRightCS = hardwareMap.get(RevColorSensorV3.class, "TRCS");//CH Port 1
+        distanceSensorRight = hardwareMap.get(DistanceSensor.class, "DSR");//CH Port 0
+        distanceSensorLeft = hardwareMap.get(DistanceSensor.class, "DSL");//CH Port 2
 
+        trayRightCS = hardwareMap.get(RevColorSensorV3.class, "TRCS");//EH Port 1
+        trayLeftCS = hardwareMap.get(RevColorSensorV3.class, "TLCS");//EH Port 2
 
         //Zero Power Behavior
         leftBackMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
@@ -141,22 +121,10 @@ public class HWMap {
         leftBackMotor.setInverted(true);
     }
 
-    @SuppressLint("DefaultLocale")
-    public void Telemetry() {
-        telemetry.addData("DSL: ", getDistanceSensorLeft().getDistance(DistanceUnit.MM));
-        telemetry.addData("DSR: ", getDistanceSensorRight().getDistance(DistanceUnit.MM));
-        telemetry.addLine(String.format("Color Sensor Left - R: %d G: %d B: %d", getTrayLeftCS().red(), getTrayLeftCS().blue(), getTrayLeftCS().green()));
-        telemetry.addLine(String.format("Color Sensor Right - R: %d G: %d B: %d", getTrayRightCS().red(), getTrayRightCS().blue(), getTrayRightCS().green()));
-        telemetry.addData("OPL: ", getOdoReadingLeft());
-        telemetry.addData("OPP: ", getOdoReadingPerpendicular());
-        telemetry.addData("OPR: ", getOdoReadingRight());
-        telemetry.update();
-    }
 
     public static double readFromIMU() {
 
-        imuAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-        return imuAngle;
+        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
     }
 
     public static void initializeIMU() {
@@ -183,12 +151,12 @@ public class HWMap {
         return trayLeftCS;
     }
 
-    public Servo getOutakeServoRight() {
-        return outakeServoRight;
+    public Servo getOuttakeServoRight() {
+        return outtakeServoRight;
     }
 
-    public Servo getOutakeServoLeft() {
-        return outakeServoLeft;
+    public Servo getOuttakeServoLeft() {
+        return outtakeServoLeft;
     }
 
     public CRServo getAxonServoRight() {

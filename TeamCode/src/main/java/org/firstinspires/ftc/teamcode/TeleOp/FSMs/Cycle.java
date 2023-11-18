@@ -5,7 +5,6 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -28,33 +27,27 @@ public class Cycle {
         outtakeRight
     }
 
-    private Arm arm;
-    private Slides slides;
+    private final Arm arm;
+    private final Slides slides;
     CycleFSM state = CycleFSM.start;
-    private Motor intakeMotor;
-    private Servo outakeServoLeft;
-    private Servo outakeServoRight;
-    private RevColorSensorV3 colorSensorLeft;
-    private RevColorSensorV3 colorSensorRight;
-    private FieldCentricDrive fieldCentricDrive;
+    private final Motor intakeMotor;
+    private final Servo outakeServoLeft;
+    private final Servo outakeServoRight;
+    private final RevColorSensorV3 colorSensorLeft;
+    private final RevColorSensorV3 colorSensorRight;
+    private final FieldCentricDrive fieldCentricDrive;
     boolean pixelInLeft = false;
     boolean pixelInRight = false;
-    private final double leftGripPixelPos = 0;
-    private final double rightGripPixelPos = 1;
     private final double leftReleasePixelPos = 0.5;
     private final double rightReleasePixelPos = 0.5;
-    private final double buffer = 20;
-    private final double ejectSpeed = -0.4, intakeSpeed = 1.0;
     private boolean stopRequested = false;
     private boolean toTransfer = false;
-    private ElapsedTime bufferTime = new ElapsedTime();
+    private final ElapsedTime bufferTime = new ElapsedTime();
 
     private double startTS;
-    private double finalTS;
 
-    private GamepadEx gamepad;
+    private final GamepadEx gamepad;
     private Telemetry telemetry;
-    private HardwareMap hardwareMap;
 
     public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
         this.gamepad = gamepad;
@@ -62,8 +55,8 @@ public class Cycle {
         this.fieldCentricDrive = fieldCentricDrive;
 
         intakeMotor = hwMap.getIntakeMotor();
-        outakeServoLeft = hwMap.getOutakeServoLeft();
-        outakeServoRight = hwMap.getOutakeServoRight();
+        outakeServoLeft = hwMap.getOuttakeServoLeft();
+        outakeServoRight = hwMap.getOuttakeServoRight();
         colorSensorLeft = hwMap.getTrayLeftCS();
         colorSensorRight = hwMap.getTrayRightCS();
 
@@ -88,6 +81,7 @@ public class Cycle {
         while (true) {
             gamepad.readButtons();
 
+            double buffer = 20;
             switch (state) {
                 case start:
 
@@ -146,7 +140,7 @@ public class Cycle {
                     toTransfer = true;
                     arm.goToIntake();
                     boolean armAtPos = arm.axonAtPos(Arm.intakePos, buffer);
-                    if (armAtPos && waits()) {
+                    if (armAtPos && delay()) {
                         slides.setTargetPos(0);
                         if (slides.atPos()) {
                             toTransfer = false;
@@ -171,13 +165,17 @@ public class Cycle {
             stopRequested = !stopRequested;
 
         if (!stopRequested) {
+            double ejectSpeed = -0.4;
             if (!toTransfer) {
                 detectPixels();
+                double leftGripPixelPos = 0;
                 if (pixelInLeft)
                     outakeServoLeft.setPosition(leftGripPixelPos);
+                double rightGripPixelPos = 1;
                 if (pixelInRight)
                     outakeServoRight.setPosition(rightGripPixelPos);
                 if ((!pixelInLeft || !pixelInRight)) {
+                    double intakeSpeed = 1.0;
                     intakeMotor.set(intakeSpeed);
                     telemetry.addData("power: ", intakeSpeed);
                 } else {
@@ -236,8 +234,8 @@ public class Cycle {
         }
     }
 
-    private boolean waits() {
-        finalTS = bufferTime.milliseconds();
+    private boolean delay() {
+        double finalTS = bufferTime.milliseconds();
         return (finalTS - startTS) >= 750;//600
     }
 }

@@ -1,16 +1,12 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class FieldCentricDrive {
-    private HWMap hwMap;
-    private MecanumDrive mecanumDrive;
+    private final MecanumDrive mecanumDrive;
 
-    public FieldCentricDrive(Telemetry telemetry, HardwareMap hardwareMap) {
-        hwMap = new HWMap(telemetry,hardwareMap);
+    public FieldCentricDrive(HWMap hwMap) {
         mecanumDrive = hwMap.getMecanumDrive();
     }
 

@@ -6,20 +6,18 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Slides {
-    private Motor LSL;
-    private Motor LSR;
+    private final Motor LSL;
+    private final Motor LSR;
     public static double p = 0.013;
     public static double i = 0.01;
     public static double d = 0.0007;
     public static double f = 0.0005;
     public static int tolerance = 50;
-    private PIDFController controller;
+    private final PIDFController controller;
     private int targetPos;
-    private HWMap hwMap;
-    private Telemetry telemetry;
+    private final Telemetry telemetry;
 
     public Slides(HWMap hwMap, Telemetry telemetry) {
-        this.hwMap = hwMap;
         this.telemetry = telemetry;
         LSL = hwMap.getLinearSlidesLeft();
         LSR = hwMap.getLinearSlidesRight();
