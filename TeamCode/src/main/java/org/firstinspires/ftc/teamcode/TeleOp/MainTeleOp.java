@@ -7,17 +7,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.TeleOp.HWMap;
+import org.firstinspires.ftc.teamcode.TeleOp.FSMs.Cycle;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 
 @TeleOp(name = "TeleOp")
 public class MainTeleOp extends LinearOpMode {
 
     public enum RobotFSM {
         start,
-        cycleFSM,
-        hangingFSM,
-        droneFSM,
-        failsafe
+        cycleFSM
     }
 
     private RobotFSM state;
@@ -39,7 +38,7 @@ public class MainTeleOp extends LinearOpMode {
 
         try {
             fieldCentricDrive = new FieldCentricDrive(telemetry, hardwareMap);
-            hwMap = new org.firstinspires.ftc.teamcode.TeleOp.HWMap(telemetry, hardwareMap);
+            hwMap = new HWMap(telemetry, hardwareMap);
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
 

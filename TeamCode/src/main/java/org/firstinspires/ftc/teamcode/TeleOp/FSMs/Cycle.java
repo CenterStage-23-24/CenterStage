@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.TeleOp;
+package org.firstinspires.ftc.teamcode.TeleOp.FSMs;
 
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -13,6 +13,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 
 public class Cycle {
 
@@ -53,7 +57,7 @@ public class Cycle {
     HardwareMap hardwareMap;
 
     public Cycle(HWMap hwMap, HardwareMap hardwareMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
-        this.gamepad = gamepad; // add control class to program
+        this.gamepad = gamepad;
         this.telemetry = telemetry;
         this.hardwareMap = hardwareMap;
         this.fieldCentricDrive = fieldCentricDrive;

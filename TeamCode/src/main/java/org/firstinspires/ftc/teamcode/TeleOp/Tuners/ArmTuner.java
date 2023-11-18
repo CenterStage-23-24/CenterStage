@@ -1,23 +1,20 @@
-package org.firstinspires.ftc.teamcode.TeleOp;
+package org.firstinspires.ftc.teamcode.TeleOp.Tuners;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.CRServo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.util.Range;
 import com.acmerobotics.dashboard.FtcDashboard;
-import org.checkerframework.checker.units.qual.A;
 
-import java.net.CacheRequest;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.AxonClass;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 
 @Config
 @TeleOp
-public class ArmOpMode extends LinearOpMode {
+public class ArmTuner extends LinearOpMode {
     private HWMap hwMap;
     private CRServo leftServo;
     private CRServo rightServo;
