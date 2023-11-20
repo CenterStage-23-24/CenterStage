@@ -29,7 +29,7 @@ public class ArmTuner extends LinearOpMode {
     // and that to get from intakePos to depositPos, you need to increase your position
 
     // Basic PID coefficients
-    public static double p = 0.006, i = .003, d = 0.015;
+    public static double p = 0.006, i = 0.003, d = 0.015;
 
     // a is a feedforward coefficient used to counteract the torque applied to the arm by gravity
     // a * sin(θ) gives the power needed to counteract gravity, θ is distance from vertically pointing down
