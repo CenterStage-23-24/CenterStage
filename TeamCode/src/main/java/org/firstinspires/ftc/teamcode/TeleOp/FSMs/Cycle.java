@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 public class Cycle {
 
@@ -29,22 +30,22 @@ public class Cycle {
 
     private final Arm arm;
     private final Slides slides;
-    CycleFSM state = CycleFSM.start;
+    private CycleFSM state = CycleFSM.start;
+    private TransferController transferController;
+
     private final Motor intakeMotor;
     private final Servo outakeServoLeft;
     private final Servo outakeServoRight;
     private final RevColorSensorV3 colorSensorLeft;
     private final RevColorSensorV3 colorSensorRight;
     private final FieldCentricDrive fieldCentricDrive;
-    boolean pixelInLeft = false;
-    boolean pixelInRight = false;
+    private boolean pixelInLeft = false;
+    private boolean pixelInRight = false;
     private final double leftReleasePixelPos = 0.5;
     private final double rightReleasePixelPos = 0.5;
     private boolean stopRequested = false;
     private boolean toTransfer = false;
-    private final ElapsedTime bufferTime = new ElapsedTime();
 
-    private double startTS;
 
     private final GamepadEx gamepad;
     private Telemetry telemetry;
@@ -62,12 +63,12 @@ public class Cycle {
 
         slides = new Slides(hwMap, telemetry);
         arm = new Arm(hwMap, telemetry);
+        transferController = new TransferController(arm, slides, telemetry);
 
         //Forces arm to init to intake pos when targetPos is initialized to outtakePos
         arm.goToIntake();
 
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        bufferTime.reset();
 
         outakeServoLeft.setPosition(leftReleasePixelPos);
         outakeServoRight.setPosition(rightReleasePixelPos);
@@ -107,7 +108,6 @@ public class Cycle {
 
                     //Retract
                     if (gamepad.isDown(GamepadKeys.Button.A)) {
-                        startTS = bufferTime.milliseconds();
                         telemetry.addData("b pressed in cycle", 1);
                         state = CycleFSM.retract;
                     }
@@ -115,12 +115,17 @@ public class Cycle {
 
                 case extend:
                     toTransfer = true;
-                    slides.setTargetPos(slides.mmToTicks(height));
-                    if (slides.atPos()) {
-                        arm.goToDeposit();
+                    if(transferController.extend()){
                         state = CycleFSM.start;
                     }
-                    telemetry.addData("atPos?", slides.atPos());
+                    break;
+
+                case retract:
+                    toTransfer = true;
+                    if(transferController.retract()){
+                        state = CycleFSM.start;
+                        toTransfer = false;
+                    }
                     break;
 
                 case outtakeLeft:
@@ -135,20 +140,6 @@ public class Cycle {
                     outakeServoRight.setPosition(rightReleasePixelPos);
                     toTransfer = true;
                     state = CycleFSM.start;
-                    break;
-
-                case retract:
-                    toTransfer = true;
-                    arm.goToIntake();
-                    boolean armAtPos = arm.axonAtPos(Arm.intakePos, buffer);
-                    if (armAtPos && delay()) {
-                        height = 0;
-                        slides.setTargetPos(height);
-                        if (slides.atPos()) {
-                            toTransfer = false;
-                            state = CycleFSM.start;
-                        }
-                    }
                     break;
             }
 
@@ -238,12 +229,6 @@ public class Cycle {
             telemetry.addData("-", "Nothing in right compartment");
             pixelInRight = false;
         }
-    }
-
-    private boolean delay() {
-        double finalTS = bufferTime.milliseconds();
-        int ms = 750;//600
-        return (finalTS - startTS) >= ms;
     }
 }
 
