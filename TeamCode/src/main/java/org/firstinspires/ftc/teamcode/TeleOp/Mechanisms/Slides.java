@@ -47,7 +47,7 @@ public class Slides {
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
     }
 
-    public int mmToTicks(int cm) {
+    protected int mmToTicks(int cm) {
         double diameterOfSpool = 4.6;
         double ratio = 37.0 / 24.0;
         double ticks = (cm / (Math.PI * diameterOfSpool)) * ratio * LSL.getCPR();
