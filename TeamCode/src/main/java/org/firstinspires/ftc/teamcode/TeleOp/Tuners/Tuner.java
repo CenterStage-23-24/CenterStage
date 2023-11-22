@@ -1,3 +1,4 @@
+/*
 package org.firstinspires.ftc.teamcode.TeleOp.Tuners;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -65,3 +66,4 @@ public class Tuner extends LinearOpMode {
         return (int) ticks;
     }
 }
+*/

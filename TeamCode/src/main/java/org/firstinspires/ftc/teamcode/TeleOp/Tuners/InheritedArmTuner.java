@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Tuners;
 
+
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.CRServo;
@@ -12,11 +14,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.AxonClass;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
-
+@Config
 public class InheritedArmTuner extends Arm {
-    public InheritedArmTuner(HWMap hwMap, Telemetry telemetry) {
-        super(hwMap, telemetry);
-    }
     private HWMap hwMap;
     private CRServo leftServo;
     private CRServo rightServo;
@@ -26,8 +25,20 @@ public class InheritedArmTuner extends Arm {
     private AxonClass rightAxon;
     private PIDController pidController;
     private Telemetry telemetry;
-    private HardwareMap hardwareMap;
 
+    public InheritedArmTuner(HWMap hwMap, Telemetry telemetry) {
+        super(hwMap, telemetry);
+        this.hwMap = hwMap;
+        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        leftServo = hwMap.getAxonServoLeft();
+        rightServo = hwMap.getAxonServoRight();
+        leftEncoder = hwMap.getAxonAnalogLeft();
+        rightEncoder = hwMap.getAxonAnalogRight();
+        pidController = new PIDController(p, i, d);
+        leftAxon = new AxonClass(leftServo, leftEncoder, true, true);
+        rightAxon = new AxonClass(rightServo, rightEncoder, false, false);
+
+    }
 
     // All code is written on the assumption that positive power -> increased position magnitude
     // and that to get from intakePos to depositPos, you need to increase your position
@@ -40,7 +51,7 @@ public class InheritedArmTuner extends Arm {
     // a is used in place of m * g * r as those remain constant, and its easier to tune a single coefficient
     public static double a = 0.07;
 
-    public static final double intakePos = 117; // Angle for Intaking pixels
+    public static final double intakePos = 115; // Angle for Intaking pixels
     public final double depositPos = super.normalizeRadiansTau(intakePos + 150); // Angle for depositing pixels, is 150 degrees from intake
     public static double intakeOffset = 60; // Degrees that the intake position is from vertically facing down
     public final double safeError = 10; // Position can be +- this many degrees from target for safe transfer
@@ -53,26 +64,7 @@ public class InheritedArmTuner extends Arm {
     public static double posVar = 0;
     public static double powerCap = 1.0;
 
-    public void runOpMode() {
-        try {
-            hwMap = new HWMap(hardwareMap);
-
-            leftServo = hwMap.getAxonServoLeft();
-            rightServo = hwMap.getAxonServoRight();
-            leftEncoder = hwMap.getAxonAnalogLeft();
-            rightEncoder = hwMap.getAxonAnalogRight();
-
-            pidController = new PIDController(p, i, d);
-            leftAxon = new AxonClass(leftServo, leftEncoder, true, true);
-            rightAxon = new AxonClass(rightServo, rightEncoder, false, false);
-
-            telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
-        } catch (Exception e) {
-            telemetry.addData("-", e.getMessage());
-            telemetry.update();
-        }
-        while (true) {
+        public void loop() {
 
             // Jank code to use FTC dashboard for a boolean, 0 = intake pos, 1 = deposit pos
             if (posVar == 0){
@@ -114,7 +106,6 @@ public class InheritedArmTuner extends Arm {
             telemetry.addData("Deg from vert: ", degreesFromVert);
             telemetry.update();
         }
-    }
 
     // Finds the smallest distance between 2 angles, input and output in degrees
     //public double angleDelta(double angle1, double angle2) {

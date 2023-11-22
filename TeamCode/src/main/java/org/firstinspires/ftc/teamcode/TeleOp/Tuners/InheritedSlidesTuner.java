@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Tuners;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
+
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
-
+@Config
 public class InheritedSlidesTuner extends Slides {
+    private HWMap hwMap;
     private Motor LSL;
     private Motor LSR;
     public static double p = 0.013;
@@ -20,14 +22,10 @@ public class InheritedSlidesTuner extends Slides {
     public static int tolerance = 50;
     public static int targetPos;
     private Telemetry telemetry;
-    private HardwareMap hardwareMap;
 
     public InheritedSlidesTuner(HWMap hwMap, Telemetry telemetry) {
         super(hwMap, telemetry);
-    }
-
-    public void runOpMode() {
-        HWMap hwMap = new HWMap(hardwareMap);
+        this.hwMap = hwMap;
         LSL = hwMap.getLinearSlidesLeft();
         LSR = hwMap.getLinearSlidesRight();
         LSL.resetEncoder();
@@ -37,8 +35,10 @@ public class InheritedSlidesTuner extends Slides {
         PIDFController controller = new PIDFController(p, i, d, f);
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         targetPos = super.mmToTicks(50);
+    }
 
-        while (true) {
+    public void loop() {
+
             double output = controller.calculate(LSL.getCurrentPosition(), targetPos);
             LSL.set(output);
             LSR.set(output);
@@ -55,6 +55,6 @@ public class InheritedSlidesTuner extends Slides {
             controller.setPIDF(p, i, d, f);
 
 
-        }
+
     }
 }

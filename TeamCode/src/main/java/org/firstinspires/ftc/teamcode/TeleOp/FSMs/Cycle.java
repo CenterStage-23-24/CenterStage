@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
-import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
+//import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 public class Cycle {
 
@@ -31,7 +31,7 @@ public class Cycle {
     private final Arm arm;
     private final Slides slides;
     private CycleFSM state = CycleFSM.start;
-    private TransferController transferController;
+//    private TransferController transferController;
 
     private final Motor intakeMotor;
     private final Servo outakeServoLeft;
@@ -63,7 +63,7 @@ public class Cycle {
 
         slides = new Slides(hwMap, telemetry);
         arm = new Arm(hwMap, telemetry);
-        transferController = new TransferController(arm, slides, telemetry);
+  //      transferController = new TransferController(arm, slides, telemetry);
 
         //Forces arm to init to intake pos when targetPos is initialized to outtakePos
         arm.goToIntake();
@@ -114,18 +114,18 @@ public class Cycle {
                     break;
 
                 case extend:
-                    toTransfer = true;
-                    if(transferController.extend()){
-                        state = CycleFSM.start;
-                    }
-                    break;
+                  toTransfer = true;
+    //                if(transferController.extend()){
+      //                  state = CycleFSM.start;
+        //            }
+          //          break;
 
-                case retract:
-                    toTransfer = true;
-                    if(transferController.retract()){
-                        state = CycleFSM.start;
-                        toTransfer = false;
-                    }
+            //    case retract:
+              //      toTransfer = true;
+                //    if(transferController.retract()){
+                  //      state = CycleFSM.start;
+                    //    toTransfer = false;
+                   // }
                     break;
 
                 case outtakeLeft:
