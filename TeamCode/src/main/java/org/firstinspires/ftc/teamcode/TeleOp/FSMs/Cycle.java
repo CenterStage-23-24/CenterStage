@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Outtake;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 
 public class Cycle {
@@ -31,15 +32,13 @@ public class Cycle {
     private final Slides slides;
     CycleFSM state = CycleFSM.start;
     private final Motor intakeMotor;
-    private final Servo outakeServoLeft;
-    private final Servo outakeServoRight;
     private final RevColorSensorV3 colorSensorLeft;
     private final RevColorSensorV3 colorSensorRight;
     private final FieldCentricDrive fieldCentricDrive;
+    private final Servo outtakeServoLeft;
+    private final Servo outtakeServoRight;
     boolean pixelInLeft = false;
     boolean pixelInRight = false;
-    private final double leftReleasePixelPos = 0.5;
-    private final double rightReleasePixelPos = 0.5;
     private boolean stopRequested = false;
     private boolean toTransfer = false;
     private final ElapsedTime bufferTime = new ElapsedTime();
@@ -48,18 +47,19 @@ public class Cycle {
 
     private final GamepadEx gamepad;
     private Telemetry telemetry;
-
+    private Outtake outtake;
     public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
         this.gamepad = gamepad;
         this.telemetry = telemetry;
         this.fieldCentricDrive = fieldCentricDrive;
 
         intakeMotor = hwMap.getIntakeMotor();
-        outakeServoLeft = hwMap.getOuttakeServoLeft();
-        outakeServoRight = hwMap.getOuttakeServoRight();
         colorSensorLeft = hwMap.getTrayLeftCS();
         colorSensorRight = hwMap.getTrayRightCS();
+        outtakeServoLeft = hwMap.getOuttakeServoLeft();
+        outtakeServoRight = hwMap.getOuttakeServoRight();
 
+        outtake = new Outtake(hwMap);
         slides = new Slides(hwMap, telemetry);
         arm = new Arm(hwMap, telemetry);
 
@@ -68,9 +68,6 @@ public class Cycle {
 
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         bufferTime.reset();
-
-        outakeServoLeft.setPosition(leftReleasePixelPos);
-        outakeServoRight.setPosition(rightReleasePixelPos);
 
         telemetry.addData("INIT: ", "Cycle");
         telemetry.update();
@@ -124,15 +121,13 @@ public class Cycle {
                     break;
 
                 case outtakeLeft:
-                    telemetry.addData("-", "Ready to deposit left");
-                    outakeServoLeft.setPosition(leftReleasePixelPos);
+                    outtake.releaseLeft();
                     toTransfer = true;
                     state = CycleFSM.start;
                     break;
 
                 case outtakeRight:
-                    telemetry.addData("-", "Ready to deposit right");
-                    outakeServoRight.setPosition(rightReleasePixelPos);
+                    outtake.releaseRight();
                     toTransfer = true;
                     state = CycleFSM.start;
                     break;
@@ -168,17 +163,15 @@ public class Cycle {
 
         if (!stopRequested) {
             double ejectSpeed = -0.4;
-            double leftGripPixelPos = 0;
-            double rightGripPixelPos = 1;
             double intakeSpeed = 1.0;
 
 
             if (!toTransfer) {
                 detectPixels();
                 if (pixelInLeft)
-                    outakeServoLeft.setPosition(leftGripPixelPos);
+                    outtake.gripLeft();
                 if (pixelInRight)
-                    outakeServoRight.setPosition(rightGripPixelPos);
+                    outtake.gripRight();
                 if ((!pixelInLeft || !pixelInRight)) {
                     intakeMotor.set(intakeSpeed);
                     telemetry.addData("power: ", intakeSpeed);
@@ -200,9 +193,10 @@ public class Cycle {
     private void detectPixels() {
         double csLeftDistance = colorSensorLeft.getDistance(DistanceUnit.MM);
         double csRightDistance = colorSensorRight.getDistance(DistanceUnit.MM);
-        final int distance = 28;
+        final int rightDistance = 28;
+        final int leftDistance = 30;
         final int greenThreshold = 300;
-        if (csLeftDistance <= distance) {
+        if (csLeftDistance <= leftDistance) {
             if (colorSensorLeft.green() > (colorSensorLeft.red() * 2)) {
                 telemetry.addData("-", "Green pixel detected in the left compartment");
                 pixelInLeft = true;
@@ -220,7 +214,7 @@ public class Cycle {
             telemetry.addData("-", "Nothing in the left compartment");
             pixelInLeft = false;
         }
-        if (csRightDistance <= distance) {
+        if (csRightDistance <= rightDistance) {
             if (colorSensorRight.green() > (colorSensorRight.red() * 2)) {
                 telemetry.addData("-", "Green pixel detected in the right compartment");
                 pixelInRight = true;
