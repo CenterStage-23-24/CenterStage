@@ -6,8 +6,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Intake;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 
 @TeleOp(name = "TeleOp")
 public class MainTeleOp extends LinearOpMode {
@@ -22,17 +26,27 @@ public class MainTeleOp extends LinearOpMode {
     private GamepadEx gamePad1;
     private GamepadEx gamePad2;
     private FieldCentricDrive fieldCentricDrive;
+    private IntakeController intakeController;
+    private Intake intake;
+    private Arm arm;
+    private Slides slides;
 
     @Override
     public void runOpMode() {
 
         try {
+
             HWMap hwMap = new HWMap(hardwareMap);
-            fieldCentricDrive = new FieldCentricDrive(hwMap);
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
+            fieldCentricDrive = new FieldCentricDrive(hwMap);
+            intake = new Intake(hwMap, telemetry);
+            intakeController = new IntakeController(intake, gamePad1);
+            arm = new Arm(hwMap, telemetry);
+            slides = new Slides(hwMap, telemetry);
 
-            cycle = new Cycle(hwMap, gamePad1, telemetry, fieldCentricDrive);
+
+            cycle = new Cycle(hwMap, gamePad1, telemetry, slides, arm);
             state = RobotFSM.cycleFSM;
 
             telemetry.addData("INIT: ", "MainTeleOp");
@@ -54,7 +68,7 @@ public class MainTeleOp extends LinearOpMode {
                     break;
                 case cycleFSM:
                     telemetry.addData("in cycle state", 1);
-                    //Conditional currently doesn't exit CycleFSM due to no exit from cycle.loop()
+
                     if (gamePad1.wasJustPressed(GamepadKeys.Button.B)) {
                         telemetry.addData("-", "Quit Cycle State");
                         state = RobotFSM.start;
@@ -63,10 +77,16 @@ public class MainTeleOp extends LinearOpMode {
                     }
                     break;
             }
-            telemetry.update();
 
             //LeftY is normally supposed to be negative but this is inbuilt in the gamepadEx class
             fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
+            intakeController.intakeCrontrol(cycle.getToTransfer());
+            telemetry.addData("toTransfer:", cycle.getToTransfer());
+            telemetry.addData("pixelinright: ", intake.getPixelInRight());
+            telemetry.addData("Pixelinleft:", intake.getPixelInLeft());
+            slides.pid();
+            arm.updatePos();
+            telemetry.update();
         }
     }
 }

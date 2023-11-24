@@ -27,32 +27,34 @@ public class Cycle {
         outtakeRight
     }
 
-    private final Arm arm;
-    private final Slides slides;
+
     CycleFSM state = CycleFSM.start;
     private final Motor intakeMotor;
     private final Servo outakeServoLeft;
     private final Servo outakeServoRight;
     private final RevColorSensorV3 colorSensorLeft;
     private final RevColorSensorV3 colorSensorRight;
-    private final FieldCentricDrive fieldCentricDrive;
     boolean pixelInLeft = false;
     boolean pixelInRight = false;
     private final double leftReleasePixelPos = 0.5;
     private final double rightReleasePixelPos = 0.5;
-    private boolean stopRequested = false;
     private boolean toTransfer = false;
     private final ElapsedTime bufferTime = new ElapsedTime();
+
 
     private double startTS;
 
     private final GamepadEx gamepad;
     private Telemetry telemetry;
 
-    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
+    private Slides slides;
+    private Arm arm;
+
+    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, Slides slides, Arm arm) {
         this.gamepad = gamepad;
         this.telemetry = telemetry;
-        this.fieldCentricDrive = fieldCentricDrive;
+        this.slides = slides;
+        this.arm = arm;
 
         intakeMotor = hwMap.getIntakeMotor();
         outakeServoLeft = hwMap.getOuttakeServoLeft();
@@ -78,172 +80,93 @@ public class Cycle {
 
 
     public void loop() {
-        while (true) {
-            gamepad.readButtons();
+        telemetry.addData("atpos test: ", slides.atPos());
+        gamepad.readButtons();
 
-            double buffer = 20;
-            int height = 50;
+        double buffer = 20;
+        int height = 50;
 
-            switch (state) {
-                case start:
-                    //Outtake Left
-                    telemetry.addData("in start in cycle", 1);
-                    if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
-                        telemetry.addData("Left-Bumper pressed in cycle", 1);
-                        state = CycleFSM.outtakeLeft;
-                    }
+        switch (state) {
+            case start:
+                //Outtake Left
+                telemetry.addData("in start in cycle", 1);
+                if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                    telemetry.addData("Left-Bumper pressed in cycle", 1);
+                    state = CycleFSM.outtakeLeft;
+                }
 
-                    //Outtake Right
-                    if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-                        telemetry.addData("Left-Bumper in cycle", 1);
-                        state = CycleFSM.outtakeRight;
-                    }
+                //Outtake Right
+                if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                    telemetry.addData("Left-Bumper in cycle", 1);
+                    state = CycleFSM.outtakeRight;
+                }
 
-                    //Extend
-                    if (gamepad.isDown(GamepadKeys.Button.Y)) {
-                        telemetry.addData("y pressed in cycle", 1);
-                        state = CycleFSM.extend;
-                    }
+                //Extend
+                if (gamepad.isDown(GamepadKeys.Button.Y)) {
+                    telemetry.addData("y pressed in cycle", 1);
+                    state = CycleFSM.extend;
+                }
 
-                    //Retract
-                    if (gamepad.isDown(GamepadKeys.Button.A)) {
-                        startTS = bufferTime.milliseconds();
-                        telemetry.addData("b pressed in cycle", 1);
-                        state = CycleFSM.retract;
-                    }
-                    break;
+                //Retract
+                if (gamepad.isDown(GamepadKeys.Button.A)) {
+                    startTS = bufferTime.milliseconds();
+                    telemetry.addData("b pressed in cycle", 1);
+                    state = CycleFSM.retract;
+                }
+                break;
 
-                case extend:
-                    toTransfer = true;
-                    slides.setTargetPos(slides.mmToTicks(height));
+            case extend:
+                toTransfer = true;
+                slides.setTargetPos(slides.mmToTicks(height));
+                if (slides.atPos()) {
+                    arm.goToDeposit();
+                    state = CycleFSM.start;
+                }
+                telemetry.addData("atPos?", slides.atPos());
+
+                break;
+
+            case outtakeLeft:
+                telemetry.addData("-", "Ready to deposit left");
+                outakeServoLeft.setPosition(leftReleasePixelPos);
+                toTransfer = true;
+                state = CycleFSM.start;
+                break;
+
+            case outtakeRight:
+                telemetry.addData("-", "Ready to deposit right");
+                outakeServoRight.setPosition(rightReleasePixelPos);
+                toTransfer = true;
+                state = CycleFSM.start;
+                break;
+
+            case retract:
+                toTransfer = true;
+                arm.goToIntake();
+                boolean armAtPos = arm.axonAtPos(Arm.intakePos, buffer);
+                if (armAtPos && delay()) {
+                    height = 0;
+                    slides.setTargetPos(height);
                     if (slides.atPos()) {
-                        arm.goToDeposit();
+                        toTransfer = false;
                         state = CycleFSM.start;
                     }
-                    telemetry.addData("atPos?", slides.atPos());
-                    break;
-
-                case outtakeLeft:
-                    telemetry.addData("-", "Ready to deposit left");
-                    outakeServoLeft.setPosition(leftReleasePixelPos);
-                    toTransfer = true;
-                    state = CycleFSM.start;
-                    break;
-
-                case outtakeRight:
-                    telemetry.addData("-", "Ready to deposit right");
-                    outakeServoRight.setPosition(rightReleasePixelPos);
-                    toTransfer = true;
-                    state = CycleFSM.start;
-                    break;
-
-                case retract:
-                    toTransfer = true;
-                    arm.goToIntake();
-                    boolean armAtPos = arm.axonAtPos(Arm.intakePos, buffer);
-                    if (armAtPos && delay()) {
-                        height = 0;
-                        slides.setTargetPos(height);
-                        if (slides.atPos()) {
-                            toTransfer = false;
-                            state = CycleFSM.start;
-                        }
-                    }
-                    break;
-            }
-
-            //Intake is out here because DRIVE TEAM wants the intake to run regardless
-            intake();
-
-            fieldCentricDrive.drive(gamepad.getLeftX(), gamepad.getLeftY(), gamepad.getRightX(), HWMap.readFromIMU());
-            slides.pid();
-            arm.updatePos();
-            telemetry.update();
-        }
-    }
-
-    private void intake() {
-        if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
-            stopRequested = !stopRequested;
-
-        if (!stopRequested) {
-            double ejectSpeed = -0.4;
-            double leftGripPixelPos = 0;
-            double rightGripPixelPos = 1;
-            double intakeSpeed = 1.0;
-
-
-            if (!toTransfer) {
-                detectPixels();
-                if (pixelInLeft)
-                    outakeServoLeft.setPosition(leftGripPixelPos);
-                if (pixelInRight)
-                    outakeServoRight.setPosition(rightGripPixelPos);
-                if ((!pixelInLeft || !pixelInRight)) {
-                    intakeMotor.set(intakeSpeed);
-                    telemetry.addData("power: ", intakeSpeed);
-                } else {
-                    intakeMotor.set(ejectSpeed);
-                    telemetry.addData("power: ", ejectSpeed);
                 }
-            } else {
-                intakeMotor.set(ejectSpeed);
-                telemetry.addData("power: ", ejectSpeed);
-            }
-        } else {
-            intakeMotor.set(0);
+                break;
         }
-
 
     }
 
-    private void detectPixels() {
-        double csLeftDistance = colorSensorLeft.getDistance(DistanceUnit.MM);
-        double csRightDistance = colorSensorRight.getDistance(DistanceUnit.MM);
-        final int distance = 28;
-        final int greenThreshold = 300;
-        if (csLeftDistance <= distance) {
-            if (colorSensorLeft.green() > (colorSensorLeft.red() * 2)) {
-                telemetry.addData("-", "Green pixel detected in the left compartment");
-                pixelInLeft = true;
-            } else if ((colorSensorLeft.blue() < colorSensorLeft.red()) && (colorSensorLeft.blue() < colorSensorLeft.green())) {
-                telemetry.addData("-", "Yellow pixel detected in the left compartment");
-                pixelInLeft = true;
-            } else if ((colorSensorLeft.blue() > colorSensorLeft.red()) && (colorSensorLeft.blue() > colorSensorLeft.green())) {
-                telemetry.addData("-", "Purple pixel detected in the left compartment");
-                pixelInLeft = true;
-            } else if (colorSensorLeft.green() >= greenThreshold) {
-                telemetry.addData("-", "White pixel detected in the left compartment");
-                pixelInLeft = true;
-            }
-        } else {
-            telemetry.addData("-", "Nothing in the left compartment");
-            pixelInLeft = false;
-        }
-        if (csRightDistance <= distance) {
-            if (colorSensorRight.green() > (colorSensorRight.red() * 2)) {
-                telemetry.addData("-", "Green pixel detected in the right compartment");
-                pixelInRight = true;
-            } else if ((colorSensorRight.blue() < colorSensorRight.red()) && (colorSensorRight.blue() < colorSensorRight.green())) {
-                telemetry.addData("-", "Yellow pixel detected in the right compartment");
-                pixelInRight = true;
-            } else if ((colorSensorRight.blue() > colorSensorRight.red()) && (colorSensorRight.blue() > colorSensorRight.green())) {
-                telemetry.addData("-", "Purple pixel detected in the right compartment");
-                pixelInRight = true;
-            } else if (colorSensorRight.green() >= greenThreshold) {
-                telemetry.addData("-", "White pixel detected in the right compartment");
-                pixelInRight = true;
-            }
-        } else {
-            telemetry.addData("-", "Nothing in right compartment");
-            pixelInRight = false;
-        }
-    }
+
 
     private boolean delay() {
         double finalTS = bufferTime.milliseconds();
         int ms = 750;//600
         return (finalTS - startTS) >= ms;
+    }
+
+    public boolean getToTransfer(){
+        return toTransfer;
     }
 }
 
