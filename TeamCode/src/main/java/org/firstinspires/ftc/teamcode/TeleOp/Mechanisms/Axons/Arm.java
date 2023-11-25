@@ -34,7 +34,6 @@ public class Arm {
         pidController = new PIDController(p, i, d);
     }
 
-
     private final double intakePos = 115; // Angle for Intaking pixels
     private final double depositPos = normalizeRadiansTau(intakePos + 150); // Angle for depositing pixels, is 150 degrees from intake
     private double intakeOffset = 60; // Degrees that the intake position is from vertically facing down
@@ -105,9 +104,13 @@ public class Arm {
         telemetry.addData("Delta: ", delta);
         telemetry.addData("Sign: ", sign);
     }
+
     //This method returns TRUE if the axons are within the buffered range of the target position or it will return FALSE.
     public boolean axonAtPos(double targetPos, double buffer) {
         return (((targetPos + buffer) >= measuredPos) && ((targetPos - buffer) <= measuredPos));
     }
 
+    public double getIntakePos(){
+        return intakePos;
+    }
 }

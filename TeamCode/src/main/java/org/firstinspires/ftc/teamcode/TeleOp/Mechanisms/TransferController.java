@@ -1,4 +1,4 @@
-/*
+
 package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -48,7 +48,7 @@ public class TransferController {
         }
 
         arm.goToIntake();
-        boolean armAtPos = arm.axonAtPos(Arm.intakePos, BUFFER);
+        boolean armAtPos = arm.axonAtPos(arm.getIntakePos(), BUFFER);
         if (armAtPos && delay()) {
             slides.setTargetPos(MIN_HEIGHT);
             if(slides.atPos()){
@@ -64,4 +64,4 @@ public class TransferController {
         return (finalTS - startTS) >= DELAY_MS;
     }
 }
-*/
+
