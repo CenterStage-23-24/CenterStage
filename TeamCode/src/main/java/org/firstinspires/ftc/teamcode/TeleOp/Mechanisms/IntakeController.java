@@ -6,12 +6,14 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 public class IntakeController {
 
     private final Intake intake;
+    private final Gripper gripper;
     private final GamepadEx gamepad;
     private boolean stopRequested = false;
 
-    public IntakeController(Intake intake, GamepadEx gamepad) {
+    public IntakeController(Intake intake, GamepadEx gamepad, Gripper gripper) {
         this.intake = intake;
         this.gamepad = gamepad;
+        this.gripper = gripper;
     }
 
     public void intakeControl(boolean toTransfer) {
@@ -23,9 +25,9 @@ public class IntakeController {
             if (!toTransfer) {
                 intake.detectPixels();
                 if (intake.getPixelInLeft())
-                    intake.gripLeft();
+                    gripper.gripLeft();
                 if (intake.getPixelInRight())
-                    intake.gripRight();
+                    gripper.gripRight();
                 if ((!intake.getPixelInLeft() || !intake.getPixelInRight())) {
                     intake.intake();
                 } else {

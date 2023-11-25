@@ -8,10 +8,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 @TeleOp(name = "TeleOp")
 public class MainTeleOp extends LinearOpMode {
@@ -27,6 +29,8 @@ public class MainTeleOp extends LinearOpMode {
     private GamepadEx gamePad2;
     private FieldCentricDrive fieldCentricDrive;
     private IntakeController intakeController;
+    private TransferController transferController;
+    private Gripper gripper;
     private Arm arm;
     private Slides slides;
 
@@ -34,19 +38,27 @@ public class MainTeleOp extends LinearOpMode {
     public void runOpMode() {
 
         try {
-
+            //Core
             HWMap hwMap = new HWMap(hardwareMap);
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
+            //Mechanisms
             fieldCentricDrive = new FieldCentricDrive(hwMap);
             Intake intake = new Intake(hwMap, telemetry);
-            intakeController = new IntakeController(intake, gamePad1);
             arm = new Arm(hwMap, telemetry);
             slides = new Slides(hwMap, telemetry);
+            //Controllers
+            intakeController = new IntakeController(intake, gamePad1, gripper);
+            transferController = new TransferController(arm, slides, telemetry);
+            gripper = new Gripper(hwMap);
+            //FSMs
+            cycle = new Cycle(gamePad1, telemetry, transferController, gripper);
 
-
-            cycle = new Cycle(hwMap, gamePad1, telemetry, arm);
+            //Setup
             state = RobotFSM.cycleFSM;
+            gripper.gripLeft();
+            gripper.gripRight();
+
 
             telemetry.addData("INIT: ", "MainTeleOp");
             telemetry.update();
@@ -76,13 +88,15 @@ public class MainTeleOp extends LinearOpMode {
                     }
                     break;
             }
-
-            //LeftY is normally supposed to be negative but this is inbuilt in the gamepadEx class
-            fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
-            intakeController.intakeControl(cycle.getToTransfer());
-            slides.pid();
-            arm.updatePos();
-            telemetry.update();
+            updateCycle();
         }
+    }
+    private void updateCycle(){
+        //LeftY is normally supposed to be negative but this is inbuilt in the gamepadEx class
+        fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
+        intakeController.intakeControl(cycle.getToTransfer());
+        slides.pid();
+        arm.updatePos();
+        telemetry.update();
     }
 }

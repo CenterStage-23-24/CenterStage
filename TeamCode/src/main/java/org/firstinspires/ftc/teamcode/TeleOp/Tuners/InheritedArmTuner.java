@@ -7,7 +7,6 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.CRServo;
 import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -17,22 +16,18 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 
 @Config
 public class InheritedArmTuner extends Arm {
-    private final CRServo leftServo;
-    private final CRServo rightServo;
-    private final AnalogInput leftEncoder;
-    private final AnalogInput rightEncoder;
     private final AxonClass leftAxon;
     private final AxonClass rightAxon;
     private final PIDController pidController;
-    private Telemetry telemetry;
+    private final Telemetry telemetry;
 
     public InheritedArmTuner(HWMap hwMap, Telemetry telemetry) {
         super(hwMap, telemetry);
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        this.leftServo = super.leftServo;
-        this.rightServo = super.rightServo;
-        this.leftEncoder = super.leftEncoder;
-        this.rightEncoder = super.rightEncoder;
+        CRServo leftServo = super.leftServo;
+        CRServo rightServo = super.rightServo;
+        AnalogInput leftEncoder = super.leftEncoder;
+        AnalogInput rightEncoder = super.rightEncoder;
         this.pidController = super.pidController;
         leftAxon = new AxonClass(leftServo, leftEncoder, true, true);
         rightAxon = new AxonClass(rightServo, rightEncoder, false, false);

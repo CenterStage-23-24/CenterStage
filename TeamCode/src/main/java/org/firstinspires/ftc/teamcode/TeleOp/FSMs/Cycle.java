@@ -3,19 +3,12 @@ package org.firstinspires.ftc.teamcode.TeleOp.FSMs;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
-import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
-import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Outtake;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
@@ -29,32 +22,24 @@ public class Cycle {
         outtakeRight
     }
 
-    private final Slides slides;
     private CycleFSM state = CycleFSM.start;
     private final TransferController transferController;
 
-    private final double leftReleasePixelPos = 0.5;
-    private final double rightReleasePixelPos = 0.5;
     private boolean toTransfer = false;
 
 
     private final GamepadEx gamepad;
-    private Telemetry telemetry;
+    private final Telemetry telemetry;
 
-    private Outtake outtake;
+    private final Gripper gripper;
 
-    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive, Arm arm) {
+    public Cycle(GamepadEx gamepad, Telemetry telemetry, TransferController transferController, Gripper gripper) {
+        //Core
         this.gamepad = gamepad;
         this.telemetry = telemetry;
-
-        outtake = new Outtake(hwMap);
-        slides = new Slides(hwMap, telemetry);
-        transferController = new TransferController(arm, slides, telemetry);
-
-        //Forces arm to init to intake pos when targetPos is initialized to outtakePos
-        arm.goToIntake();
-
-        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        //Controllers
+        this.gripper = gripper;
+        this.transferController = transferController;
 
         telemetry.addData("INIT: ", "Cycle");
         telemetry.update();
@@ -62,7 +47,6 @@ public class Cycle {
 
 
     public void loop() {
-        telemetry.addData("At pos test: ", slides.atPos());
         gamepad.readButtons();
         switch (state) {
             case start:
@@ -109,14 +93,14 @@ public class Cycle {
 
             case outtakeLeft:
                 telemetry.addData("-", "Ready to deposit left");
-                outtake.releaseLeft();
+                gripper.releaseLeft();
                 toTransfer = true;
                 state = CycleFSM.start;
                 break;
 
             case outtakeRight:
                 telemetry.addData("-", "Ready to deposit right");
-                outtake.releaseRight();
+                gripper.releaseRight();
                 toTransfer = true;
                 state = CycleFSM.start;
                 break;

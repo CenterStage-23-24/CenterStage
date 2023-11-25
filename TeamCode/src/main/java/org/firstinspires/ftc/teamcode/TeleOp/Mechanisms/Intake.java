@@ -1,50 +1,37 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-import java.security.Provider;
-
 public class Intake {
 
-    private double ejectSpeed = -0.4;
-    private double leftGripPixelPos = 0;
-    private double rightGripPixelPos = 1;
-    private double intakeSpeed = 1.0;
+    private static final double EJECT_SPEED = -0.4;
+    private static final double INTAKE_SPEED = 1.0;
 
-    private HWMap hwMap;
-    private Telemetry telemetry;
+    private final Telemetry telemetry;
 
-    private Motor intakeMotor;
-    private Servo outtakeServoLeft;
-    private Servo outtakeServoRight;
-    private RevColorSensorV3 trayLeftCS;
-    private RevColorSensorV3 trayRightCS;
-    private final int distance = 28;
-    private final int greenThreshold = 300;
+    private final Motor intakeMotor;
+    private final RevColorSensorV3 trayLeftCS;
+    private final RevColorSensorV3 trayRightCS;
+    private static final int DISTANCE = 28;
+    private static final int GREEN_THRESHOLD = 300;
 
     public boolean pixelInLeft;
     public boolean pixelInRight;
 
     public Intake(HWMap hwMap, Telemetry telemetry) {
-        this.hwMap = hwMap;
         this.telemetry = telemetry;
         intakeMotor = hwMap.getIntakeMotor();
-        outtakeServoLeft = hwMap.getOuttakeServoLeft();
-        outtakeServoRight = hwMap.getOuttakeServoRight();
         trayLeftCS = hwMap.getTrayLeftCS();
         trayRightCS = hwMap.getTrayRightCS();
 
     }
 
     public void intake() {
-        intakeMotor.set(intakeSpeed);
+        intakeMotor.set(INTAKE_SPEED);
     }
 
     public void intake(int motorPower){
@@ -52,15 +39,7 @@ public class Intake {
     }
 
     public void eject() {
-        intakeMotor.set(ejectSpeed);
-    }
-
-    public void gripLeft() {
-        outtakeServoLeft.setPosition(leftGripPixelPos);
-    }
-
-    public void gripRight() {
-        outtakeServoRight.setPosition(rightGripPixelPos);
+        intakeMotor.set(EJECT_SPEED);
     }
 
     public void detectPixels() {
@@ -74,14 +53,14 @@ public class Intake {
         int rightBlue = trayRightCS.blue();
         int rightGreen = trayRightCS.green();
 
-        if (csLeftDistance <= distance) {
+        if (csLeftDistance <= DISTANCE) {
             checkColor(leftRed, leftGreen, leftBlue);
             pixelInLeft = true;
         } else {
             telemetry.addData("-", "Nothing in the left compartment");
             pixelInLeft = false;
         }
-        if (csRightDistance <= distance) {
+        if (csRightDistance <= DISTANCE) {
             checkColor(rightRed, rightGreen, rightBlue);
             pixelInRight = true;
         } else {
@@ -98,7 +77,7 @@ public class Intake {
             telemetry.addData("-", "Yellow pixel detected in the right compartment");
         } else if ((blue > red) && (blue > green)) {
             telemetry.addData("-", "Purple pixel detected in the right compartment");
-        } else if (green >= greenThreshold) {
+        } else if (green >= GREEN_THRESHOLD) {
             telemetry.addData("-", "White pixel detected in the right compartment");
         }
     }

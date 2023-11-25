@@ -14,10 +14,10 @@ public class Arm {
     // a is a feedforward coefficient used to counteract the torque applied to the arm by gravity
     // a * sin(θ) gives the power needed to counteract gravity, θ is distance from vertically pointing down
     // a is used in place of m * g * r as those remain constant, and its easier to tune a single coefficient
-    private final double p = 0.00518;
-    private final double i = 0.003;
-    private final double d = 0.015;
-    private final double a = 0.07;
+    private static final double P = 0.00518;
+    private static final double I = 0.003;
+    private static final double D = 0.015;
+    private static final double A = 0.07;
     protected final AxonClass leftAxon;
     protected final AxonClass rightAxon;
     protected final PIDController pidController;
@@ -35,17 +35,17 @@ public class Arm {
         rightEncoder = hwMap.getAxonAnalogRight();
         leftAxon = new AxonClass(leftServo, leftEncoder, true, true);
         rightAxon = new AxonClass(rightServo, rightEncoder, false, false);
-        pidController = new PIDController(p, i, d);
+        pidController = new PIDController(P, I, D);
     }
 
-    private final double intakePos = 115; // Angle for Intaking pixels
-    private final double depositPos = normalizeRadiansTau(intakePos + 150); // Angle for depositing pixels, is 150 degrees from intake
-    private double intakeOffset = 60; // Degrees that the intake position is from vertically facing down
-    private final double safeError = 10; // Position can be +- this many degrees from target for safe transfer
-    private final double safeIntake = normalizeRadiansTau(intakePos - safeError); // Safe range to start transfer from intake pos
+    private static final double INTAKE_POS = 115; // Angle for Intaking pixels
+    private final double depositPos = normalizeRadiansTau(INTAKE_POS + 150); // Angle for depositing pixels, is 150 degrees from intake
+    private static double INTAKE_OFFSET = 60; // Degrees that the intake position is from vertically facing down
+    private static final double safeError = 10; // Position can be +- this many degrees from target for safe transfer
+    private final double safeIntake = normalizeRadiansTau(INTAKE_POS - safeError); // Safe range to start transfer from intake pos
     private final double safeRange = 150 + (2 * safeError); // the range of the safe values from safeIntake, will end at depositPos + safeError
 
-    private double targetPos = intakePos;
+    private double targetPos = INTAKE_POS;
     private double measuredPos = 0;
 
     //Temp Vars for testing
@@ -75,7 +75,7 @@ public class Arm {
     }
 
     public void goToIntake() {
-        targetPos = intakePos;
+        targetPos = INTAKE_POS;
     }
 
     public void updatePos() {
@@ -91,8 +91,8 @@ public class Arm {
         double power = pidController.calculate(0, error);
 
         // Feedforward using a
-        double degreesFromVert = angleDelta(measuredPos, intakePos) * angleDeltaSign(measuredPos, intakePos) + intakeOffset; // Degrees the arm is away from vertically straight down
-        double feedForward = -a * Math.sin(toRadians(degreesFromVert)); // Calculating power
+        double degreesFromVert = angleDelta(measuredPos, INTAKE_POS) * angleDeltaSign(measuredPos, INTAKE_POS) + INTAKE_OFFSET; // Degrees the arm is away from vertically straight down
+        double feedForward = -A * Math.sin(toRadians(degreesFromVert)); // Calculating power
         power += feedForward; // Adding feedforward to power
 
         //Applying the sign to the power
@@ -115,6 +115,6 @@ public class Arm {
     }
 
     public double getIntakePos() {
-        return intakePos;
+        return INTAKE_POS;
     }
 }
