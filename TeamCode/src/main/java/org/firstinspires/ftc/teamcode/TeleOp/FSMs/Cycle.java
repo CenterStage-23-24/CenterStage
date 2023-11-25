@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Outtake;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
@@ -32,9 +33,6 @@ public class Cycle {
     private CycleFSM state = CycleFSM.start;
     private final TransferController transferController;
 
-    private final Servo outakeServoLeft;
-    private final Servo outakeServoRight;
-
     private final double leftReleasePixelPos = 0.5;
     private final double rightReleasePixelPos = 0.5;
     private boolean toTransfer = false;
@@ -43,13 +41,13 @@ public class Cycle {
     private final GamepadEx gamepad;
     private Telemetry telemetry;
 
-    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, Arm arm) {
+    private Outtake outtake;
+
+    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive, Arm arm) {
         this.gamepad = gamepad;
         this.telemetry = telemetry;
 
-        outakeServoLeft = hwMap.getOuttakeServoLeft();
-        outakeServoRight = hwMap.getOuttakeServoRight();
-
+        outtake = new Outtake(hwMap);
         slides = new Slides(hwMap, telemetry);
         transferController = new TransferController(arm, slides, telemetry);
 
@@ -57,9 +55,6 @@ public class Cycle {
         arm.goToIntake();
 
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
-        outakeServoLeft.setPosition(leftReleasePixelPos);
-        outakeServoRight.setPosition(rightReleasePixelPos);
 
         telemetry.addData("INIT: ", "Cycle");
         telemetry.update();
@@ -69,7 +64,6 @@ public class Cycle {
     public void loop() {
         telemetry.addData("At pos test: ", slides.atPos());
         gamepad.readButtons();
-
         switch (state) {
             case start:
                 //Outtake Left
@@ -115,14 +109,14 @@ public class Cycle {
 
             case outtakeLeft:
                 telemetry.addData("-", "Ready to deposit left");
-                outakeServoLeft.setPosition(leftReleasePixelPos);
+                outtake.releaseLeft();
                 toTransfer = true;
                 state = CycleFSM.start;
                 break;
 
             case outtakeRight:
                 telemetry.addData("-", "Ready to deposit right");
-                outakeServoRight.setPosition(rightReleasePixelPos);
+                outtake.releaseRight();
                 toTransfer = true;
                 state = CycleFSM.start;
                 break;
