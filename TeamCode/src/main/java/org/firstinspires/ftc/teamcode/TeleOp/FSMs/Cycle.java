@@ -44,7 +44,7 @@ public class Cycle {
     private final GamepadEx gamepad;
     private Telemetry telemetry;
 
-    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
+    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry) {
         this.gamepad = gamepad;
         this.telemetry = telemetry;
 
