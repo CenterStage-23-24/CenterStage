@@ -33,6 +33,7 @@ public class MainTeleOp extends LinearOpMode {
     private Gripper gripper;
     private Arm arm;
     private Slides slides;
+    private Intake intake;
 
     @Override
     public void runOpMode() {
@@ -44,20 +45,20 @@ public class MainTeleOp extends LinearOpMode {
             gamePad2 = new GamepadEx(gamepad2);
             //Mechanisms
             fieldCentricDrive = new FieldCentricDrive(hwMap);
-            Intake intake = new Intake(hwMap, telemetry);
+            intake = new Intake(hwMap, telemetry);
             arm = new Arm(hwMap, telemetry);
             slides = new Slides(hwMap, telemetry);
             //Controllers
+            gripper = new Gripper(hwMap);
             intakeController = new IntakeController(intake, gamePad1, gripper);
             transferController = new TransferController(arm, slides, telemetry);
-            gripper = new Gripper(hwMap);
             //FSMs
             cycle = new Cycle(gamePad1, telemetry, transferController, gripper);
 
             //Setup
             state = RobotFSM.cycleFSM;
-            gripper.gripLeft();
-            gripper.gripRight();
+            gripper.releaseLeft();
+            gripper.releaseRight();
 
 
             telemetry.addData("INIT: ", "MainTeleOp");
@@ -70,6 +71,7 @@ public class MainTeleOp extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+
             gamePad1.readButtons();
             gamePad2.readButtons();
             switch (state) {
@@ -97,6 +99,8 @@ public class MainTeleOp extends LinearOpMode {
         intakeController.intakeControl(cycle.getToTransfer());
         slides.pid();
         arm.updatePos();
+        telemetry.addData("Left pixel", intake.getPixelInLeft());
+        telemetry.addData("Right pixel", intake.getPixelInRight());
         telemetry.update();
     }
 }

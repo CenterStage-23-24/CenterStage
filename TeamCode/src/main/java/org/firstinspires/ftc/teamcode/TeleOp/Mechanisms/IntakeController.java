@@ -28,16 +28,15 @@ public class IntakeController {
                     gripper.gripLeft();
                 if (intake.getPixelInRight())
                     gripper.gripRight();
-                if ((!intake.getPixelInLeft() || !intake.getPixelInRight())) {
+
+                if ((!intake.getPixelInLeft() || !intake.getPixelInRight()))
                     intake.intake();
-                } else {
+                else
                     intake.eject();
-                }
-            } else {
+            } else
                 intake.eject();
-            }
-        } else {
+        } else
             intake.intake(0);
-        }
+
     }
 }

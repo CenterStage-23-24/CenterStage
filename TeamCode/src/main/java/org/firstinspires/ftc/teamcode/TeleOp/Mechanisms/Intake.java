@@ -16,7 +16,8 @@ public class Intake {
     private final Motor intakeMotor;
     private final RevColorSensorV3 trayLeftCS;
     private final RevColorSensorV3 trayRightCS;
-    private static final int DISTANCE = 28;
+    private static final int LEFT_DISTANCE = 28;
+    private static final int RIGHT_DISTANCE = 30;
     private static final int GREEN_THRESHOLD = 300;
 
     public boolean pixelInLeft;
@@ -53,14 +54,14 @@ public class Intake {
         int rightBlue = trayRightCS.blue();
         int rightGreen = trayRightCS.green();
 
-        if (csLeftDistance <= DISTANCE) {
+        if (csLeftDistance <= LEFT_DISTANCE) {
             checkColor(leftRed, leftGreen, leftBlue);
             pixelInLeft = true;
         } else {
             telemetry.addData("-", "Nothing in the left compartment");
             pixelInLeft = false;
         }
-        if (csRightDistance <= DISTANCE) {
+        if (csRightDistance <= RIGHT_DISTANCE) {
             checkColor(rightRed, rightGreen, rightBlue);
             pixelInRight = true;
         } else {

@@ -13,6 +13,8 @@ public class Gripper {
     public Gripper(HWMap hwMap){
         outtakeServoLeft = hwMap.getOuttakeServoLeft();
         outtakeServoRight = hwMap.getOuttakeServoRight();
+
+
     }
 
     public void releaseLeft(){

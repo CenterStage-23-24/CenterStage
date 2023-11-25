@@ -85,6 +85,8 @@ public class Cycle {
 
             case retract:
                 toTransfer = true;
+                gripper.releaseRight();
+                gripper.releaseLeft();
                 if (transferController.retract()) {
                     state = CycleFSM.start;
                     toTransfer = false;
