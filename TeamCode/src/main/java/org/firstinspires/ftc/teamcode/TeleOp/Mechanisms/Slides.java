@@ -6,14 +6,14 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Slides {
-    private final Motor LSL;
-    private final Motor LSR;
-    public static double p = 0.013;
-    public static double i = 0.01;
-    public static double d = 0.0007;
-    public static double f = 0.0005;
-    public static int tolerance = 50;
-    private final PIDFController controller;
+    protected final Motor LSL;
+    protected final Motor LSR;
+    private static final double P = 0.013;
+    private static final double I = 0.01;
+    private static final double D = 0.0007;
+    private static final double F = 0.0005;
+    private final int tolerance = 50;
+    protected final PIDFController controller;
     private int targetPos;
     private final Telemetry telemetry;
 
@@ -25,7 +25,7 @@ public class Slides {
         LSR.resetEncoder();
         LSL.setRunMode(Motor.RunMode.RawPower);
         LSR.setRunMode(Motor.RunMode.RawPower);
-        controller = new PIDFController(p, i, d, f);
+        controller = new PIDFController(P, I, D, F);
     }
 
     public void pid() {
@@ -47,7 +47,7 @@ public class Slides {
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
     }
 
-    public int mmToTicks(int cm) {
+    protected int mmToTicks(int cm) {
         double diameterOfSpool = 4.6;
         double ratio = 37.0 / 24.0;
         double ticks = (cm / (Math.PI * diameterOfSpool)) * ratio * LSL.getCPR();

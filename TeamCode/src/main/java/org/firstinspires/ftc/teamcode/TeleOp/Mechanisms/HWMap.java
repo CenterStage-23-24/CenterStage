@@ -41,9 +41,9 @@ public class HWMap {
     private final CRServo axonServoRight;
     private final AnalogInput axonAnalogLeft;
     private final AnalogInput axonAnalogRight;
-    private Servo OdoRetractionLeft;
-    private Servo OdoRetractionRight;
-    private Servo OdoRetractionMiddle;
+    private final Servo OdoRetractionLeft;
+    private final Servo OdoRetractionRight;
+    private final Servo OdoRetractionMiddle;
 
     //Sensors
 
