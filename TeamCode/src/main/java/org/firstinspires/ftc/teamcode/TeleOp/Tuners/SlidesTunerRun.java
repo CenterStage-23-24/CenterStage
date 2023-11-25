@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 public class SlidesTunerRun extends LinearOpMode {
     InheritedSlidesTuner inheritedSlidesTuner;
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode(){
         try {
             HWMap hwMap = new HWMap(hardwareMap);
             inheritedSlidesTuner = new InheritedSlidesTuner(hwMap,telemetry);

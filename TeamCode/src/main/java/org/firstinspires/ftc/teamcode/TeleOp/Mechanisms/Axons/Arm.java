@@ -18,17 +18,21 @@ public class Arm {
     private final double i = 0.003;
     private final double d = 0.015;
     private final double a = 0.07;
-    private final AxonClass leftAxon;
-    private final AxonClass rightAxon;
-    private final PIDController pidController;
+    protected final AxonClass leftAxon;
+    protected final AxonClass rightAxon;
+    protected final PIDController pidController;
+    protected final CRServo leftServo;
+    protected final CRServo rightServo;
+    protected final AnalogInput leftEncoder;
+    protected final AnalogInput rightEncoder;
     private final Telemetry telemetry;
 
     public Arm(HWMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
-        final CRServo leftServo = hwMap.getAxonServoLeft();
-        final CRServo rightServo = hwMap.getAxonServoRight();
-        final AnalogInput leftEncoder = hwMap.getAxonAnalogLeft();
-        final AnalogInput rightEncoder = hwMap.getAxonAnalogRight();
+        leftServo = hwMap.getAxonServoLeft();
+        rightServo = hwMap.getAxonServoRight();
+        leftEncoder = hwMap.getAxonAnalogLeft();
+        rightEncoder = hwMap.getAxonAnalogRight();
         leftAxon = new AxonClass(leftServo, leftEncoder, true, true);
         rightAxon = new AxonClass(rightServo, rightEncoder, false, false);
         pidController = new PIDController(p, i, d);
@@ -110,7 +114,7 @@ public class Arm {
         return (((targetPos + buffer) >= measuredPos) && ((targetPos - buffer) <= measuredPos));
     }
 
-    public double getIntakePos(){
+    public double getIntakePos() {
         return intakePos;
     }
 }

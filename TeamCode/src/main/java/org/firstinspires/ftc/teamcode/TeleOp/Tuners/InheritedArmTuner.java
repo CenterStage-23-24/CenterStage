@@ -14,27 +14,26 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.AxonClass;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
+
 @Config
 public class InheritedArmTuner extends Arm {
-    private HWMap hwMap;
-    private CRServo leftServo;
-    private CRServo rightServo;
-    private AnalogInput leftEncoder;
-    private AnalogInput rightEncoder;
-    private AxonClass leftAxon;
-    private AxonClass rightAxon;
-    private PIDController pidController;
+    private final CRServo leftServo;
+    private final CRServo rightServo;
+    private final AnalogInput leftEncoder;
+    private final AnalogInput rightEncoder;
+    private final AxonClass leftAxon;
+    private final AxonClass rightAxon;
+    private final PIDController pidController;
     private Telemetry telemetry;
 
     public InheritedArmTuner(HWMap hwMap, Telemetry telemetry) {
         super(hwMap, telemetry);
-        this.hwMap = hwMap;
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        leftServo = hwMap.getAxonServoLeft();
-        rightServo = hwMap.getAxonServoRight();
-        leftEncoder = hwMap.getAxonAnalogLeft();
-        rightEncoder = hwMap.getAxonAnalogRight();
-        pidController = new PIDController(p, i, d);
+        this.leftServo = super.leftServo;
+        this.rightServo = super.rightServo;
+        this.leftEncoder = super.leftEncoder;
+        this.rightEncoder = super.rightEncoder;
+        this.pidController = super.pidController;
         leftAxon = new AxonClass(leftServo, leftEncoder, true, true);
         rightAxon = new AxonClass(rightServo, rightEncoder, false, false);
 
@@ -64,68 +63,47 @@ public class InheritedArmTuner extends Arm {
     public static double posVar = 0;
     public static double powerCap = 1.0;
 
-        public void loop() {
+    public void loop() {
 
-            // Jank code to use FTC dashboard for a boolean, 0 = intake pos, 1 = deposit pos
-            if (posVar == 0){
-                targetPos = intakePos;
-            } else {
-                targetPos = depositPos;
-            }
-
-            pidController.setPID(p, i, d);
-            double measuredPos = leftAxon.getPos();
-
-            double delta  = super.angleDelta(measuredPos, targetPos);
-            double sign = super.angleDeltaSign(measuredPos, targetPos);
-            // Distance between measured and target position * the sign of that distance
-            double error = delta * sign;
-
-            // We use zero here because we calculate the error and its direction for the PID loop
-            double power = pidController.calculate(0, error);
-
-            // Feedforward using a
-            double degreesFromVert = super.angleDelta(measuredPos, intakePos) *  super.angleDeltaSign(measuredPos, intakePos) + intakeOffset; // Degrees the arm is away from vertically straight down
-            double feedForward = -a * Math.sin(super.toRadians(degreesFromVert)); // Calculating power
-            power += feedForward; // Adding feedforward to power
-
-            // Capping the power
-            power = Math.min(Math.abs(power), powerCap) * Math.signum(power);
-
-            // Setting servo powers, one servo should have a true value for inverse when its created so we can set positive powers to both
-            leftAxon.setPower(power);
-            rightAxon.setPower(power);
-
-            telemetry.addData("Power: ", power);
-            telemetry.addData("Measured Pos Left: ", measuredPos);
-            telemetry.addData("Measured Pos Right: ", rightAxon.getPos());
-            telemetry.addData("Target Pos: ", targetPos);
-            telemetry.addData("Delta: ", delta);
-            telemetry.addData("Sign: ", sign);
-            telemetry.addData("Error: ", error);
-            telemetry.addData("Deg from vert: ", degreesFromVert);
-            telemetry.update();
+        // Jank code to use FTC dashboard for a boolean, 0 = intake pos, 1 = deposit pos
+        if (posVar == 0) {
+            targetPos = intakePos;
+        } else {
+            targetPos = depositPos;
         }
 
-    // Finds the smallest distance between 2 angles, input and output in degrees
-    //public double angleDelta(double angle1, double angle2) {
-      //  return Math.min(normalizeRadiansTau(angle1 - angle2), 360 - normalizeRadiansTau(angle1 - angle2));
-   // }
-    // Finds the direction of the smallest distance between 2 angles
-   //public double angleDeltaSign(double position, double target) {
-     //  return -(Math.signum(normalizeRadiansTau(target - position) - (360 - normalizeRadiansTau(target - position))));
-    //}
-    // Converts angle from degrees to radians
-    //public double toRadians(double degrees) {
-      //  return degrees * Math.PI/180;
-    //}
-    // Takes input angle in degrees, returns that angle in the range of 0-360
-  //  public double normalizeRadiansTau(double angle){
-    //    return (angle + 360) % 360;
-    //}
+        pidController.setPID(p, i, d);
+        double measuredPos = leftAxon.getPos();
 
+        double delta = super.angleDelta(measuredPos, targetPos);
+        double sign = super.angleDeltaSign(measuredPos, targetPos);
+        // Distance between measured and target position * the sign of that distance
+        double error = delta * sign;
 
+        // We use zero here because we calculate the error and its direction for the PID loop
+        double power = pidController.calculate(0, error);
 
+        // Feedforward using a
+        double degreesFromVert = super.angleDelta(measuredPos, intakePos) * super.angleDeltaSign(measuredPos, intakePos) + intakeOffset; // Degrees the arm is away from vertically straight down
+        double feedForward = -a * Math.sin(super.toRadians(degreesFromVert)); // Calculating power
+        power += feedForward; // Adding feedforward to power
 
+        // Capping the power
+        power = Math.min(Math.abs(power), powerCap) * Math.signum(power);
+
+        // Setting servo powers, one servo should have a true value for inverse when its created so we can set positive powers to both
+        leftAxon.setPower(power);
+        rightAxon.setPower(power);
+
+        telemetry.addData("Power: ", power);
+        telemetry.addData("Measured Pos Left: ", measuredPos);
+        telemetry.addData("Measured Pos Right: ", rightAxon.getPos());
+        telemetry.addData("Target Pos: ", targetPos);
+        telemetry.addData("Delta: ", delta);
+        telemetry.addData("Sign: ", sign);
+        telemetry.addData("Error: ", error);
+        telemetry.addData("Deg from vert: ", degreesFromVert);
+        telemetry.update();
+    }
 
 }

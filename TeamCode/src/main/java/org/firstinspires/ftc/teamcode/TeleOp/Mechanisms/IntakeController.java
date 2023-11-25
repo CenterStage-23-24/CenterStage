@@ -3,12 +3,10 @@ package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
 public class IntakeController {
 
-    private Intake intake;
-    private GamepadEx gamepad;
+    private final Intake intake;
+    private final GamepadEx gamepad;
     private boolean stopRequested = false;
 
     public IntakeController(Intake intake, GamepadEx gamepad) {
@@ -16,7 +14,7 @@ public class IntakeController {
         this.gamepad = gamepad;
     }
 
-    public void intakeCrontrol(boolean toTransfer) {
+    public void intakeControl(boolean toTransfer) {
         if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
             stopRequested = !stopRequested;
 

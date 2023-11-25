@@ -27,7 +27,6 @@ public class MainTeleOp extends LinearOpMode {
     private GamepadEx gamePad2;
     private FieldCentricDrive fieldCentricDrive;
     private IntakeController intakeController;
-    private Intake intake;
     private Arm arm;
     private Slides slides;
 
@@ -40,13 +39,13 @@ public class MainTeleOp extends LinearOpMode {
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
             fieldCentricDrive = new FieldCentricDrive(hwMap);
-            intake = new Intake(hwMap, telemetry);
+            Intake intake = new Intake(hwMap, telemetry);
             intakeController = new IntakeController(intake, gamePad1);
             arm = new Arm(hwMap, telemetry);
             slides = new Slides(hwMap, telemetry);
 
 
-            cycle = new Cycle(hwMap, gamePad1, telemetry);
+            cycle = new Cycle(hwMap, gamePad1, telemetry, arm);
             state = RobotFSM.cycleFSM;
 
             telemetry.addData("INIT: ", "MainTeleOp");
@@ -80,7 +79,7 @@ public class MainTeleOp extends LinearOpMode {
 
             //LeftY is normally supposed to be negative but this is inbuilt in the gamepadEx class
             fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
-            intakeController.intakeCrontrol(cycle.getToTransfer());
+            intakeController.intakeControl(cycle.getToTransfer());
             slides.pid();
             arm.updatePos();
             telemetry.update();

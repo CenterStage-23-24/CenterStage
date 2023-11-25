@@ -13,9 +13,6 @@ public class ArmTunerRun extends LinearOpMode {
         try {
             HWMap hwMap = new HWMap(hardwareMap);
             inheritedArmTuner = new InheritedArmTuner(hwMap,telemetry);
-
-
-
         }catch (Exception e) {
             telemetry.addData("-", e.getMessage());
             telemetry.update();

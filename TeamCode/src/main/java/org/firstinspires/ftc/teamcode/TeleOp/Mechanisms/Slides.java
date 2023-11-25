@@ -6,8 +6,8 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Slides {
-    private final Motor LSL;
-    private final Motor LSR;
+    protected final Motor LSL;
+    protected final Motor LSR;
     private final double p = 0.013;
     public final double i = 0.01;
     private final double d = 0.0007;

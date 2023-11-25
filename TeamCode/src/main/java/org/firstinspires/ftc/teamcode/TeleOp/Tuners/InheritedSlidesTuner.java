@@ -12,27 +12,20 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 @Config
 public class InheritedSlidesTuner extends Slides {
-    private HWMap hwMap;
-    private Motor LSL;
-    private Motor LSR;
+    private final Motor LSL;
+    private final Motor LSR;
     public static double p = 0.013;
     public static double i = 0.01;
     public static double d = 0.0007;
     public static double f = 0.0005;
     public static int tolerance = 50;
     public static int targetPos;
-    private Telemetry telemetry;
+    private final Telemetry telemetry;
 
     public InheritedSlidesTuner(HWMap hwMap, Telemetry telemetry) {
         super(hwMap, telemetry);
-        this.hwMap = hwMap;
-        LSL = hwMap.getLinearSlidesLeft();
-        LSR = hwMap.getLinearSlidesRight();
-        LSL.resetEncoder();
-        LSR.resetEncoder();
-        LSL.setRunMode(Motor.RunMode.RawPower);
-        LSR.setRunMode(Motor.RunMode.RawPower);
-        PIDFController controller = new PIDFController(p, i, d, f);
+        this.LSL = super.LSL;
+        this.LSR = super.LSR;
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         targetPos = super.mmToTicks(50);
     }

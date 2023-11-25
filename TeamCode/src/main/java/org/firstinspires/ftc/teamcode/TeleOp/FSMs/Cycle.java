@@ -28,10 +28,9 @@ public class Cycle {
         outtakeRight
     }
 
-    private final Arm arm;
     private final Slides slides;
     private CycleFSM state = CycleFSM.start;
-    private TransferController transferController;
+    private final TransferController transferController;
 
     private final Servo outakeServoLeft;
     private final Servo outakeServoRight;
@@ -44,7 +43,7 @@ public class Cycle {
     private final GamepadEx gamepad;
     private Telemetry telemetry;
 
-    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry) {
+    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, Arm arm) {
         this.gamepad = gamepad;
         this.telemetry = telemetry;
 
@@ -52,7 +51,6 @@ public class Cycle {
         outakeServoRight = hwMap.getOuttakeServoRight();
 
         slides = new Slides(hwMap, telemetry);
-        arm = new Arm(hwMap, telemetry);
         transferController = new TransferController(arm, slides, telemetry);
 
         //Forces arm to init to intake pos when targetPos is initialized to outtakePos
@@ -69,11 +67,8 @@ public class Cycle {
 
 
     public void loop() {
-        telemetry.addData("atpos test: ", slides.atPos());
+        telemetry.addData("At pos test: ", slides.atPos());
         gamepad.readButtons();
-
-        double buffer = 20;
-        int height = 50;
 
         switch (state) {
             case start:
@@ -96,27 +91,27 @@ public class Cycle {
                     state = CycleFSM.extend;
                 }
 
-                    //Retract
-                    if (gamepad.isDown(GamepadKeys.Button.A)) {
-                        telemetry.addData("b pressed in cycle", 1);
-                        state = CycleFSM.retract;
-                    }
-                    break;
+                //Retract
+                if (gamepad.isDown(GamepadKeys.Button.A)) {
+                    telemetry.addData("b pressed in cycle", 1);
+                    state = CycleFSM.retract;
+                }
+                break;
 
-                case extend:
-                  toTransfer = true;
-                    if(transferController.extend()){
-                        state = CycleFSM.start;
-                    }
-                    break;
+            case extend:
+                toTransfer = true;
+                if (transferController.extend()) {
+                    state = CycleFSM.start;
+                }
+                break;
 
-                case retract:
-                    toTransfer = true;
-                    if(transferController.retract()){
-                        state = CycleFSM.start;
-                        toTransfer = false;
-                    }
-                    break;
+            case retract:
+                toTransfer = true;
+                if (transferController.retract()) {
+                    state = CycleFSM.start;
+                    toTransfer = false;
+                }
+                break;
 
             case outtakeLeft:
                 telemetry.addData("-", "Ready to deposit left");
@@ -125,17 +120,17 @@ public class Cycle {
                 state = CycleFSM.start;
                 break;
 
-                case outtakeRight:
-                    telemetry.addData("-", "Ready to deposit right");
-                    outakeServoRight.setPosition(rightReleasePixelPos);
-                    toTransfer = true;
-                    state = CycleFSM.start;
-                    break;
-            }
+            case outtakeRight:
+                telemetry.addData("-", "Ready to deposit right");
+                outakeServoRight.setPosition(rightReleasePixelPos);
+                toTransfer = true;
+                state = CycleFSM.start;
+                break;
+        }
 
     }
 
-    public boolean getToTransfer(){
+    public boolean getToTransfer() {
         return toTransfer;
     }
 }
