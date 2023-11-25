@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 public class Cycle {
 
@@ -27,49 +28,37 @@ public class Cycle {
         outtakeRight
     }
 
+    private final Arm arm;
+    private final Slides slides;
+    private CycleFSM state = CycleFSM.start;
+    private TransferController transferController;
 
-    CycleFSM state = CycleFSM.start;
-    private final Motor intakeMotor;
     private final Servo outakeServoLeft;
     private final Servo outakeServoRight;
-    private final RevColorSensorV3 colorSensorLeft;
-    private final RevColorSensorV3 colorSensorRight;
-    boolean pixelInLeft = false;
-    boolean pixelInRight = false;
+
     private final double leftReleasePixelPos = 0.5;
     private final double rightReleasePixelPos = 0.5;
     private boolean toTransfer = false;
-    private final ElapsedTime bufferTime = new ElapsedTime();
 
-
-    private double startTS;
 
     private final GamepadEx gamepad;
     private Telemetry telemetry;
 
-    private Slides slides;
-    private Arm arm;
-
-    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, Slides slides, Arm arm) {
+    public Cycle(HWMap hwMap, GamepadEx gamepad, Telemetry telemetry, FieldCentricDrive fieldCentricDrive) {
         this.gamepad = gamepad;
         this.telemetry = telemetry;
-        this.slides = slides;
-        this.arm = arm;
 
-        intakeMotor = hwMap.getIntakeMotor();
         outakeServoLeft = hwMap.getOuttakeServoLeft();
         outakeServoRight = hwMap.getOuttakeServoRight();
-        colorSensorLeft = hwMap.getTrayLeftCS();
-        colorSensorRight = hwMap.getTrayRightCS();
 
         slides = new Slides(hwMap, telemetry);
         arm = new Arm(hwMap, telemetry);
+        transferController = new TransferController(arm, slides, telemetry);
 
         //Forces arm to init to intake pos when targetPos is initialized to outtakePos
         arm.goToIntake();
 
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        bufferTime.reset();
 
         outakeServoLeft.setPosition(leftReleasePixelPos);
         outakeServoRight.setPosition(rightReleasePixelPos);
@@ -107,24 +96,27 @@ public class Cycle {
                     state = CycleFSM.extend;
                 }
 
-                //Retract
-                if (gamepad.isDown(GamepadKeys.Button.A)) {
-                    startTS = bufferTime.milliseconds();
-                    telemetry.addData("b pressed in cycle", 1);
-                    state = CycleFSM.retract;
-                }
-                break;
+                    //Retract
+                    if (gamepad.isDown(GamepadKeys.Button.A)) {
+                        telemetry.addData("b pressed in cycle", 1);
+                        state = CycleFSM.retract;
+                    }
+                    break;
 
-            case extend:
-                toTransfer = true;
-                slides.setTargetPos(slides.mmToTicks(height));
-                if (slides.atPos()) {
-                    arm.goToDeposit();
-                    state = CycleFSM.start;
-                }
-                telemetry.addData("atPos?", slides.atPos());
+                case extend:
+                  toTransfer = true;
+                    if(transferController.extend()){
+                        state = CycleFSM.start;
+                    }
+                    break;
 
-                break;
+                case retract:
+                    toTransfer = true;
+                    if(transferController.retract()){
+                        state = CycleFSM.start;
+                        toTransfer = false;
+                    }
+                    break;
 
             case outtakeLeft:
                 telemetry.addData("-", "Ready to deposit left");
@@ -133,36 +125,14 @@ public class Cycle {
                 state = CycleFSM.start;
                 break;
 
-            case outtakeRight:
-                telemetry.addData("-", "Ready to deposit right");
-                outakeServoRight.setPosition(rightReleasePixelPos);
-                toTransfer = true;
-                state = CycleFSM.start;
-                break;
+                case outtakeRight:
+                    telemetry.addData("-", "Ready to deposit right");
+                    outakeServoRight.setPosition(rightReleasePixelPos);
+                    toTransfer = true;
+                    state = CycleFSM.start;
+                    break;
+            }
 
-            case retract:
-                toTransfer = true;
-                arm.goToIntake();
-                boolean armAtPos = arm.axonAtPos(Arm.intakePos, buffer);
-                if (armAtPos && delay()) {
-                    height = 0;
-                    slides.setTargetPos(height);
-                    if (slides.atPos()) {
-                        toTransfer = false;
-                        state = CycleFSM.start;
-                    }
-                }
-                break;
-        }
-
-    }
-
-
-
-    private boolean delay() {
-        double finalTS = bufferTime.milliseconds();
-        int ms = 750;//600
-        return (finalTS - startTS) >= ms;
     }
 
     public boolean getToTransfer(){
