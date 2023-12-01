@@ -10,6 +10,7 @@ public class Intake {
 
     private static final double EJECT_SPEED = -0.4;
     private static final double INTAKE_SPEED = 1.0;
+    private final double POWER_EJECT = 0.8;
 
     private final Telemetry telemetry;
 
@@ -29,6 +30,10 @@ public class Intake {
         trayLeftCS = hwMap.getTrayLeftCS();
         trayRightCS = hwMap.getTrayRightCS();
 
+    }
+
+    public void powerEject() {
+        intakeMotor.set(POWER_EJECT);
     }
 
     public void intake() {
@@ -89,5 +94,11 @@ public class Intake {
 
     public boolean getPixelInRight(){
         return pixelInRight;
+    }
+
+    public boolean intakeJammed() {
+       double intakeVelocity = intakeMotor.getCorrectedVelocity();
+       final double JAMMED_THRESHOLD = 0.3;
+       return intakeVelocity >= 0 || intakeVelocity <= JAMMED_THRESHOLD;
     }
 }
