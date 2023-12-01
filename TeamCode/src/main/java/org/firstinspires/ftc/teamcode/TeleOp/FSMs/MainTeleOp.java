@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.usb.RobotUsbDevice;
 
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
@@ -34,6 +35,9 @@ public class MainTeleOp extends LinearOpMode {
     private Arm arm;
     private Slides slides;
     private Intake intake;
+    private boolean backdropAlignmentAutomationStarted = true;
+    private static final double ANGLE_ACCEPTABLE_ERROR_RANGE = 2;
+
 
     @Override
     public void runOpMode() {
@@ -44,7 +48,7 @@ public class MainTeleOp extends LinearOpMode {
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
             //Mechanisms
-            fieldCentricDrive = new FieldCentricDrive(hwMap);
+            fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
             intake = new Intake(hwMap, telemetry);
             arm = new Arm(hwMap, telemetry);
             slides = new Slides(hwMap, telemetry);
@@ -94,8 +98,18 @@ public class MainTeleOp extends LinearOpMode {
         }
     }
     private void updateCycle(){
-        //LeftY is normally supposed to be negative but this is inbuilt in the gamepadEx class
-        fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
+        if(gamePad1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
+            backdropAlignmentAutomationStarted = true;
+        }
+        if(gamePad1.getRightX() >= 0.2 || gamePad1.getRightX() <= 0.2)
+            backdropAlignmentAutomationStarted = false;
+
+        if(backdropAlignmentAutomationStarted && fieldCentricDrive.robotAtAngle(ANGLE_ACCEPTABLE_ERROR_RANGE)){
+            double rightX = fieldCentricDrive.backdropAlignment();
+            fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), rightX, HWMap.readFromIMU());
+        }else
+            fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
+
         intakeController.intakeControl(cycle.getToTransfer());
         slides.pid();
         arm.updatePos();
