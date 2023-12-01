@@ -19,7 +19,11 @@ public class Cycle {
         extend,
         retract,
         outtakeLeft,
-        outtakeRight
+        outtakeRight,
+        pos_up,
+        pos_down,
+        offset_up,
+        offset_down
     }
 
     private CycleFSM state = CycleFSM.start;
@@ -50,6 +54,7 @@ public class Cycle {
         gamepad.readButtons();
         switch (state) {
             case start:
+                checkIndexInputs();
                 //Outtake Left
                 telemetry.addData("in start in cycle", 1);
                 if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
@@ -78,6 +83,7 @@ public class Cycle {
 
             case extend:
                 toTransfer = true;
+                checkIndexInputs();
                 if (transferController.extend()) {
                     state = CycleFSM.start;
                 }
@@ -85,6 +91,7 @@ public class Cycle {
 
             case retract:
                 toTransfer = true;
+                checkIndexInputs();
                 gripper.releaseRight();
                 gripper.releaseLeft();
                 if (transferController.retract()) {
@@ -106,8 +113,38 @@ public class Cycle {
                 toTransfer = true;
                 state = CycleFSM.start;
                 break;
+
+            case pos_up:
+                transferController.pos_up();
+                state = CycleFSM.start;
+                break;
+
+            case pos_down:
+                transferController.pos_down();
+                state = CycleFSM.start;
+                break;
+
+            case offset_up:
+                transferController.offset_up();
+                state = CycleFSM.start;
+                break;
+
+            case offset_down:
+                transferController.offset_down();
+                state = CycleFSM.start;
+                break;
+
         }
 
+    }
+
+    public void checkIndexInputs(){
+        if(gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) == 1.0){
+            state = CycleFSM.pos_up;
+        }
+        if(gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) == 1.0){
+            state = CycleFSM.pos_down;
+        }
     }
 
     public boolean getToTransfer() {

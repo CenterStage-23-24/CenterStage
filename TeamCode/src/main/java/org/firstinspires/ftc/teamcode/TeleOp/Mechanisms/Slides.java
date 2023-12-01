@@ -28,8 +28,15 @@ public class Slides {
         controller = new PIDFController(P, I, D, F);
     }
 
-    public void pid() {
-        double output = controller.calculate(LSL.getCurrentPosition(), targetPos);
+    public void pid(boolean toTransfer) {
+
+        double output;
+        if(toTransfer){
+            output = controller.calculate(LSL.getCurrentPosition(), targetPos);
+        } else{
+            output = controller.calculate(LSL.getCurrentPosition(), 0);
+        }
+
         LSL.set(output);
         LSR.set(output);
 
