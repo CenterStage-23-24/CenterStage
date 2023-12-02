@@ -12,8 +12,9 @@ public class IntakeController {
     private final GamepadEx gamepad;
     private boolean stopRequested = false;
     private boolean intakeRunning= false;
-    private final int powerEjectSetVelocity = -2000;
+    private final int powerEjectSetVelocity = -1600;
     private final int powerEjectVelocityMargin = 100;
+    private boolean rampUp = true;
 
 
     public IntakeController(Intake intake, GamepadEx gamepad, Gripper gripper) {
@@ -24,6 +25,9 @@ public class IntakeController {
 
     public void intakeControl(boolean toTransfer) {
         intakeRunning = false;
+        if(intake.getIntakeVelocity() > 2000) {
+            rampUp = false;
+        }
         if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
             stopRequested = !stopRequested;
 
@@ -40,16 +44,23 @@ public class IntakeController {
                     intakeRunning = true;
                     intake.intake();
                 }
-                else
+                else {
                     intake.eject();
-            } else
+                    rampUp = true;
+                }
+            } else {
                 intake.eject();
-        } else
+                rampUp = true;
+            }
+        } else {
             intake.intake(0);
+            rampUp = true;
+        }
 
-        if (intakeRunning) {
+        if (intakeRunning && !rampUp) {
             if(intake.intakeJammed()) {
                 intake.powerEject();
+                rampUp = true;
             }
             if(intake.getIntakeVelocity() <= (powerEjectSetVelocity + powerEjectVelocityMargin)) {
                 intake.intake();
