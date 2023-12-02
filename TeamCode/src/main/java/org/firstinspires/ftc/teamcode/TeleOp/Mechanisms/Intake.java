@@ -25,13 +25,15 @@ public class Intake {
     private boolean pixelInRight;
 
     private double intakeVelocity;
-    private final double JAMMED_THRESHOLD = ((((96*3.14)*435)/60)/1000)*0.3; // check value
+    private boolean intakeJammed;
+    private final double JAMMED_THRESHOLD = 2500; // check value - 1400 is half of max on test bench
 
     public Intake(HWMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
         intakeMotor = hwMap.getIntakeMotor();
         trayLeftCS = hwMap.getTrayLeftCS();
         trayRightCS = hwMap.getTrayRightCS();
+        intakeJammed = false;
 
     }
 
@@ -50,6 +52,8 @@ public class Intake {
     public void eject() {
         intakeMotor.set(EJECT_SPEED);
     }
+
+
 
     public void detectPixels() {
         double csLeftDistance = trayLeftCS.getDistance(DistanceUnit.MM);
@@ -100,12 +104,14 @@ public class Intake {
     }
 
     public double getIntakeVelocity() {
+        intakeVelocity = intakeMotor.getCorrectedVelocity();
         return intakeVelocity;
     }
 
     public boolean intakeJammed() {
-        intakeVelocity = intakeMotor.getCorrectedVelocity(); // Encoder doesn't have to be reset?
+        intakeVelocity = intakeMotor.getCorrectedVelocity();
         telemetry.addData("in intake jammed method",1);
-        return intakeVelocity >= 0 && intakeVelocity <= JAMMED_THRESHOLD;
+        return intakeVelocity <= JAMMED_THRESHOLD;
+
     }
 }
