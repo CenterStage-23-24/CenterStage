@@ -218,4 +218,7 @@ public class HWMap {
     public MecanumDrive getMecanumDrive() {
         return mecanumDrive;
     }
+    public IMU getImu(){
+        return imu;
+    }
 }

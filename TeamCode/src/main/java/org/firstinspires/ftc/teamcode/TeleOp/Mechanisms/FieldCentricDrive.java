@@ -2,16 +2,17 @@ package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
+import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.ftccommon.internal.manualcontrol.commands.ImuCommands;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.opencv.core.Mat;
 
 
 public class FieldCentricDrive {
     private final MecanumDrive mecanumDrive;
     private final PIDController pidController;
     private static final double P = 0, I = 0, D = 0;
-    private static final double BACKDROP_ANGLE = 90;
+    private static final double BACKDROP_ANGLE = 270;
     private final Telemetry telemetry;
 
     public FieldCentricDrive(HWMap hwMap, Telemetry telemetry) {
@@ -26,13 +27,19 @@ public class FieldCentricDrive {
     }
 
     public double backdropAlignment() {
-        double deltaAngle = shortestDistance(BACKDROP_ANGLE, HWMap.readFromIMU());
-        double dir = dir(BACKDROP_ANGLE, HWMap.readFromIMU());
+
+        double deltaAngle = shortestDistance(HWMap.readFromIMU());
+        double dir = dir(HWMap.readFromIMU());
+
         // Distance between measured and target position * the sign of that distance
         double error = deltaAngle * dir;
 
-        //It is 0 because we don't need to tell it what angle it is at, rather tell it how much it has to move.
-        double power = pidController.calculate(HWMap.readFromIMU(), error);
+        /*It is 0 because we already figure the error out in the deltaAngle variable
+         *where we set it equal to the targetPos - measured Pos.*/
+        double power = pidController.calculate(0, error);
+
+        //This is just as a safety measure if something goes wrong inside the code.
+        power = Math.abs(power) * Math.signum(power);
 
         // Telemetry
         telemetry.addData("Heading: ", HWMap.readFromIMU());
@@ -48,14 +55,14 @@ public class FieldCentricDrive {
         return (angle + 360) % 360;
     }
 
-    private double shortestDistance(double target, double position) {
+    private double shortestDistance(double position) {
         //This segment finds the shortest distance
-        return Math.min(normalizeDegrees(target - position), 360 - normalizeDegrees(target - position));
+        return Math.min(normalizeDegrees(BACKDROP_ANGLE - position), 360 - normalizeDegrees(BACKDROP_ANGLE - position));
     }
 
     // Finds the direction of the smallest distance between 2 angles
-    private double dir(double position, double target) {
-        return -(Math.signum(normalizeDegrees(target - position) - (360 - normalizeDegrees(target - position))));
+    private double dir(double position) {
+        return -(Math.signum(normalizeDegrees(BACKDROP_ANGLE - position) - (360 - normalizeDegrees(BACKDROP_ANGLE - position))));
     }
 
     public boolean robotAtAngle(double buffer) {
