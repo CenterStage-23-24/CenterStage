@@ -66,14 +66,14 @@ public class TransferController {
     }
 
     public void pos_up(){
-        int tempPos = slideIndexPos += index_increment;
+        int tempPos = slideIndexPos + index_increment;
         if(tempPos < MAX_SLIDE_HEIGHT){
             slideIndexPos = tempPos;
         }
     }
 
     public void pos_down(){
-        int tempPos = slideIndexPos -= index_increment;
+        int tempPos = slideIndexPos - index_increment;
         if(tempPos >= MIN_SLIDE_HEIGHT){
             slideIndexPos = tempPos;
         }

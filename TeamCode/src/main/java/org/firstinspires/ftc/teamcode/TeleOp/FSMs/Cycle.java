@@ -79,6 +79,18 @@ public class Cycle {
                     telemetry.addData("b pressed in cycle", 1);
                     state = CycleFSM.retract;
                 }
+
+                //Offset up
+                if(gamepad.isDown(GamepadKeys.Button.DPAD_UP)){
+                    telemetry.addData("dpad_up pressed in cycle", 1);
+                    state = CycleFSM.offset_up;
+                }
+
+                //Offset down
+                if(gamepad.isDown(GamepadKeys.Button.DPAD_DOWN)){
+                    telemetry.addData("dpad_down pressed in cycle", 1);
+                    state = CycleFSM.offset_down;
+                }
                 break;
 
             case extend:
