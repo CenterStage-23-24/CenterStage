@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
+
+
 public class IntakeController {
 
     private final Intake intake;
@@ -10,6 +12,7 @@ public class IntakeController {
     private final GamepadEx gamepad;
     private boolean stopRequested = false;
     private boolean intakeRunning= false;
+
 
     public IntakeController(Intake intake, GamepadEx gamepad, Gripper gripper) {
         this.intake = intake;
@@ -32,8 +35,8 @@ public class IntakeController {
                     gripper.gripRight();
 
                 if ((!intake.getPixelInLeft() || !intake.getPixelInRight())) {
-                    intake.intake();
                     intakeRunning = true;
+                    intake.intake();
                 }
                 else
                     intake.eject();

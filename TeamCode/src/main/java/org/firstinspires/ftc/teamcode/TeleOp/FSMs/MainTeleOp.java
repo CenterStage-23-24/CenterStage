@@ -101,6 +101,7 @@ public class MainTeleOp extends LinearOpMode {
         arm.updatePos();
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
+        telemetry.addData("Intake Velocity",intake.getIntakeVelocity());
         telemetry.update();
     }
 }

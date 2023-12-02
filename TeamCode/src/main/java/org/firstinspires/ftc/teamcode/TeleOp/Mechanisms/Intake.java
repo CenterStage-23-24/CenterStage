@@ -10,7 +10,7 @@ public class Intake {
 
     private static final double EJECT_SPEED = -0.4;
     private static final double INTAKE_SPEED = 1.0;
-    private final double POWER_EJECT = 0.8;
+    private final double POWER_EJECT = 0.8; // should it be static
 
     private final Telemetry telemetry;
 
@@ -24,15 +24,14 @@ public class Intake {
     private boolean pixelInLeft;
     private boolean pixelInRight;
 
-    private double intakeVelocity; // compiler says this value can be final. However, this value should change every loop. Should it be static?
-    private final double JAMMED_THRESHOLD = 0.3;
+    private double intakeVelocity;
+    private final double JAMMED_THRESHOLD = 0.3; // should it be static
 
     public Intake(HWMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
         intakeMotor = hwMap.getIntakeMotor();
         trayLeftCS = hwMap.getTrayLeftCS();
         trayRightCS = hwMap.getTrayRightCS();
-        intakeVelocity = intakeMotor.getCorrectedVelocity(); // check that this value is updated every loop. Maybe put in method instead
 
     }
 
@@ -100,8 +99,13 @@ public class Intake {
         return pixelInRight;
     }
 
+    public double getIntakeVelocity() {
+        return intakeVelocity;
+    }
+
     public boolean intakeJammed() {
-       telemetry.addData("intake velocity",intakeVelocity);
-       return intakeVelocity >= 0 && intakeVelocity <= JAMMED_THRESHOLD;
+        intakeVelocity = intakeMotor.getCorrectedVelocity();
+        telemetry.addData("in intake jammed method",1);
+        return intakeVelocity >= 0 && intakeVelocity <= JAMMED_THRESHOLD;
     }
 }
