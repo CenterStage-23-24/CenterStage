@@ -8,9 +8,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Intake {
 
-    private static final double EJECT_SPEED = -0.4;
+    private static final double EJECT_SPEED = -0.4; // change all static?
     private static final double INTAKE_SPEED = 1.0;
-    private final double POWER_EJECT = -0.8; // should it be static
+    private final double POWER_EJECT = -0.8;
 
     private final Telemetry telemetry;
 
@@ -25,7 +25,7 @@ public class Intake {
     private boolean pixelInRight;
 
     private double intakeVelocity;
-    private final double JAMMED_THRESHOLD = 0.3; // should it be static
+    private final double JAMMED_THRESHOLD = ((((96*3.14)*435)/60)/1000)*0.3; // check value
 
     public Intake(HWMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
@@ -104,7 +104,7 @@ public class Intake {
     }
 
     public boolean intakeJammed() {
-        intakeVelocity = intakeMotor.getCorrectedVelocity();
+        intakeVelocity = intakeMotor.getCorrectedVelocity(); // Encoder doesn't have to be reset?
         telemetry.addData("in intake jammed method",1);
         return intakeVelocity >= 0 && intakeVelocity <= JAMMED_THRESHOLD;
     }
