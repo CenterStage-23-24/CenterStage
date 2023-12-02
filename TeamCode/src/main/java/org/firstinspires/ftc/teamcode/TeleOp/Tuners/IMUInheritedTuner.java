@@ -1,33 +1,38 @@
-package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
+package org.firstinspires.ftc.teamcode.TeleOp.Tuners;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
-import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.ftccommon.internal.manualcontrol.commands.ImuCommands;
+import org.checkerframework.checker.units.qual.C;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 
+@Config
+public class IMUInheritedTuner extends FieldCentricDrive {
+    private PIDController pidController;
+    private Telemetry telemetry;
+    private MecanumDrive mecanumDrive;
+    public static double BACKDROP_ANGLE = 270;
+    public static double p = 0.003, i = 0.0, d = 0.0;
 
-public class FieldCentricDrive {
-    private final MecanumDrive mecanumDrive;
-    private final PIDController pidController;
-    //private static final double P = 0.003, I = 0, D = 0; // Test Bench
-    private static final double P = 0.03, I = 0, D = 0; //Robot
-    private static final double BACKDROP_ANGLE = 90;
-    private final Telemetry telemetry;
-
-    public FieldCentricDrive(HWMap hwMap, Telemetry telemetry) {
+    public IMUInheritedTuner(HWMap hwMap, Telemetry telemetry) {
+        super(hwMap, telemetry);
         this.telemetry = telemetry;
+        pidController = new PIDController(p,i,d);
         mecanumDrive = hwMap.getMecanumDrive();
-
-        pidController = new PIDController(P, I, D);
     }
 
     public void drive(double strafe, double forward, double turn, double heading) {
         mecanumDrive.driveFieldCentric(strafe, forward, turn, heading);
     }
 
+
     public double backdropAlignment() {
+        pidController.setPID(p,i,d);
+        double normalizeHeading = normalizeDegrees(HWMap.readFromIMU());
 
         double deltaAngle = shortestDistance(HWMap.readFromIMU());
         double dir = dir(HWMap.readFromIMU());
@@ -43,7 +48,10 @@ public class FieldCentricDrive {
         power = Math.abs(power) * Math.signum(power);
 
         // Telemetry
-        telemetry.addData("Heading: ", HWMap.readFromIMU());
+        telemetry.addData("P: ", p);
+        telemetry.addData("I: ", i);
+        telemetry.addData("D: ", d);
+        telemetry.addData("Heading: ", normalizeHeading);
         telemetry.addData("Error: ", error);
         telemetry.addData("Delta Angle: ", deltaAngle);
         telemetry.addData("Sign: ", dir);
@@ -67,8 +75,6 @@ public class FieldCentricDrive {
     }
 
     public boolean robotAtAngle(double buffer) {
-        boolean atAngle = (((BACKDROP_ANGLE + buffer) >= normalizeDegrees(HWMap.readFromIMU())) && ((BACKDROP_ANGLE - buffer) <= normalizeDegrees(HWMap.readFromIMU())));
-        return atAngle;
+        return (((BACKDROP_ANGLE + buffer) >= HWMap.readFromIMU()) && ((BACKDROP_ANGLE - buffer) <= HWMap.readFromIMU()));
     }
-
 }

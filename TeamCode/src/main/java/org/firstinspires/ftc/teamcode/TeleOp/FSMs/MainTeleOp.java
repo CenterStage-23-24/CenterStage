@@ -5,8 +5,8 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.usb.RobotUsbDevice;
 
+import org.firstinspires.ftc.teamcode.R;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
-@TeleOp(name = "TeleOp-1.0.3")
+@TeleOp(name = "TeleOp Feature: IMU Alignment")
 public class MainTeleOp extends LinearOpMode {
 
     public enum RobotFSM {
@@ -35,8 +35,8 @@ public class MainTeleOp extends LinearOpMode {
     private Arm arm;
     private Slides slides;
     private Intake intake;
-    private boolean backdropAlignmentAutomationStarted = true;
-    private static final double ANGLE_ACCEPTABLE_ERROR_RANGE = 2;
+    private boolean backdropAlignmentAutomationStarted = false;
+    private static final double ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE = 5;
 
 
     @Override
@@ -98,21 +98,28 @@ public class MainTeleOp extends LinearOpMode {
         }
     }
     private void updateCycle(){
-        if(gamePad1.wasJustPressed(GamepadKeys.Button.RIGHT_STICK_BUTTON)){
+        if(gamePad1.isDown(GamepadKeys.Button.X)){
             backdropAlignmentAutomationStarted = true;
         }
-        if(gamePad1.getRightX() >= 0.2 || gamePad1.getRightX() <= 0.2)
-            backdropAlignmentAutomationStarted = false;
 
-        if(backdropAlignmentAutomationStarted && fieldCentricDrive.robotAtAngle(ANGLE_ACCEPTABLE_ERROR_RANGE)){
+        if(backdropAlignmentAutomationStarted && !fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)){
             double rightX = fieldCentricDrive.backdropAlignment();
             fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), rightX, HWMap.readFromIMU());
-        }else
+            if((gamePad1.getRightX() >= 0.2 || gamePad1.getRightX() <= -0.2) || fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)){
+                backdropAlignmentAutomationStarted = false;
+            }
+        }else{
+            backdropAlignmentAutomationStarted = false;
             fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
+        }
+
 
         intakeController.intakeControl(cycle.getToTransfer());
         slides.pid();
         arm.updatePos();
+        telemetry.addData("rightX", gamePad1.getRightX());
+        telemetry.addData("backdropAutomationOn?", backdropAlignmentAutomationStarted);
+        telemetry.addData("Heading", fieldCentricDrive.normalizeDegrees(HWMap.readFromIMU()));
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
         telemetry.update();
