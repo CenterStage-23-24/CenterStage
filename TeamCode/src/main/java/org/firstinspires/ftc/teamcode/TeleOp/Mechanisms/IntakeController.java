@@ -42,7 +42,7 @@ public class IntakeController {
         } else
             intake.intake(0);
 
-        if (intakeRunning==true) {
+        if (intakeRunning) {
             if(intake.intakeJammed()) {
                 intake.powerEject();
             }
