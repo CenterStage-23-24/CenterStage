@@ -26,7 +26,7 @@ public class Intake {
 
     private double intakeVelocity;
     private boolean intakeJammed;
-    private final double JAMMED_THRESHOLD = 1600; // check value - 1400 is half of max on test bench
+    private final double JAMMED_THRESHOLD = 2500; // check value - 1400 is half of max on test bench
 
     public Intake(HWMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
