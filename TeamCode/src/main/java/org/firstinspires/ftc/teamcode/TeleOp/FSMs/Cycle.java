@@ -40,6 +40,8 @@ public class Cycle {
     private final Gripper gripper;
     private double prev_left_trigger = 0.0;
     private double prev_right_trigger = 0.0;
+    private boolean prev_dpad_up = false;
+    private boolean prev_dpad_down = false;
 
     public Cycle(GamepadEx gamepad, Telemetry telemetry, TransferController transferController, Gripper gripper) {
         //Core
@@ -82,18 +84,6 @@ public class Cycle {
                 if (gamepad.isDown(GamepadKeys.Button.A)) {
                     telemetry.addData("b pressed in cycle", 1);
                     state = CycleFSM.retract;
-                }
-
-                //Offset up
-                if(gamepad.isDown(GamepadKeys.Button.DPAD_UP)){
-                    telemetry.addData("dpad_up pressed in cycle", 1);
-                    state = CycleFSM.offset_up;
-                }
-
-                //Offset down
-                if(gamepad.isDown(GamepadKeys.Button.DPAD_DOWN)){
-                    telemetry.addData("dpad_down pressed in cycle", 1);
-                    state = CycleFSM.offset_down;
                 }
                 break;
 
@@ -161,14 +151,26 @@ public class Cycle {
         if(gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) == 1.0 & prev_right_trigger != 1.0){
             transferController.pos_down();
         }
+        if(gamepad.isDown(GamepadKeys.Button.DPAD_UP) & !prev_dpad_up){
+            transferController.offset_up();
+        }
+        if(gamepad.isDown(GamepadKeys.Button.DPAD_DOWN) & !prev_dpad_down){
+            transferController.offset_down();
+        }
 
         prev_left_trigger = gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
         prev_right_trigger = gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        prev_dpad_up = gamepad.isDown(GamepadKeys.Button.DPAD_UP);
+        prev_dpad_down = gamepad.isDown(GamepadKeys.Button.DPAD_DOWN);
     }
 
     public boolean getToTransfer() {
         return toTransfer;
     }
+
+    public boolean getPrevUp(){return prev_dpad_up;}
+
+    public boolean getPrevDown(){return prev_dpad_down;}
 }
 
 

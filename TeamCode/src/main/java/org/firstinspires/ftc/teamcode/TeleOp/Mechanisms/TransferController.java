@@ -7,11 +7,20 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 
 public class TransferController {
+
+    private static final int default_index_inc = 10; //only for telemetry purposes
+    private static final int index_increment = default_index_inc; //config as needed in CM
+    private static final int OFFSET_INCREMENT = 5; //config as needed in CM
+    private static final int MAX_SLIDE_HEIGHT = 64; //convert to CM
+    private int min_slide_height = 24; //config as needed in CM
+
+/*
     private static final int default_index_inc = 2; //only for telemetry purposes
     private static final int index_increment = default_index_inc; //config as needed in CM
     private static final int OFFSET_INCREMENT = 5; //config as needed in CM
     private static final int MAX_SLIDE_HEIGHT = 17; //convert to CM
     private int min_slide_height = 2; //config as needed in CM
+*/
     private int slideIndexPos = min_slide_height;
     private static final int BUFFER = 20;
     private static final int DELAY_MS = 750;
@@ -35,6 +44,7 @@ public class TransferController {
 
     public boolean extend(){
         telemetry.addData("atPos?", slides.atPos());
+        //telemetry.addData("SLIDE TARGET POS?", slides.mmToTicks(slideIndexPos));
         slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         if (slides.atPos()) {
             arm.goToDeposit();
@@ -85,10 +95,30 @@ public class TransferController {
     public void offset_up(){
         slideIndexPos += OFFSET_INCREMENT;
         min_slide_height += OFFSET_INCREMENT;
+        slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+
+        /*
+        int tempPos = slideIndexPos + OFFSET_INCREMENT;
+        if(tempPos < MAX_SLIDE_HEIGHT && min_slide_height < MAX_SLIDE_HEIGHT){
+            slideIndexPos = tempPos;
+            min_slide_height += OFFSET_INCREMENT;
+            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+        }
+         */
     }
     public void offset_down(){
         slideIndexPos -= OFFSET_INCREMENT;
         min_slide_height -= OFFSET_INCREMENT;
+        slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+
+        /*
+        int tempPos = slideIndexPos - OFFSET_INCREMENT;
+
+        if(tempPos >= min_slide_height){
+            slideIndexPos = tempPos;
+
+        }
+         */
     }
 
     public void telem(){

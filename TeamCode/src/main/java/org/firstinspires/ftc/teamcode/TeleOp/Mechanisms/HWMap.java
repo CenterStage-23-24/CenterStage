@@ -60,8 +60,8 @@ public class HWMap {
         rightBackMotor = new Motor(hardwareMap, "RB", Motor.GoBILDA.RPM_435);//CH Port 3. The left odo pod accesses this motor's encoder port.
 
         //Linear Slides Motors
-        linearSlidesLeft = new Motor(hardwareMap, "LSL", Motor.GoBILDA.RPM_312); //EH Port 2
-        linearSlidesRight = new Motor(hardwareMap, "LSR", Motor.GoBILDA.RPM_312);//EH Port 3
+        linearSlidesLeft = new Motor(hardwareMap, "LSL", Motor.GoBILDA.RPM_1150); //EH Port 2
+        linearSlidesRight = new Motor(hardwareMap, "LSR", Motor.GoBILDA.RPM_1150);//EH Port 3
 
         // Intake Motor
         intakeMotor = new Motor(hardwareMap, "IM", Motor.GoBILDA.RPM_435); //EH Port 0

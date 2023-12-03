@@ -103,6 +103,10 @@ public class MainTeleOp extends LinearOpMode {
         telemetry.addData("toTransfer", cycle.getToTransfer());
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
+        telemetry.addData("SLIDE TARGET POS?", slides.mmToTicks(24));
+        telemetry.addData("SLIDES AT POS?", slides.atPos());
+        telemetry.addData("PREV DPAD UP", cycle.getPrevUp());
+        telemetry.addData("PREV DPAD DOWN", cycle.getPrevDown());
         telemetry.update();
     }
 }
