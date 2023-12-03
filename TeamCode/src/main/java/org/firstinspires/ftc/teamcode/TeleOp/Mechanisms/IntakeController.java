@@ -4,7 +4,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-
+// ejects at wrong time
 public class IntakeController {
 
     private final Intake intake;
