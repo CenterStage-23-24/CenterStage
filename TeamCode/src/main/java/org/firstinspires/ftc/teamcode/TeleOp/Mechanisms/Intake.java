@@ -111,7 +111,7 @@ public class Intake {
     public boolean intakeJammed() {
         intakeVelocity = intakeMotor.getCorrectedVelocity();
         telemetry.addData("in intake jammed method",1);
-        return intakeVelocity <= JAMMED_THRESHOLD; // working
+        return intakeVelocity <= JAMMED_THRESHOLD;
 
     }
 }

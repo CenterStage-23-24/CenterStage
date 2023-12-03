@@ -60,7 +60,7 @@ public class IntakeController {
         if (intakeRunning && !rampUp) {
             if(intake.intakeJammed()) {
                 intake.powerEject();
-                rampUp = true; // change to work
+                rampUp = true;
             }
             if(intake.getIntakeVelocity() <= (powerEjectSetVelocity + powerEjectVelocityMargin)) {
                 intake.intake();
