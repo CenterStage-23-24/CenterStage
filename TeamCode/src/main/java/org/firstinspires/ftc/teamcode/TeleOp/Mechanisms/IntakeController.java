@@ -9,7 +9,6 @@ public class IntakeController {
     private final Gripper gripper;
     private final GamepadEx gamepad;
     private boolean stopRequested = false;
-    private boolean intakeRunning= false;
 
     public IntakeController(Intake intake, GamepadEx gamepad, Gripper gripper) {
         this.intake = intake;
@@ -18,7 +17,6 @@ public class IntakeController {
     }
 
     public void intakeControl(boolean toTransfer) {
-        intakeRunning = false;
         if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
             stopRequested = !stopRequested;
 
@@ -31,23 +29,14 @@ public class IntakeController {
                 if (intake.getPixelInRight())
                     gripper.gripRight();
 
-                if ((!intake.getPixelInLeft() || !intake.getPixelInRight())) {
+                if ((!intake.getPixelInLeft() || !intake.getPixelInRight()))
                     intake.intake();
-                    intakeRunning = true;
-                }
                 else
                     intake.eject();
             } else
                 intake.eject();
         } else
             intake.intake(0);
-
-        if (intakeRunning==true) {
-            if(intake.intakeJammed()) {
-                intake.powerEject();
-            }
-
-        }
 
     }
 }
