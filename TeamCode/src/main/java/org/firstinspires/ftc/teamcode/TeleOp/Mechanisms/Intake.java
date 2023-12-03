@@ -10,7 +10,7 @@ public class Intake {
 
     private static final double EJECT_SPEED = -0.4;
     private static final double INTAKE_SPEED = 1.0;
-    private final double POWER_EJECT = -0.8; // should it be static
+    private final double POWER_EJECT = 0.8; // should it be static
 
     private final Telemetry telemetry;
 
