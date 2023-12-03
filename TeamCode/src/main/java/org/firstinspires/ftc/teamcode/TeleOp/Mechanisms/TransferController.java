@@ -7,11 +7,12 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 
 public class TransferController {
-    private int index_increment = 0; //config as needed in CM
-    private static final int OFFSET_INCREMENT = 0; //config as needed in CM
-    private static final int MAX_SLIDE_HEIGHT = 1000; //convert to CM
-    private static final int MIN_SLIDE_HEIGHT = 0; //config as needed in CM
-    private int slideIndexPos = MIN_SLIDE_HEIGHT;
+    private static final int default_index_inc = 2; //only for telemetry purposes
+    private static final int index_increment = default_index_inc; //config as needed in CM
+    private static final int OFFSET_INCREMENT = 5; //config as needed in CM
+    private static final int MAX_SLIDE_HEIGHT = 17; //convert to CM
+    private int min_slide_height = 2; //config as needed in CM
+    private int slideIndexPos = min_slide_height;
     private static final int BUFFER = 20;
     private static final int DELAY_MS = 750;
     private final Arm arm;
@@ -69,21 +70,31 @@ public class TransferController {
         int tempPos = slideIndexPos + index_increment;
         if(tempPos < MAX_SLIDE_HEIGHT){
             slideIndexPos = tempPos;
+            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
 
     public void pos_down(){
         int tempPos = slideIndexPos - index_increment;
-        if(tempPos >= MIN_SLIDE_HEIGHT){
+        if(tempPos >= min_slide_height){
             slideIndexPos = tempPos;
+            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
 
     public void offset_up(){
-        index_increment += OFFSET_INCREMENT;
+        slideIndexPos += OFFSET_INCREMENT;
+        min_slide_height += OFFSET_INCREMENT;
     }
     public void offset_down(){
-        index_increment -= OFFSET_INCREMENT;
+        slideIndexPos -= OFFSET_INCREMENT;
+        min_slide_height -= OFFSET_INCREMENT;
+    }
+
+    public void telem(){
+        telemetry.addData("OFFSET: ", OFFSET_INCREMENT);
+        telemetry.addData("INDEX INC: ", index_increment);
+        telemetry.addData("SLIDE INDEX: ", slideIndexPos);
     }
 }
 

@@ -99,6 +99,8 @@ public class MainTeleOp extends LinearOpMode {
         intakeController.intakeControl(cycle.getToTransfer());
         slides.pid(cycle.getToTransfer());
         arm.updatePos();
+        transferController.telem();
+        telemetry.addData("toTransfer", cycle.getToTransfer());
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
         telemetry.update();

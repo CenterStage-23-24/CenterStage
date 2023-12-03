@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp.FSMs;
 
+import android.widget.Button;
+
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -36,6 +38,8 @@ public class Cycle {
     private final Telemetry telemetry;
 
     private final Gripper gripper;
+    private double prev_left_trigger = 0.0;
+    private double prev_right_trigger = 0.0;
 
     public Cycle(GamepadEx gamepad, Telemetry telemetry, TransferController transferController, Gripper gripper) {
         //Core
@@ -151,12 +155,15 @@ public class Cycle {
     }
 
     public void checkIndexInputs(){
-        if(gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) == 1.0){
-            state = CycleFSM.pos_up;
+        if(gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) == 1.0 & prev_left_trigger != 1.0){
+            transferController.pos_up();
         }
-        if(gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) == 1.0){
-            state = CycleFSM.pos_down;
+        if(gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) == 1.0 & prev_right_trigger != 1.0){
+            transferController.pos_down();
         }
+
+        prev_left_trigger = gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        prev_right_trigger = gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
     }
 
     public boolean getToTransfer() {

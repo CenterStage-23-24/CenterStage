@@ -8,10 +8,16 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Slides {
     protected final Motor LSL;
     protected final Motor LSR;
+    /*
     private static final double P = 0.013;
     private static final double I = 0.01;
     private static final double D = 0.0007;
     private static final double F = 0.0005;
+     */
+    public static double P = 0.0032;
+    public static double I = 0.01;
+    public static double D = 0.0007;
+    public static double F = 0;
     private final int tolerance = 50;
     protected final PIDFController controller;
     private int targetPos;
@@ -44,6 +50,8 @@ public class Slides {
         telemetry.addData("LSL POS", LSL.getCurrentPosition());
         telemetry.addData("LSR POS", LSR.getCurrentPosition());
         telemetry.addData("tolerance", tolerance);
+        telemetry.addData("LSL cm", ticksToCm(LSL.getCurrentPosition()));
+        telemetry.addData("LSR cm", ticksToCm(LSR.getCurrentPosition()));
     }
 
     public void setTargetPos(int targetPos) {
@@ -54,11 +62,18 @@ public class Slides {
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
     }
 
-    protected int mmToTicks(int cm) {
+    public int mmToTicks(int cm) {
         double diameterOfSpool = 4.6;
         double ratio = 37.0 / 24.0;
         double ticks = (cm / (Math.PI * diameterOfSpool)) * ratio * LSL.getCPR();
         return (int) ticks;
 
+    }
+
+    public int ticksToCm(int ticks){
+        double diameterOfSpool = 4.6;
+        double ratio = 37.0 / 24.0;
+        double cm = (ticks / (LSL.getCPR() * ratio)) * Math.PI * diameterOfSpool;
+        return (int) cm;
     }
 }
