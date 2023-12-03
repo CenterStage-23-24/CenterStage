@@ -21,18 +21,14 @@ public class Intake {
     private static final int RIGHT_DISTANCE = 30;
     private static final int GREEN_THRESHOLD = 300;
 
-    private boolean pixelInLeft;
-    private boolean pixelInRight;
-
-    private double intakeVelocity; // compiler says this value can be final. However, this value should change every loop. Should it be static?
-    private final double JAMMED_THRESHOLD = 0.3;
+    public boolean pixelInLeft;
+    public boolean pixelInRight;
 
     public Intake(HWMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
         intakeMotor = hwMap.getIntakeMotor();
         trayLeftCS = hwMap.getTrayLeftCS();
         trayRightCS = hwMap.getTrayRightCS();
-        intakeVelocity = intakeMotor.getCorrectedVelocity(); // check that this value is updated every loop. Maybe put in method instead
 
     }
 
@@ -101,7 +97,8 @@ public class Intake {
     }
 
     public boolean intakeJammed() {
-       telemetry.addData("intake velocity",intakeVelocity);
-       return intakeVelocity >= 0 && intakeVelocity <= JAMMED_THRESHOLD;
+       double intakeVelocity = intakeMotor.getCorrectedVelocity();
+       final double JAMMED_THRESHOLD = 0.3;
+       return intakeVelocity >= 0 || intakeVelocity <= JAMMED_THRESHOLD;
     }
 }
