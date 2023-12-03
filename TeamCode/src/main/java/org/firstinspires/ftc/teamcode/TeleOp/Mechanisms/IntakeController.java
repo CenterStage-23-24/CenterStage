@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.robotcore.util.ElapsedTime;
+
 
 
 public class IntakeController {
@@ -12,8 +12,6 @@ public class IntakeController {
     private final GamepadEx gamepad;
     private boolean stopRequested = false;
     private boolean intakeRunning= false;
-    private final int powerEjectSetVelocity = -2000;
-    private final int powerEjectVelocityMargin = 100;
 
 
     public IntakeController(Intake intake, GamepadEx gamepad, Gripper gripper) {
@@ -50,9 +48,6 @@ public class IntakeController {
         if (intakeRunning) {
             if(intake.intakeJammed()) {
                 intake.powerEject();
-            }
-            if(intake.getIntakeVelocity() <= (powerEjectSetVelocity + powerEjectVelocityMargin)) {
-                intake.intake();
             }
 
         }
