@@ -2,15 +2,16 @@ package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Intake {
 
-    private static final double EJECT_SPEED = -0.4; // change all static?
+    private static final double EJECT_SPEED = -0.4;
     private static final double INTAKE_SPEED = 1.0;
-    private final double POWER_EJECT = -0.8;
+    private static final double POWER_EJECT = -0.8;
 
     private final Telemetry telemetry;
 
@@ -25,15 +26,18 @@ public class Intake {
     private boolean pixelInRight;
 
     private double intakeVelocity;
-    private boolean intakeJammed;
-    private final double JAMMED_THRESHOLD = 1600; // check value - 1400 is half of max on test bench
+    private static final double JAMMED_THRESHOLD = 2000;
+
+    //private double startTS;
+    //private final ElapsedTime bufferTime = new ElapsedTime();
+    //private static final int DELAY_MS = 2000;
+
 
     public Intake(HWMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
         intakeMotor = hwMap.getIntakeMotor();
         trayLeftCS = hwMap.getTrayLeftCS();
         trayRightCS = hwMap.getTrayRightCS();
-        intakeJammed = false;
 
     }
 
@@ -109,9 +113,9 @@ public class Intake {
     }
 
     public boolean intakeJammed() {
-        intakeVelocity = intakeMotor.getCorrectedVelocity();
-        telemetry.addData("in intake jammed method",1);
-        return intakeVelocity <= JAMMED_THRESHOLD; // working
+        telemetry.addData("in intake jammed method", 1);
+        return intakeVelocity <= JAMMED_THRESHOLD;
 
     }
+
 }
