@@ -23,7 +23,6 @@ public class TransferController {
     private static final int SAFE_HEIGHT = 2;
     private int min_slide_height = SAFE_HEIGHT; //config as needed in CM
 */
-
     private int slideIndexPos = min_slide_height;
     private static final int BUFFER = 20;
     private static final int DELAY_MS = 750;
@@ -101,10 +100,11 @@ public class TransferController {
         min_slide_height += OFFSET_INCREMENT;
         slides.setTargetPos(slides.mmToTicks(slideIndexPos));
          */
-        int tempPos = min_slide_height + OFFSET_INCREMENT;
-        if(tempPos < MAX_HEIGHT){
-            min_slide_height = tempPos;
-            slideIndexPos += OFFSET_INCREMENT;
+        int tempMinPos = min_slide_height + OFFSET_INCREMENT;
+        int tempIndexPos = slideIndexPos + OFFSET_INCREMENT;
+        if(tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT){
+            min_slide_height = tempMinPos;
+            slideIndexPos = tempIndexPos;
             slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
@@ -114,10 +114,11 @@ public class TransferController {
         min_slide_height -= OFFSET_INCREMENT;
         slides.setTargetPos(slides.mmToTicks(slideIndexPos));
          */
-        int tempPos = min_slide_height - OFFSET_INCREMENT;
-        if(tempPos >= SAFE_HEIGHT){
-            min_slide_height = tempPos;
-            slideIndexPos -= OFFSET_INCREMENT;
+        int tempMinPos = min_slide_height - OFFSET_INCREMENT;
+        int tempIndexPos = slideIndexPos - OFFSET_INCREMENT;
+        if(tempMinPos >= SAFE_HEIGHT && tempIndexPos >= SAFE_HEIGHT){
+            min_slide_height = tempMinPos;
+            slideIndexPos = tempIndexPos;
             slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
@@ -126,6 +127,6 @@ public class TransferController {
         telemetry.addData("OFFSET: ", OFFSET_INCREMENT);
         telemetry.addData("INDEX INC: ", index_increment);
         telemetry.addData("SLIDE INDEX: ", slideIndexPos);
+        telemetry.addData("MIN SLIDE HEIGHT: ", min_slide_height);
     }
 }
-
