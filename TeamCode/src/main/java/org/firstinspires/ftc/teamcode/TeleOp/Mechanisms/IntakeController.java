@@ -84,4 +84,7 @@ public class IntakeController {
         return rampUp;
     }
 
+    public boolean isIntakeRunning() {
+        return intakeRunning;
+    }
 }
