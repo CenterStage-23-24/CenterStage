@@ -103,13 +103,7 @@ public class MainTeleOp extends LinearOpMode {
         telemetry.addData("Right pixel", intake.getPixelInRight());
         telemetry.addData("Intake Velocity",intake.getIntakeVelocity());
         telemetry.addData("Power Ejecting",intakeController.isPowerEjecting());
-        telemetry.addData("intake set before",intakeController.isSetBeforeIntake());
-        telemetry.addData("eject set before",intakeController.isSetBeforeEject());
         telemetry.addData("Intake Jammed",intake.intakeJammed());
-        telemetry.addData("Intake Delay", intakeController.isDelayIntake());
-        telemetry.addData("Eject Delay",intakeController.isDelayEject());
-        telemetry.addData("Start ts intake",intakeController.getStartTSIntake());
-        telemetry.addData("Start ts eject",intakeController.getStartTSEject());
         telemetry.addData("Ramp up",intakeController.isRampUp());
         telemetry.update();
     }

@@ -17,17 +17,6 @@ public class IntakeController {
     private boolean rampUp = true;
     private boolean powerEjecting = false;
 
-    //private double startTSEject;
-    //private final ElapsedTime bufferTime = new ElapsedTime();
-    //private static final int DELAY_MS_EJECT = 5000;
-
-    //private double startTSIntake;
-    //private static final int DELAY_MS_Intake = 5000;
-    //private boolean setBeforeIntake = false;
-    //private boolean isSetBeforeEject = false;
-    //private boolean delayIntake = false;
-    //private boolean delayEject = false;
-
 
     public IntakeController(Intake intake, GamepadEx gamepad, Gripper gripper) {
         this.intake = intake;
