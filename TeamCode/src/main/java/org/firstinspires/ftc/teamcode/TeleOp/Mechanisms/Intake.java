@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-//ejects at wrong time
 public class Intake {
 
     private static final double EJECT_SPEED = -0.4;
@@ -26,11 +25,8 @@ public class Intake {
     private boolean pixelInRight;
 
     private double intakeVelocity;
-    private static final double JAMMED_THRESHOLD = 2000;
+    private static final double JAMMED_THRESHOLD = 500;
 
-    //private double startTS;
-    //private final ElapsedTime bufferTime = new ElapsedTime();
-    //private static final int DELAY_MS = 2000;
 
 
     public Intake(HWMap hwMap, Telemetry telemetry) {

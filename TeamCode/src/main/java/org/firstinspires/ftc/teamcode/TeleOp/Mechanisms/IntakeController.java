@@ -4,7 +4,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-// ejects at wrong time
+
 public class IntakeController {
 
     private final Intake intake;
@@ -17,16 +17,16 @@ public class IntakeController {
     private boolean rampUp = true;
     private boolean powerEjecting = false;
 
-    private double startTSEject;
-    private final ElapsedTime bufferTime = new ElapsedTime();
-    private static final int DELAY_MS_EJECT = 5000;
+    //private double startTSEject;
+    //private final ElapsedTime bufferTime = new ElapsedTime();
+    //private static final int DELAY_MS_EJECT = 5000;
 
-    private double startTSIntake;
-    private static final int DELAY_MS_Intake = 5000;
-    private boolean setBeforeIntake = false;
-    private boolean isSetBeforeEject = false;
-    private boolean delayIntake = false;
-    private boolean delayEject = false;
+    //private double startTSIntake;
+    //private static final int DELAY_MS_Intake = 5000;
+    //private boolean setBeforeIntake = false;
+    //private boolean isSetBeforeEject = false;
+    //private boolean delayIntake = false;
+    //private boolean delayEject = false;
 
 
     public IntakeController(Intake intake, GamepadEx gamepad, Gripper gripper) {
@@ -77,41 +77,45 @@ public class IntakeController {
         if (intakeRunning && !rampUp) {
 
             if (intake.intakeJammed()) {
-                if (!setBeforeIntake) {
-                    startTSIntake = bufferTime.milliseconds();
-                    setBeforeIntake = true;
-                }
-                if (delayIntake()) {
+                //if (!setBeforeIntake) {
+                  //  startTSIntake = bufferTime.milliseconds();
+                    //setBeforeIntake = true;
+                //}
+                //if (delayIntake()) {
                     intake.powerEject();
                     powerEjecting = true;
-                }
-
-            }
-            if (powerEjecting) {
-                if(!isSetBeforeEject) {
-                    startTSEject = bufferTime.milliseconds();
-                    isSetBeforeEject = true;
-                }
-                if (delayEject()) {
+                if(intake.getIntakeVelocity() <= (powerEjectSetVelocity + powerEjectVelocityMargin)) {
+                      rampUp = true;
                     intake.intake();
-                }
-                if(!intake.intakeJammed()) {
-                    rampUp = true;
-                }
+                     }
+                //}
+
+            }
+           // if (powerEjecting) {
+             //   if(!isSetBeforeEject) {
+               //     startTSEject = bufferTime.milliseconds();
+                 //   isSetBeforeEject = true;
+                //}
+                //if (delayEject()) {
+                  //  intake.intake();
+                //}
+                //if(!intake.intakeJammed()) {
+                  //  rampUp = true;
+                //}
 
             }
 
-            /* The following is the logic that uses the power eject velocity instead of time to which back to intake.
+            /* The code is the logic that uses the power eject velocity instead of time to which back to intake.
                We changed to time because the battery can effect the velocity. This does not allow the logic to work.
              */
-            //if(intake.getIntakeVelocity() <= (powerEjectSetVelocity + powerEjectVelocityMargin)) {
-              //  rampUp = true;
-                //intake.intake();
-           // }
+
 
         }
-
+    public boolean isRampUp() {
+        return rampUp;
     }
+
+       /*
     public boolean delayIntake() {
         double finalTS = bufferTime.milliseconds();
         delayIntake =  (finalTS - startTSIntake) >= DELAY_MS_Intake;
@@ -146,8 +150,6 @@ public class IntakeController {
     public double getStartTSIntake() {
         return startTSIntake;
     }
+    */
 
-    public boolean isRampUp() {
-        return rampUp;
-    }
 }
