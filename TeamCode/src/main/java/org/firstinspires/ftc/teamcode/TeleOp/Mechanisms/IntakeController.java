@@ -12,8 +12,8 @@ public class IntakeController {
     private final GamepadEx gamepad;
     private boolean stopRequested = false;
     private boolean intakeRunning= false;
-    private final int powerEjectSetVelocity = -1600;
-    private final int powerEjectVelocityMargin = 100;
+    private final int powerEjectSetVelocity = -1500;
+    private final int powerEjectVelocityMargin = 300;
     private boolean rampUp = true;
     private boolean powerEjecting = false;
 
@@ -77,79 +77,22 @@ public class IntakeController {
         if (intakeRunning && !rampUp) {
 
             if (intake.intakeJammed()) {
-                //if (!setBeforeIntake) {
-                  //  startTSIntake = bufferTime.milliseconds();
-                    //setBeforeIntake = true;
-                //}
-                //if (delayIntake()) {
                     intake.powerEject();
                     powerEjecting = true;
-                if(intake.getIntakeVelocity() <= (powerEjectSetVelocity + powerEjectVelocityMargin)) {
-                      rampUp = true;
+                if(intake.getIntakeVelocity() <= (powerEjectSetVelocity + powerEjectVelocityMargin)) { // if doesn't work could be issue with battery as velocity is not reaching high enough. Could try to lower the velocity needed to be reached or using wait time.
+                      rampUp = true; // should work based on testing on Sunday. Make sure it does though
                     intake.intake();
                      }
-                //}
 
-            }
-           // if (powerEjecting) {
-             //   if(!isSetBeforeEject) {
-               //     startTSEject = bufferTime.milliseconds();
-                 //   isSetBeforeEject = true;
-                //}
-                //if (delayEject()) {
-                  //  intake.intake();
-                //}
-                //if(!intake.intakeJammed()) {
-                  //  rampUp = true;
-                //}
 
             }
 
-            /* The code is the logic that uses the power eject velocity instead of time to which back to intake.
-               We changed to time because the battery can effect the velocity. This does not allow the logic to work.
-             */
+            }
 
 
         }
     public boolean isRampUp() {
         return rampUp;
     }
-
-       /*
-    public boolean delayIntake() {
-        double finalTS = bufferTime.milliseconds();
-        delayIntake =  (finalTS - startTSIntake) >= DELAY_MS_Intake;
-        return delayIntake;
-    }
-    public boolean delayEject() {
-        double finalTS = bufferTime.milliseconds();
-        delayEject = (finalTS - startTSEject) >= DELAY_MS_EJECT;
-        return delayEject;
-    }
-
-    public boolean isSetBeforeIntake() {
-        return setBeforeIntake;
-    }
-
-    public boolean isSetBeforeEject() {
-        return isSetBeforeEject;
-    }
-
-    public boolean isDelayIntake() {
-        return delayIntake;
-    }
-
-    public boolean isDelayEject() {
-        return delayEject;
-    }
-
-    public double getStartTSEject() {
-        return startTSEject;
-    }
-
-    public double getStartTSIntake() {
-        return startTSIntake;
-    }
-    */
 
 }
