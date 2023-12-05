@@ -9,12 +9,14 @@ public class Slides {
     protected final Motor LSL;
     protected final Motor LSR;
 
+    //ROBOT CONSTANTS:
     private static final double P = 0.013;
     private static final double I = 0.01;
     private static final double D = 0.0007;
     private static final double F = 0.0005;
 
 /*
+TEST BENCH CONSTANTS:
     public static double P = 0.0032;
     public static double I = 0.01;
     public static double D = 0.0007;

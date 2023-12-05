@@ -7,22 +7,21 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 
 public class TransferController {
-
-    private static final int default_index_inc = 10; //only for telemetry purposes
-    private static final int index_increment = default_index_inc; //config as needed in CM
+//ROBOT MEASUREMENT CONSTANTS:
+    private static final int index_increment = 10; //config as needed in CM
     private static final int OFFSET_INCREMENT = 5; //config as needed in CM
     private static final int MAX_SLIDE_HEIGHT = 64; //convert to CM
     private static final int SAFE_HEIGHT = 24;
-    private int min_slide_height = SAFE_HEIGHT; //config as needed in CM
 
 /*
-    private static final int default_index_inc = 2; //only for telemetry purposes
-    private static final int index_increment = default_index_inc; //config as needed in CM
+TEST BENCH MEASUREMENT CONSTANTS:
+    private static final int index_increment = 2; //config as needed in CM
     private static final int OFFSET_INCREMENT = 5; //config as needed in CM
     private static final int MAX_SLIDE_HEIGHT = 17; //convert to CM
     private static final int SAFE_HEIGHT = 2;
-    private int min_slide_height = SAFE_HEIGHT; //config as needed in CM
 */
+
+    private int min_slide_height = SAFE_HEIGHT; //config as needed in CM
     private int slideIndexPos = min_slide_height;
     private static final int BUFFER = 20;
     private static final int DELAY_MS = 750;
@@ -46,7 +45,6 @@ public class TransferController {
 
     public boolean extend(){
         telemetry.addData("atPos?", slides.atPos());
-        //telemetry.addData("SLIDE TARGET POS?", slides.mmToTicks(slideIndexPos));
         slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         if (slides.atPos()) {
             arm.goToDeposit();
@@ -95,11 +93,6 @@ public class TransferController {
     }
 
     public void offset_up(){
-        /*
-        slideIndexPos += OFFSET_INCREMENT;
-        min_slide_height += OFFSET_INCREMENT;
-        slides.setTargetPos(slides.mmToTicks(slideIndexPos));
-         */
         int tempMinPos = min_slide_height + OFFSET_INCREMENT;
         int tempIndexPos = slideIndexPos + OFFSET_INCREMENT;
         if(tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT){
@@ -109,11 +102,6 @@ public class TransferController {
         }
     }
     public void offset_down(){
-        /*
-        slideIndexPos -= OFFSET_INCREMENT;
-        min_slide_height -= OFFSET_INCREMENT;
-        slides.setTargetPos(slides.mmToTicks(slideIndexPos));
-         */
         int tempMinPos = min_slide_height - OFFSET_INCREMENT;
         int tempIndexPos = slideIndexPos - OFFSET_INCREMENT;
         if(tempMinPos >= SAFE_HEIGHT && tempIndexPos >= SAFE_HEIGHT){
