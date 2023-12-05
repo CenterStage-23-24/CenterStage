@@ -17,7 +17,7 @@ public class IntakeController {
     }
 
     public void intakeControl(boolean toTransfer) {
-        if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
+        if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT))
             stopRequested = !stopRequested;
 
         if (!stopRequested) {

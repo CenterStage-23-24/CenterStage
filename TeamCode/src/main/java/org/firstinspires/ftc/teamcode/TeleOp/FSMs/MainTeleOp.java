@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
-@TeleOp(name = "TeleOp-1.0.3")
+@TeleOp(name = "TeleOp-1.1.0")
 public class MainTeleOp extends LinearOpMode {
 
     public enum RobotFSM {
@@ -97,10 +97,16 @@ public class MainTeleOp extends LinearOpMode {
         //LeftY is normally supposed to be negative but this is inbuilt in the gamepadEx class
         fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
         intakeController.intakeControl(cycle.getToTransfer());
-        slides.pid();
+        slides.pid(cycle.getToTransfer());
         arm.updatePos();
+        transferController.telem();
+        telemetry.addData("toTransfer", cycle.getToTransfer());
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
+        telemetry.addData("SLIDE TARGET POS?", slides.mmToTicks(24));
+        telemetry.addData("SLIDES AT POS?", slides.atPos());
+        telemetry.addData("PREV DPAD UP", cycle.getPrevUp());
+        telemetry.addData("PREV DPAD DOWN", cycle.getPrevDown());
         telemetry.update();
     }
 }

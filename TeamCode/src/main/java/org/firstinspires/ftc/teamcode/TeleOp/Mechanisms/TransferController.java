@@ -7,9 +7,22 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 
 public class TransferController {
-    private static final int MAX_HEIGHT = 50;
-    private static final int MIN_HEIGHT = 0;
-    private static final int INCREMENT = 10;
+//ROBOT MEASUREMENT CONSTANTS:
+    private static final int index_increment = 10; //config as needed in CM
+    private static final int OFFSET_INCREMENT = 5; //config as needed in CM
+    private static final int MAX_SLIDE_HEIGHT = 64; //convert to CM
+    private static final int SAFE_HEIGHT = 24;
+
+/*
+TEST BENCH MEASUREMENT CONSTANTS:
+    private static final int index_increment = 2; //config as needed in CM
+    private static final int OFFSET_INCREMENT = 5; //config as needed in CM
+    private static final int MAX_SLIDE_HEIGHT = 17; //convert to CM
+    private static final int SAFE_HEIGHT = 2;
+*/
+
+    private int min_slide_height = SAFE_HEIGHT; //config as needed in CM
+    private int slideIndexPos = min_slide_height;
     private static final int BUFFER = 20;
     private static final int DELAY_MS = 750;
     private final Arm arm;
@@ -32,7 +45,7 @@ public class TransferController {
 
     public boolean extend(){
         telemetry.addData("atPos?", slides.atPos());
-        slides.setTargetPos(slides.mmToTicks(MAX_HEIGHT));
+        slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         if (slides.atPos()) {
             arm.goToDeposit();
             return true;
@@ -49,7 +62,7 @@ public class TransferController {
         arm.goToIntake();
         boolean armAtPos = arm.axonAtPos(arm.getIntakePos(), BUFFER);
         if (armAtPos && delay()) {
-            slides.setTargetPos(MIN_HEIGHT);
+            slides.setTargetPos(0);
             if(slides.atPos()){
                 retractState = RetractState.NOT_STARTED;
                 return true;
@@ -62,5 +75,46 @@ public class TransferController {
         double finalTS = bufferTime.milliseconds();
         return (finalTS - startTS) >= DELAY_MS;
     }
-}
 
+    public void pos_up(){
+        int tempPos = slideIndexPos + index_increment;
+        if(tempPos < MAX_SLIDE_HEIGHT){
+            slideIndexPos = tempPos;
+            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+        }
+    }
+
+    public void pos_down(){
+        int tempPos = slideIndexPos - index_increment;
+        if(tempPos >= min_slide_height){
+            slideIndexPos = tempPos;
+            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+        }
+    }
+
+    public void offset_up(){
+        int tempMinPos = min_slide_height + OFFSET_INCREMENT;
+        int tempIndexPos = slideIndexPos + OFFSET_INCREMENT;
+        if(tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT){
+            min_slide_height = tempMinPos;
+            slideIndexPos = tempIndexPos;
+            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+        }
+    }
+    public void offset_down(){
+        int tempMinPos = min_slide_height - OFFSET_INCREMENT;
+        int tempIndexPos = slideIndexPos - OFFSET_INCREMENT;
+        if(tempMinPos >= SAFE_HEIGHT && tempIndexPos >= SAFE_HEIGHT){
+            min_slide_height = tempMinPos;
+            slideIndexPos = tempIndexPos;
+            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+        }
+    }
+
+    public void telem(){
+        telemetry.addData("OFFSET: ", OFFSET_INCREMENT);
+        telemetry.addData("INDEX INC: ", index_increment);
+        telemetry.addData("SLIDE INDEX: ", slideIndexPos);
+        telemetry.addData("MIN SLIDE HEIGHT: ", min_slide_height);
+    }
+}

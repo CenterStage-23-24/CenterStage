@@ -45,6 +45,11 @@ public class InheritedArmTuner extends Arm {
     // a is used in place of m * g * r as those remain constant, and its easier to tune a single coefficient
     public static double a = 0.07;
 
+    /*
+    TEST BENCH CONSTANTS:
+    public static double p = 0.006, i = 0.003, d = 0.015;
+    public static double a = 0.07;
+     */
     public static final double intakePos = 115; // Angle for Intaking pixels
     public final double depositPos = super.normalizeRadiansTau(intakePos + 150); // Angle for depositing pixels, is 150 degrees from intake
     public static double intakeOffset = 60; // Degrees that the intake position is from vertically facing down
