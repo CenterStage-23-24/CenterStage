@@ -12,8 +12,8 @@ public class IntakeController {
     private final GamepadEx gamepad;
     private boolean stopRequested = false;
     private boolean intakeRunning= false;
-    private final int powerEjectSetVelocity = -1500;
-    private final int powerEjectVelocityMargin = 300;
+    public static int POWER_EJECT_SET_VELOCITY = -1500; // public static right now
+    public static int POWER_EJECT_VELOCITY_MARGIN = 300; // public static right now
     private boolean rampUp = true;
     private boolean powerEjecting = false;
 
@@ -68,7 +68,7 @@ public class IntakeController {
             if (intake.intakeJammed()) {
                     intake.powerEject();
                     powerEjecting = true;
-                if(intake.getIntakeVelocity() <= (powerEjectSetVelocity + powerEjectVelocityMargin)) { // if doesn't work could be issue with battery as velocity is not reaching high enough. Could try to lower the velocity needed to be reached or using wait time.
+                if(intake.getIntakeVelocity() <= (POWER_EJECT_SET_VELOCITY + POWER_EJECT_VELOCITY_MARGIN)) { // if doesn't work could be issue with battery as velocity is not reaching high enough. Could try to lower the velocity needed to be reached or using wait time.
                       rampUp = true; // should work based on testing on Sunday. Make sure it does though
                     intake.intake();
                      }

@@ -10,7 +10,7 @@ public class Intake {
 
     private static final double EJECT_SPEED = -0.4;
     private static final double INTAKE_SPEED = 1.0;
-    private static final double POWER_EJECT = -0.8;
+    public static double POWER_EJECT = -0.8; // public static right now
 
     private final Telemetry telemetry;
 
@@ -25,7 +25,7 @@ public class Intake {
     private boolean pixelInRight;
 
     private double intakeVelocity;
-    private static final double JAMMED_THRESHOLD = 500;
+    public static double JAMMED_THRESHOLD = 500; // public static right now
 
 
 
