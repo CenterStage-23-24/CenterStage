@@ -128,9 +128,9 @@ public class HWMap {
     }
 
     public static void initializeIMU() {
-        RevHubOrientationOnRobot orientation = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.RIGHT, RevHubOrientationOnRobot.UsbFacingDirection.UP);//This change is only for test bench it should normally be RIGHT and UP.
-        IMU.Parameters parameters = new IMU.Parameters(orientation);
-        imu.initialize(parameters);
+        RevHubOrientationOnRobot revHubOrientation = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.RIGHT, RevHubOrientationOnRobot.UsbFacingDirection.UP);//This change is only for test bench it should normally be RIGHT and UP.
+        IMU.Parameters revParameters = new IMU.Parameters(revHubOrientation);
+        imu.initialize(revParameters);
         imu.resetYaw();
     }
 
@@ -217,8 +217,5 @@ public class HWMap {
 
     public MecanumDrive getMecanumDrive() {
         return mecanumDrive;
-    }
-    public IMU getImu(){
-        return imu;
     }
 }

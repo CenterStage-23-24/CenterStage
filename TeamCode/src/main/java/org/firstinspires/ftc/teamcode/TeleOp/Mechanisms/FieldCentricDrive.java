@@ -2,9 +2,7 @@ package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
-import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.ftccommon.internal.manualcontrol.commands.ImuCommands;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 
@@ -13,8 +11,9 @@ public class FieldCentricDrive {
     private final PIDController pidController;
     //private static final double P = 0.003, I = 0, D = 0; // Test Bench
     private static final double P = 0.03, I = 0, D = 0; //Robot
-    private static final double BACKDROP_ANGLE = 90;
+    private double backdropAngle = 90;
     private final Telemetry telemetry;
+
 
     public FieldCentricDrive(HWMap hwMap, Telemetry telemetry) {
         this.telemetry = telemetry;
@@ -58,17 +57,19 @@ public class FieldCentricDrive {
 
     private double shortestDistance(double position) {
         //This segment finds the shortest distance
-        return Math.min(normalizeDegrees(BACKDROP_ANGLE - position), 360 - normalizeDegrees(BACKDROP_ANGLE - position));
+        return Math.min(normalizeDegrees(backdropAngle - position), 360 - normalizeDegrees(backdropAngle - position));
     }
 
     // Finds the direction of the smallest distance between 2 angles
     private double dir(double position) {
-        return (Math.signum(normalizeDegrees(BACKDROP_ANGLE - position) - (360 - normalizeDegrees(BACKDROP_ANGLE - position))));
+        return (Math.signum(normalizeDegrees(backdropAngle - position) - (360 - normalizeDegrees(backdropAngle - position))));
     }
 
     public boolean robotAtAngle(double buffer) {
-        boolean atAngle = (((BACKDROP_ANGLE + buffer) >= normalizeDegrees(HWMap.readFromIMU())) && ((BACKDROP_ANGLE - buffer) <= normalizeDegrees(HWMap.readFromIMU())));
-        return atAngle;
+        return (((backdropAngle + buffer) >= normalizeDegrees(HWMap.readFromIMU())) && ((backdropAngle - buffer) <= normalizeDegrees(HWMap.readFromIMU())));
     }
 
+    public void setBackdropAngle(double backdropAngle) {
+        this.backdropAngle = backdropAngle;
+    }
 }

@@ -97,18 +97,24 @@ public class MainTeleOp extends LinearOpMode {
             updateCycle();
         }
     }
-    private void updateCycle(){
-        if(gamePad1.isDown(GamepadKeys.Button.X)){
+
+    private void updateCycle() {
+        if (gamePad1.isDown(GamepadKeys.Button.X)) {
             backdropAlignmentAutomationStarted = true;
+
+            if ((HWMap.readFromIMU() <= 359) && (HWMap.readFromIMU() >= 271))
+                fieldCentricDrive.setBackdropAngle(270);
+            else
+                fieldCentricDrive.setBackdropAngle(90);
         }
 
-        if(backdropAlignmentAutomationStarted && !fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)){
+        if (backdropAlignmentAutomationStarted && !fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)) {
             double rightX = fieldCentricDrive.backdropAlignment();
             fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), rightX, HWMap.readFromIMU());
-            if((gamePad1.getRightX() >= 0.2 || gamePad1.getRightX() <= -0.2) || fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)){
+            if ((gamePad1.getRightX() >= 0.2 || gamePad1.getRightX() <= -0.2) || fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)) {
                 backdropAlignmentAutomationStarted = false;
             }
-        }else{
+        } else {
             backdropAlignmentAutomationStarted = false;
             fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
         }
