@@ -24,7 +24,7 @@ TEST BENCH CONSTANTS:
 */
     private final int tolerance = 50;
     protected final PIDFController controller;
-    private int targetPos;
+    private double targetPos;
     private final Telemetry telemetry;
 
     public Slides(HWMap hwMap, Telemetry telemetry) {
@@ -58,7 +58,7 @@ TEST BENCH CONSTANTS:
         telemetry.addData("LSR cm", ticksToCm(LSR.getCurrentPosition()));
     }
 
-    public void setTargetPos(int targetPos) {
+    public void setTargetPos(double targetPos) {
         this.targetPos = targetPos;
     }
 
@@ -66,7 +66,7 @@ TEST BENCH CONSTANTS:
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
     }
 
-    public int mmToTicks(int cm) {
+    public int mmToTicks(double cm) {
         double diameterOfSpool = 4.6;
         double ratio = 37.0 / 24.0;
         double ticks = (cm / (Math.PI * diameterOfSpool)) * ratio * LSL.getCPR();
@@ -74,10 +74,9 @@ TEST BENCH CONSTANTS:
 
     }
 
-    public int ticksToCm(int ticks){
+    public double ticksToCm(int ticks){
         double diameterOfSpool = 4.6;
         double ratio = 37.0 / 24.0;
-        double cm = (ticks / (LSL.getCPR() * ratio)) * Math.PI * diameterOfSpool;
-        return (int) cm;
+        return (ticks / (LSL.getCPR() * ratio)) * Math.PI * diameterOfSpool;
     }
 }
