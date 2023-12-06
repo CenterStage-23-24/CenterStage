@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 
 public class TransferController {
 //ROBOT MEASUREMENT CONSTANTS:
-    private static final int index_increment = 10; //config as needed in CM
+    private static final double index_increment = 6.6; //config as needed in CM
     private static final int OFFSET_INCREMENT = 5; //config as needed in CM
     private static final int MAX_SLIDE_HEIGHT = 64; //convert to CM
     private static final int SAFE_HEIGHT = 24;
@@ -22,7 +22,7 @@ TEST BENCH MEASUREMENT CONSTANTS:
 */
 
     private int min_slide_height = SAFE_HEIGHT; //config as needed in CM
-    private int slideIndexPos = min_slide_height;
+    private double slideIndexPos = min_slide_height;
     private static final int BUFFER = 20;
     private static final int DELAY_MS = 750;
     private final Arm arm;
@@ -77,7 +77,7 @@ TEST BENCH MEASUREMENT CONSTANTS:
     }
 
     public void pos_up(){
-        int tempPos = slideIndexPos + index_increment;
+        double tempPos = slideIndexPos + index_increment;
         if(tempPos < MAX_SLIDE_HEIGHT){
             slideIndexPos = tempPos;
             slides.setTargetPos(slides.mmToTicks(slideIndexPos));
@@ -85,7 +85,7 @@ TEST BENCH MEASUREMENT CONSTANTS:
     }
 
     public void pos_down(){
-        int tempPos = slideIndexPos - index_increment;
+        double tempPos = slideIndexPos - index_increment;
         if(tempPos >= min_slide_height){
             slideIndexPos = tempPos;
             slides.setTargetPos(slides.mmToTicks(slideIndexPos));
@@ -94,7 +94,7 @@ TEST BENCH MEASUREMENT CONSTANTS:
 
     public void offset_up(){
         int tempMinPos = min_slide_height + OFFSET_INCREMENT;
-        int tempIndexPos = slideIndexPos + OFFSET_INCREMENT;
+        double tempIndexPos = slideIndexPos + OFFSET_INCREMENT;
         if(tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT){
             min_slide_height = tempMinPos;
             slideIndexPos = tempIndexPos;
@@ -103,7 +103,7 @@ TEST BENCH MEASUREMENT CONSTANTS:
     }
     public void offset_down(){
         int tempMinPos = min_slide_height - OFFSET_INCREMENT;
-        int tempIndexPos = slideIndexPos - OFFSET_INCREMENT;
+        double tempIndexPos = slideIndexPos - OFFSET_INCREMENT;
         if(tempMinPos >= SAFE_HEIGHT && tempIndexPos >= SAFE_HEIGHT){
             min_slide_height = tempMinPos;
             slideIndexPos = tempIndexPos;
