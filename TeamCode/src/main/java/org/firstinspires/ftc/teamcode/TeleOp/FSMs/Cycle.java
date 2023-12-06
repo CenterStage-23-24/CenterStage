@@ -19,7 +19,9 @@ public class Cycle {
         extend,
         retract,
         outtakeLeft,
-        outtakeRight
+        outtakeRight,
+        outtakeBoth,
+        gripper
     }
 
     private CycleFSM state = CycleFSM.start;
@@ -45,42 +47,33 @@ public class Cycle {
         telemetry.update();
     }
 
-
     public void loop() {
         gamepad.readButtons();
         switch (state) {
             case start:
-                //Outtake Left
-                telemetry.addData("in start in cycle", 1);
-                if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
-                    telemetry.addData("Left-Bumper pressed in cycle", 1);
-                    state = CycleFSM.outtakeLeft;
-                }
-
-                //Outtake Right
-                if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
-                    telemetry.addData("Left-Bumper in cycle", 1);
-                    state = CycleFSM.outtakeRight;
-                }
-
                 //Extend
                 if (gamepad.isDown(GamepadKeys.Button.Y)) {
                     telemetry.addData("y pressed in cycle", 1);
                     state = CycleFSM.extend;
                 }
 
-                //Retract
-                if (gamepad.isDown(GamepadKeys.Button.A)) {
-                    telemetry.addData("b pressed in cycle", 1);
-                    state = CycleFSM.retract;
-                }
-                break;
-
             case extend:
                 toTransfer = true;
                 if (transferController.extend()) {
-                    state = CycleFSM.start;
+                    state = CycleFSM.gripper;
                 }
+                break;
+
+            case gripper:
+                while(!(gamepad.isDown(GamepadKeys.Button.A))){
+                    if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                        telemetry.addData("Left-Bumper pressed in cycle", 1);
+
+                    if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                        telemetry.addData("Left-Bumper in cycle", 1);
+                }
+
+                state = CycleFSM.retract;
                 break;
 
             case retract:
@@ -92,21 +85,6 @@ public class Cycle {
                     toTransfer = false;
                 }
                 break;
-
-            case outtakeLeft:
-                telemetry.addData("-", "Ready to deposit left");
-                gripper.releaseLeft();
-                toTransfer = true;
-                state = CycleFSM.start;
-                break;
-
-            case outtakeRight:
-                telemetry.addData("-", "Ready to deposit right");
-                gripper.releaseRight();
-                toTransfer = true;
-                state = CycleFSM.start;
-                break;
-        }
 
     }
 
