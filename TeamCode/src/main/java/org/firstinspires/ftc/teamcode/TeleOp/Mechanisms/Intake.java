@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+@Config
 public class Intake {
 
     private static final double EJECT_SPEED = -0.4;
     private static final double INTAKE_SPEED = 1.0;
-    public static double POWER_EJECT = -0.8; // public static right now
+    public static double POWER_EJECT = -0.4; // public static right now
 
     private final Telemetry telemetry;
 

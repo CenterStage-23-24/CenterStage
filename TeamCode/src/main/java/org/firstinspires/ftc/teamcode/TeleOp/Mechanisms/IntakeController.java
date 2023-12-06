@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-
+@Config
 public class IntakeController {
 
     private final Intake intake;
@@ -12,8 +13,7 @@ public class IntakeController {
     private final GamepadEx gamepad;
     private boolean stopRequested = false;
     private boolean intakeRunning= false;
-    public static int POWER_EJECT_SET_VELOCITY = -1500; // public static right now
-    public static int POWER_EJECT_VELOCITY_MARGIN = 300; // public static right now
+    public static int POWER_EJECT_SET_VELOCITY = -1200; // public static right now
     private boolean rampUp = true;
     private boolean powerEjecting = false;
 
@@ -31,7 +31,7 @@ public class IntakeController {
     public void intakeControl(boolean toTransfer) {
         intakeRunning = false;
         powerEjecting = false;
-        if(intake.getIntakeVelocity() > 2000) { // edge case exists(has not happened yet) that if the the velocity doesn't go over 2000 due to battery
+        if(intake.getIntakeVelocity() > 1500) { // edge case exists(has not happened yet) that if the the velocity doesn't go over 2000 due to battery
             rampUp = false;
         }
         if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
@@ -68,7 +68,7 @@ public class IntakeController {
             if (intake.intakeJammed()) {
                     intake.powerEject();
                     powerEjecting = true;
-                if(intake.getIntakeVelocity() <= (POWER_EJECT_SET_VELOCITY + POWER_EJECT_VELOCITY_MARGIN)) { // if doesn't work could be issue with battery as velocity is not reaching high enough. Could try to lower the velocity needed to be reached or using wait time.
+                if(intake.getIntakeVelocity() <= (POWER_EJECT_SET_VELOCITY)) { // if doesn't work could be issue with battery as velocity is not reaching high enough. Could try to lower the velocity needed to be reached or using wait time.
                       rampUp = true; // should work based on testing on Sunday. Make sure it does though
                     intake.intake();
                      }

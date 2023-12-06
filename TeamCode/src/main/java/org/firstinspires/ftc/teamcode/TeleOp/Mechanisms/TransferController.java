@@ -48,6 +48,7 @@ public class TransferController {
 
         arm.goToIntake();
         boolean armAtPos = arm.axonAtPos(arm.getIntakePos(), BUFFER);
+        telemetry.addData("armAtPos:", armAtPos);
         if (armAtPos && delay()) {
             slides.setTargetPos(MIN_HEIGHT);
             if(slides.atPos()){
