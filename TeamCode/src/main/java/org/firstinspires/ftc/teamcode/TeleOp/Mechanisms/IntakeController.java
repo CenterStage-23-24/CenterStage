@@ -46,23 +46,27 @@ public class IntakeController {
 
             if (!toTransfer) {
                 intake.detectPixels();
-                if (intake.getPixelInLeft())
+                if (intake.getPixelInLeft()) {
                     gripper.gripLeft();
-                if (intake.getPixelInRight())
-                    gripper.gripRight();
-
-                if ((!intake.getPixelInLeft() || !intake.getPixelInRight()))
-                    intake.intake();
-                else
-                    intake.eject();
-                   rampUp = true;
                 }
-            } else {
-                intake.eject();
-        } else
-            intake.intake(0);
-            rampUp = true;
-        }
+                if (intake.getPixelInRight()) {
+                    gripper.gripRight();
+                }
+                if ((!intake.getPixelInLeft() || !intake.getPixelInRight())) {
+                    intake.intake();
+                }
+            else {
+                    intake.eject();
+                    rampUp = true;
+                }
+            }else{
+                    intake.eject();
+                    rampUp = true;
+                }
+            }else{
+                    intake.intake(0);
+                    rampUp = true;
+                }
 
         if (intakeRunning && !rampUp && !jammingDisabled) {
 
