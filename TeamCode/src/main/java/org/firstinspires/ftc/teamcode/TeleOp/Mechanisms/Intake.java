@@ -41,10 +41,12 @@ public class Intake {
     }
 
 
-    }
 
     public void intake() {
         intakeMotor.set(INTAKE_SPEED);
+    }
+    public void powerEject() {
+        intakeMotor.set(POWER_EJECT);
     }
 
     public void intake(int motorPower){
