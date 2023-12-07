@@ -5,6 +5,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.R;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
@@ -37,6 +38,7 @@ public class MainTeleOp extends LinearOpMode {
     private Intake intake;
     private boolean backdropAlignmentAutomationStarted = false;
     private static final double ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE = 5;
+    private ElapsedTime bufferTime;
 
 
     @Override
@@ -47,8 +49,9 @@ public class MainTeleOp extends LinearOpMode {
             HWMap hwMap = new HWMap(hardwareMap);
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
+            bufferTime = new ElapsedTime();
             //Mechanisms
-            fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
+            fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry, bufferTime);
             intake = new Intake(hwMap, telemetry);
             arm = new Arm(hwMap, telemetry);
             slides = new Slides(hwMap, telemetry);
@@ -101,11 +104,12 @@ public class MainTeleOp extends LinearOpMode {
     private void updateCycle() {
         if (gamePad1.isDown(GamepadKeys.Button.X)) {
             backdropAlignmentAutomationStarted = true;
+            fieldCentricDrive.setAlignmentStartTS(bufferTime.milliseconds());
 
-            if ((HWMap.readFromIMU() <= 359) && (HWMap.readFromIMU() >= 271))
-                fieldCentricDrive.setBackdropAngle(270);
-            else
+            if ((HWMap.readFromIMU() >=1) && (HWMap.readFromIMU() <= 179))
                 fieldCentricDrive.setBackdropAngle(90);
+            else
+                fieldCentricDrive.setBackdropAngle(270);
         }
 
         if (backdropAlignmentAutomationStarted && !fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)) {

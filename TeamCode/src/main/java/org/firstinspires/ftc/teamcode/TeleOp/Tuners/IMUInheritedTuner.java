@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.checkerframework.checker.units.qual.C;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -18,8 +19,8 @@ public class IMUInheritedTuner extends FieldCentricDrive {
     public static double BACKDROP_ANGLE = 270;
     public static double p = 0.003, i = 0.0, d = 0.0;
 
-    public IMUInheritedTuner(HWMap hwMap, Telemetry telemetry) {
-        super(hwMap, telemetry);
+    public IMUInheritedTuner(HWMap hwMap, Telemetry telemetry, ElapsedTime time) {
+        super(hwMap, telemetry, time);
         this.telemetry = telemetry;
         pidController = new PIDController(p,i,d);
         mecanumDrive = hwMap.getMecanumDrive();

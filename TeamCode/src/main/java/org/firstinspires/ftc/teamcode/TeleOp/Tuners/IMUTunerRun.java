@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.TeleOp.Tuners;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
@@ -14,7 +15,8 @@ public class IMUTunerRun extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         try {
             HWMap hwMap = new HWMap(hardwareMap);
-            imuInheritedTuner = new IMUInheritedTuner(hwMap, telemetry);
+            ElapsedTime time = new ElapsedTime();
+            imuInheritedTuner = new IMUInheritedTuner(hwMap, telemetry, time);
         } catch (Exception e) {
             telemetry.addData("-", e.getMessage());
             telemetry.update();
