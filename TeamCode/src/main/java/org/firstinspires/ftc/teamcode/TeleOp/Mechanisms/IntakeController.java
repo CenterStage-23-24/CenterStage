@@ -31,7 +31,7 @@ public class IntakeController {
 
     public void intakeControl(boolean toTransfer) {
         gamepad.readButtons();
-        if(gamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+        if(gamepad.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
             jammingDisabled = !jammingDisabled;
         }
         intakeRunning = false;
