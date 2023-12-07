@@ -65,12 +65,13 @@ public class Cycle {
                 break;
 
             case gripper:
-                while(!(gamepad.isDown(GamepadKeys.Button.A))){
+                while (!(gamepad.isDown(GamepadKeys.Button.A))) {
                     if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                         telemetry.addData("Left-Bumper pressed in cycle", 1);
-
+                    }
                     if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                         telemetry.addData("Left-Bumper in cycle", 1);
+                    }
                 }
 
                 state = CycleFSM.retract;
@@ -85,9 +86,8 @@ public class Cycle {
                     toTransfer = false;
                 }
                 break;
-
+        }
     }
-
     public boolean getToTransfer() {
         return toTransfer;
     }
