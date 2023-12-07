@@ -14,6 +14,7 @@ public class Intake {
     private static final double INTAKE_SPEED = 1.0;
     private final static double POWER_EJECT = -0.4;
 
+
     private final Telemetry telemetry;
 
     private final Motor intakeMotor;
@@ -22,6 +23,7 @@ public class Intake {
     private static final int LEFT_DISTANCE = 28;
     private static final int RIGHT_DISTANCE = 30;
     private static final int GREEN_THRESHOLD = 300;
+
 
     private boolean pixelInLeft;
     private boolean pixelInRight;
@@ -36,11 +38,9 @@ public class Intake {
         intakeMotor = hwMap.getIntakeMotor();
         trayLeftCS = hwMap.getTrayLeftCS();
         trayRightCS = hwMap.getTrayRightCS();
-
     }
 
-    public void powerEject() {
-        intakeMotor.set(POWER_EJECT);
+
     }
 
     public void intake() {
@@ -54,8 +54,6 @@ public class Intake {
     public void eject() {
         intakeMotor.set(EJECT_SPEED);
     }
-
-
 
     public void detectPixels() {
         double csLeftDistance = trayLeftCS.getDistance(DistanceUnit.MM);
@@ -104,6 +102,7 @@ public class Intake {
     public boolean getPixelInRight(){
         return pixelInRight;
     }
+
 
     public double getIntakeVelocity() {
         intakeVelocity = intakeMotor.getCorrectedVelocity();

@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
 
 public class IntakeController {
 
@@ -12,6 +10,7 @@ public class IntakeController {
     private final Gripper gripper;
     private final GamepadEx gamepad;
     private boolean stopRequested = false;
+
     private boolean intakeRunning= false;
     private final static int POWER_EJECT_SET_VELOCITY = -400;
     private boolean rampUp = true;
@@ -39,7 +38,8 @@ public class IntakeController {
         if(intake.getIntakeVelocity() > 1500) {
             rampUp = false;
         }
-        if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
+
+        if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT))
             stopRequested = !stopRequested;
 
         if (!stopRequested) {
@@ -51,19 +51,15 @@ public class IntakeController {
                 if (intake.getPixelInRight())
                     gripper.gripRight();
 
-                if ((!intake.getPixelInLeft() || !intake.getPixelInRight())) {
-                    intakeRunning = true;
+                if ((!intake.getPixelInLeft() || !intake.getPixelInRight()))
                     intake.intake();
-                }
-                else {
+                else
                     intake.eject();
                    rampUp = true;
                 }
             } else {
                 intake.eject();
-                rampUp = true;
-            }
-        } else {
+        } else
             intake.intake(0);
             rampUp = true;
         }
