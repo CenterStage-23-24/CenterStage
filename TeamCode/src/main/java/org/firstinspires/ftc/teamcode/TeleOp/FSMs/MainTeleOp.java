@@ -14,8 +14,8 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
-// ejects at wrong time
-@TeleOp(name = "TeleOp-UnJamming_Automation")
+
+@TeleOp(name = "TeleOp-1.2.0")
 public class MainTeleOp extends LinearOpMode {
 
     public enum RobotFSM {
