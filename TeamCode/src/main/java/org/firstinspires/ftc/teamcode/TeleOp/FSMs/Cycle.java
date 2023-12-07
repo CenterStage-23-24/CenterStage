@@ -18,9 +18,6 @@ public class Cycle {
         start,
         extend,
         retract,
-        outtakeLeft,
-        outtakeRight,
-        outtakeBoth,
         gripper
     }
 
