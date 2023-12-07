@@ -106,6 +106,7 @@ public class MainTeleOp extends LinearOpMode {
         telemetry.addData("Intake Jammed",intake.intakeJammed());
         telemetry.addData("Ramp up",intakeController.isRampUp());
         telemetry.addData("Intake Running",intakeController.isIntakeRunning());
+        telemetry.addData("Jamming disabled",intakeController.isJammingDisabled());
         telemetry.update();
     }
 }

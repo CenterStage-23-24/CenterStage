@@ -16,6 +16,7 @@ public class IntakeController {
     public static int POWER_EJECT_SET_VELOCITY = -1200; // public static right now
     private boolean rampUp = true;
     private boolean powerEjecting = false;
+    private boolean jammingDisabled = false;
 
 
     public IntakeController(Intake intake, GamepadEx gamepad, Gripper gripper) {
@@ -29,6 +30,10 @@ public class IntakeController {
     }
 
     public void intakeControl(boolean toTransfer) {
+        gamepad.readButtons();
+        if(gamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+            jammingDisabled = !jammingDisabled;
+        }
         intakeRunning = false;
         powerEjecting = false;
         if(intake.getIntakeVelocity() > 1500) { // edge case exists(has not happened yet) that if the the velocity doesn't go over 2000 due to battery
@@ -63,13 +68,13 @@ public class IntakeController {
             rampUp = true;
         }
 
-        if (intakeRunning && !rampUp) {
+        if (intakeRunning && !rampUp && !jammingDisabled) {
 
             if (intake.intakeJammed()) {
                     intake.powerEject();
                     powerEjecting = true;
                 if(intake.getIntakeVelocity() <= (POWER_EJECT_SET_VELOCITY)) { // if doesn't work could be issue with battery as velocity is not reaching high enough. Could try to lower the velocity needed to be reached or using wait time.
-                      rampUp = true; // should work based on testing on Sunday. Make sure it does though
+                      rampUp = true;
                     intake.intake();
                      }
 
@@ -87,4 +92,10 @@ public class IntakeController {
     public boolean isIntakeRunning() {
         return intakeRunning;
     }
+
+    public boolean isJammingDisabled() {
+        return jammingDisabled;
+    }
+
+
 }
