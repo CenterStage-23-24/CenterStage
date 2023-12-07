@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
-@TeleOp(name = "TeleOp-1.1.1")
+@TeleOp(name = "TeleOp-1.2.0")
 public class MainTeleOp extends LinearOpMode {
 
     public enum RobotFSM {
@@ -103,6 +103,13 @@ public class MainTeleOp extends LinearOpMode {
         telemetry.addData("toTransfer", cycle.getToTransfer());
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
+        telemetry.addData("Intake Velocity",intake.getIntakeVelocity());
+        telemetry.addData("Power Ejecting",intakeController.isPowerEjecting());
+        telemetry.addData("Intake Jammed",intake.intakeJammed());
+        telemetry.addData("Ramp up",intakeController.isRampUp());
+        telemetry.addData("Intake Running",intakeController.isIntakeRunning());
+        telemetry.addData("Jamming disabled",intakeController.isJammingDisabled());
+
         telemetry.addData("SLIDE TARGET POS?", slides.mmToTicks(24));
         telemetry.addData("SLIDES AT POS?", slides.atPos());
         telemetry.addData("PREV DPAD UP", cycle.getPrevUp());

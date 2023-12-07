@@ -61,6 +61,7 @@ TEST BENCH MEASUREMENT CONSTANTS:
 
         arm.goToIntake();
         boolean armAtPos = arm.axonAtPos(arm.getIntakePos(), BUFFER);
+        telemetry.addData("armAtPos:", armAtPos);
         if (armAtPos && delay()) {
             slides.setTargetPos(0);
             if(slides.atPos()){
