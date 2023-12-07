@@ -97,7 +97,7 @@ public class MainTeleOp extends LinearOpMode {
         //LeftY is normally supposed to be negative but this is inbuilt in the gamepadEx class
         fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
         intakeController.intakeControl(cycle.getToTransfer());
-        slides.pid();
+        slides.pid(cycle.getToTransfer());
         arm.updatePos();
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
