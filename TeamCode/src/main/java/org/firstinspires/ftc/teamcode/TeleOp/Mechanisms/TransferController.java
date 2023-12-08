@@ -21,7 +21,7 @@ TEST BENCH MEASUREMENT CONSTANTS:
     private static final int SAFE_HEIGHT = 2;
 */
 
-    private int min_slide_height = SAFE_HEIGHT; //config as needed in CM
+    private double min_slide_height = SAFE_HEIGHT; //config as needed in CM
     private double slideIndexPos = min_slide_height;
     private static final int BUFFER = 20;
     private static final int DELAY_MS = 750;
@@ -94,7 +94,7 @@ TEST BENCH MEASUREMENT CONSTANTS:
     }
 
     public void offset_up(){
-        int tempMinPos = min_slide_height + OFFSET_INCREMENT;
+        double tempMinPos = min_slide_height + OFFSET_INCREMENT;
         double tempIndexPos = slideIndexPos + OFFSET_INCREMENT;
         if(tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT){
             min_slide_height = tempMinPos;
@@ -103,7 +103,7 @@ TEST BENCH MEASUREMENT CONSTANTS:
         }
     }
     public void offset_down(){
-        int tempMinPos = min_slide_height - OFFSET_INCREMENT;
+        double tempMinPos = min_slide_height - OFFSET_INCREMENT;
         double tempIndexPos = slideIndexPos - OFFSET_INCREMENT;
         if(tempMinPos >= SAFE_HEIGHT && tempIndexPos >= SAFE_HEIGHT){
             min_slide_height = tempMinPos;

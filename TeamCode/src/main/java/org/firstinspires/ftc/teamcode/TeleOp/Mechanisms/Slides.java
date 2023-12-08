@@ -8,8 +8,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Slides {
     protected final Motor LSL;
     protected final Motor LSR;
-
-    //ROBOT CONSTANTS:
     private static final double P = 0.013;
     private static final double I = 0.01;
     private static final double D = 0.0007;
@@ -24,7 +22,7 @@ TEST BENCH CONSTANTS:
 */
     private final int tolerance = 50;
     protected final PIDFController controller;
-    private double targetPos;
+    private int targetPos;
     private final Telemetry telemetry;
 
     public Slides(HWMap hwMap, Telemetry telemetry) {
@@ -58,7 +56,7 @@ TEST BENCH CONSTANTS:
         telemetry.addData("LSR cm", ticksToCm(LSR.getCurrentPosition()));
     }
 
-    public void setTargetPos(double targetPos) {
+    public void setTargetPos(int targetPos) {
         this.targetPos = targetPos;
     }
 

@@ -5,7 +5,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.R;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
@@ -15,7 +17,8 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
-@TeleOp(name = "TeleOp-1.2.1")
+@TeleOp(name = "TeleOp: 1.3.0")
+
 public class MainTeleOp extends LinearOpMode {
 
     public enum RobotFSM {
@@ -34,6 +37,9 @@ public class MainTeleOp extends LinearOpMode {
     private Arm arm;
     private Slides slides;
     private Intake intake;
+    private boolean backdropAlignmentAutomationStarted = false;
+    private static final double ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE = 12;
+
 
     @Override
     public void runOpMode() {
@@ -44,7 +50,7 @@ public class MainTeleOp extends LinearOpMode {
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
             //Mechanisms
-            fieldCentricDrive = new FieldCentricDrive(hwMap);
+            fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
             intake = new Intake(hwMap, telemetry);
             arm = new Arm(hwMap, telemetry);
             slides = new Slides(hwMap, telemetry);
@@ -93,14 +99,32 @@ public class MainTeleOp extends LinearOpMode {
             updateCycle();
         }
     }
-    private void updateCycle(){
-        //LeftY is normally supposed to be negative but this is inbuilt in the gamepadEx class
-        fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
+
+    private void updateCycle() {
+        if (gamePad1.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
+            backdropAlignmentAutomationStarted = true;
+
+            if ((HWMap.readFromIMU() >= 1) && (HWMap.readFromIMU() <= 179))
+                fieldCentricDrive.setBackdropAngle(90);
+            else
+                fieldCentricDrive.setBackdropAngle(270);
+        }
+
+        if (backdropAlignmentAutomationStarted && !fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)) {
+            double rightX = fieldCentricDrive.backdropAlignment();
+            fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), rightX, HWMap.readFromIMU());
+            if ((gamePad1.getRightX() >= 0.2 || gamePad1.getRightX() <= -0.2)) {
+                backdropAlignmentAutomationStarted = false;
+            }
+        } else {
+            backdropAlignmentAutomationStarted = false;
+            fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
+        }
+
+
         intakeController.intakeControl(cycle.getToTransfer());
         slides.pid(cycle.getToTransfer());
         arm.updatePos();
-        transferController.telem();
-        telemetry.addData("toTransfer", cycle.getToTransfer());
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
         telemetry.addData("Intake Velocity",intake.getIntakeVelocity());
