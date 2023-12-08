@@ -15,20 +15,20 @@ public class Arm {
     // a * sin(θ) gives the power needed to counteract gravity, θ is distance from vertically pointing down
     // a is used in place of m * g * r as those remain constant, and its easier to tune a single coefficient
 
-/*
+
     //ROBOT CONSTANTS:
     private static final double P = 0.00518;
     private static final double I = 0.003;
     private static final double D = 0.015;
     private static final double A = 0.07;
-*/
 
-
+/*
     //TEST BENCH CONSTANTS:
         private static final double P = 0.0047;
         private static final double I = 0;
         private static final double D = 0;
         private static final double A = 0;
+*/
 
     protected final AxonClass leftAxon;
     protected final AxonClass rightAxon;

@@ -22,6 +22,7 @@ public class Cycle1 {
         retract,
         outtakeLeft,
         outtakeRight,
+        outtakeBoth
     }
 
     private CycleFSM state = CycleFSM.start;
@@ -66,6 +67,12 @@ public class Cycle1 {
                 if (fsmController.getRightBumper()) {
                     telemetry.addData("Left-Bumper in cycle", 1);
                     state = CycleFSM.outtakeRight;
+                }
+
+                //Outtake Both
+                if (fsmController.getRightBumper() && fsmController.getLeftBumper()) {
+                    telemetry.addData("Left-Bumper in cycle", 1);
+                    state = CycleFSM.outtakeBoth;
                 }
 
                 //Extend
@@ -115,9 +122,19 @@ public class Cycle1 {
                 toTransfer = true;
                 state = CycleFSM.start;
                 break;
+
+            case outtakeBoth:
+                fsmController.setRightBumper(false);
+                fsmController.setLeftBumper(false);
+                telemetry.addData("-", "Ready to deposit right");
+                gripper.releaseRight();
+                gripper.releaseLeft();
+                toTransfer = true;
+                state = CycleFSM.start;
+                break;
+
         }
     }
-
     public boolean getToTransfer() {
         return toTransfer;
     }
