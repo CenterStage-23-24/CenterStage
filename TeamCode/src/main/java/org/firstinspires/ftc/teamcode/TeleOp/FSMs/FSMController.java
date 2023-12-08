@@ -9,7 +9,7 @@ public class FSMController {
     private boolean leftBumper;
     private boolean rightBumper;
     private boolean YButton;
-    private boolean XButton;
+    private boolean AButton;
 
 
     private final GamepadEx gamepad;
@@ -30,8 +30,8 @@ public class FSMController {
         if(gamepad.isDown(GamepadKeys.Button.Y)){
             YButton = true;
         }
-        if(gamepad.isDown(GamepadKeys.Button.Y)){
-            XButton = true;
+        if(gamepad.isDown(GamepadKeys.Button.A)){
+            AButton = true;
         }
     }
 
@@ -45,8 +45,8 @@ public class FSMController {
     public boolean getYButton(){
         return YButton;
     }
-    public boolean getXButton(){
-        return XButton;
+    public boolean getAButton(){
+        return AButton;
     }
 
     //Setter Methods
@@ -59,7 +59,7 @@ public class FSMController {
     public void setYButton(boolean YButton) {
         this.YButton = YButton;
     }
-    public void setXButton(boolean XButton) {
-        this.XButton = XButton;
+    public void setAButton(boolean XButton) {
+        this.AButton = XButton;
     }
 }

@@ -52,6 +52,7 @@ public class Cycle1 {
 
     public void loop() {
         gamepad.readButtons();
+        fsmController.readControllerInputs();
         switch (state) {
             case start:
                 //Outtake Left
@@ -74,7 +75,7 @@ public class Cycle1 {
                 }
 
                 //Retract
-                if (fsmController.getXButton()) {
+                if (fsmController.getAButton()) {
                     telemetry.addData("b pressed in cycle", 1);
                     state = CycleFSM.retract;
                 }
@@ -89,7 +90,7 @@ public class Cycle1 {
                 break;
 
             case retract:
-                fsmController.setXButton(false);
+                fsmController.setAButton(false);
                 toTransfer = true;
                 gripper.releaseRight();
                 gripper.releaseLeft();
