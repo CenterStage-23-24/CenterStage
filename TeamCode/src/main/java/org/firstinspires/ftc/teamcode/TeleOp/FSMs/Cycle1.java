@@ -25,6 +25,7 @@ public class Cycle1 {
     }
 
     private CycleFSM state = CycleFSM.start;
+    private final FSMController fsmController;
     private final TransferController transferController;
 
     private boolean toTransfer = false;
@@ -34,10 +35,6 @@ public class Cycle1 {
     private final Telemetry telemetry;
 
     private final Gripper gripper;
-    private double prev_left_trigger = 0.0;
-    private double prev_right_trigger = 0.0;
-    private boolean prev_dpad_up = false;
-    private boolean prev_dpad_down = false;
 
     public Cycle1(GamepadEx gamepad, Telemetry telemetry, TransferController transferController, Gripper gripper) {
         //Core
@@ -46,6 +43,7 @@ public class Cycle1 {
         //Controllers
         this.gripper = gripper;
         this.transferController = transferController;
+        this.fsmController = new FSMController(gamepad);
 
         telemetry.addData("INIT: ", "Cycle");
         telemetry.update();
@@ -58,31 +56,32 @@ public class Cycle1 {
             case start:
                 //Outtake Left
                 telemetry.addData("in start in cycle", 1);
-                if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
+                if (fsmController.getLeftBumper()) {
                     telemetry.addData("Left-Bumper pressed in cycle", 1);
                     state = CycleFSM.outtakeLeft;
                 }
 
                 //Outtake Right
-                if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
+                if (fsmController.getRightBumper()) {
                     telemetry.addData("Left-Bumper in cycle", 1);
                     state = CycleFSM.outtakeRight;
                 }
 
                 //Extend
-                if (gamepad.isDown(GamepadKeys.Button.Y)) {
+                if (fsmController.getYButton()) {
                     telemetry.addData("y pressed in cycle", 1);
                     state = CycleFSM.extend;
                 }
 
                 //Retract
-                if (gamepad.isDown(GamepadKeys.Button.A)) {
+                if (fsmController.getXButton()) {
                     telemetry.addData("b pressed in cycle", 1);
                     state = CycleFSM.retract;
                 }
                 break;
 
             case extend:
+                fsmController.setYButton(false);
                 toTransfer = true;
                 if (transferController.extend()) {
                     state = CycleFSM.start;
@@ -90,6 +89,7 @@ public class Cycle1 {
                 break;
 
             case retract:
+                fsmController.setXButton(false);
                 toTransfer = true;
                 gripper.releaseRight();
                 gripper.releaseLeft();
@@ -100,6 +100,7 @@ public class Cycle1 {
                 break;
 
             case outtakeLeft:
+                fsmController.setLeftBumper(false);
                 telemetry.addData("-", "Ready to deposit left");
                 gripper.releaseLeft();
                 toTransfer = true;
@@ -107,6 +108,7 @@ public class Cycle1 {
                 break;
 
             case outtakeRight:
+                fsmController.setRightBumper(false);
                 telemetry.addData("-", "Ready to deposit right");
                 gripper.releaseRight();
                 toTransfer = true;
