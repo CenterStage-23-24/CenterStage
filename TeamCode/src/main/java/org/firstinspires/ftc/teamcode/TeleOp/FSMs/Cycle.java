@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp.FSMs;
 
+import android.widget.Button;
+
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -19,7 +21,11 @@ public class Cycle {
         extend,
         retract,
         outtakeLeft,
-        outtakeRight
+        outtakeRight,
+        pos_up,
+        pos_down,
+        offset_up,
+        offset_down
     }
 
     private CycleFSM state = CycleFSM.start;
@@ -32,6 +38,10 @@ public class Cycle {
     private final Telemetry telemetry;
 
     private final Gripper gripper;
+    private double prev_left_trigger = 0.0;
+    private double prev_right_trigger = 0.0;
+    private boolean prev_dpad_up = false;
+    private boolean prev_dpad_down = false;
 
     public Cycle(GamepadEx gamepad, Telemetry telemetry, TransferController transferController, Gripper gripper) {
         //Core
@@ -50,6 +60,7 @@ public class Cycle {
         gamepad.readButtons();
         switch (state) {
             case start:
+                checkIndexInputs();
                 //Outtake Left
                 telemetry.addData("in start in cycle", 1);
                 if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
@@ -78,6 +89,7 @@ public class Cycle {
 
             case extend:
                 toTransfer = true;
+                checkIndexInputs();
                 if (transferController.extend()) {
                     state = CycleFSM.start;
                 }
@@ -85,6 +97,7 @@ public class Cycle {
 
             case retract:
                 toTransfer = true;
+                checkIndexInputs();
                 gripper.releaseRight();
                 gripper.releaseLeft();
                 if (transferController.retract()) {
@@ -106,13 +119,58 @@ public class Cycle {
                 toTransfer = true;
                 state = CycleFSM.start;
                 break;
+
+            case pos_up:
+                transferController.pos_up();
+                state = CycleFSM.start;
+                break;
+
+            case pos_down:
+                transferController.pos_down();
+                state = CycleFSM.start;
+                break;
+
+            case offset_up:
+                transferController.offset_up();
+                state = CycleFSM.start;
+                break;
+
+            case offset_down:
+                transferController.offset_down();
+                state = CycleFSM.start;
+                break;
+
         }
 
+    }
+
+    public void checkIndexInputs(){
+        if(gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) == 1.0 & prev_left_trigger != 1.0){
+            transferController.pos_up();
+        }
+        if(gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) == 1.0 & prev_right_trigger != 1.0){
+            transferController.pos_down();
+        }
+        if(gamepad.isDown(GamepadKeys.Button.DPAD_UP) & !prev_dpad_up){
+            transferController.offset_up();
+        }
+        if(gamepad.isDown(GamepadKeys.Button.DPAD_DOWN) & !prev_dpad_down){
+            transferController.offset_down();
+        }
+
+        prev_left_trigger = gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        prev_right_trigger = gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        prev_dpad_up = gamepad.isDown(GamepadKeys.Button.DPAD_UP);
+        prev_dpad_down = gamepad.isDown(GamepadKeys.Button.DPAD_DOWN);
     }
 
     public boolean getToTransfer() {
         return toTransfer;
     }
+
+    public boolean getPrevUp(){return prev_dpad_up;}
+
+    public boolean getPrevDown(){return prev_dpad_down;}
 }
 
 

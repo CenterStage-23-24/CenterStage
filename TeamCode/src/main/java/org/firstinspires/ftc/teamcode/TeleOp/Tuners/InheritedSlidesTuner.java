@@ -17,6 +17,15 @@ public class InheritedSlidesTuner extends Slides {
     public static double i = 0.01;
     public static double d = 0.0007;
     public static double f = 0.0005;
+
+    /*
+    TEST BENCH CONSTANTS:
+    public static double p = 0.0032;
+    public static double i = 0.01;
+    public static double d = 0.0007;
+    public static double f = 0;
+     */
+
     public static int tolerance = 50;
     public static int targetPos;
     private final Telemetry telemetry;
