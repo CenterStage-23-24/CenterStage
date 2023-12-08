@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Tuners;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -13,15 +15,15 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 
 @Config
 public class IMUInheritedTuner extends FieldCentricDrive {
-    private PIDController pidController;
-    private Telemetry telemetry;
-    private MecanumDrive mecanumDrive;
+    private final PIDController pidController;
+    private final Telemetry telemetry;
+    private final MecanumDrive mecanumDrive;
     public static double BACKDROP_ANGLE = 270;
-    public static double p = 0.003, i = 0.0, d = 0.0;
+    public static double p = 0.003, i = 0.0, d = 0.0;//Robot
 
-    public IMUInheritedTuner(HWMap hwMap, Telemetry telemetry, ElapsedTime time) {
-        super(hwMap, telemetry, time);
-        this.telemetry = telemetry;
+    public IMUInheritedTuner(HWMap hwMap, Telemetry telemetry) {
+        super(hwMap, telemetry);
+        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         pidController = new PIDController(p,i,d);
         mecanumDrive = hwMap.getMecanumDrive();
     }
@@ -53,9 +55,11 @@ public class IMUInheritedTuner extends FieldCentricDrive {
         telemetry.addData("I: ", i);
         telemetry.addData("D: ", d);
         telemetry.addData("Heading: ", normalizeHeading);
+        telemetry.addData("Target Pos: ", BACKDROP_ANGLE);
         telemetry.addData("Error: ", error);
         telemetry.addData("Delta Angle: ", deltaAngle);
         telemetry.addData("Sign: ", dir);
+        telemetry.update();
 
         return power;
     }

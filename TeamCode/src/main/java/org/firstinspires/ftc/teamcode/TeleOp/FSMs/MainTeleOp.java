@@ -37,8 +37,7 @@ public class MainTeleOp extends LinearOpMode {
     private Slides slides;
     private Intake intake;
     private boolean backdropAlignmentAutomationStarted = false;
-    private static final double ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE = 5;
-    private ElapsedTime bufferTime;
+    private static final double ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE = 12;
 
 
     @Override
@@ -49,9 +48,8 @@ public class MainTeleOp extends LinearOpMode {
             HWMap hwMap = new HWMap(hardwareMap);
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
-            bufferTime = new ElapsedTime();
             //Mechanisms
-            fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry, bufferTime);
+            fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
             intake = new Intake(hwMap, telemetry);
             arm = new Arm(hwMap, telemetry);
             slides = new Slides(hwMap, telemetry);
@@ -102,11 +100,10 @@ public class MainTeleOp extends LinearOpMode {
     }
 
     private void updateCycle() {
-        if (gamePad1.isDown(GamepadKeys.Button.X)) {
+        if (gamePad1.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
             backdropAlignmentAutomationStarted = true;
-            fieldCentricDrive.setAlignmentStartTS(bufferTime.milliseconds());
 
-            if ((HWMap.readFromIMU() >=1) && (HWMap.readFromIMU() <= 179))
+            if ((HWMap.readFromIMU() >= 1) && (HWMap.readFromIMU() <= 179))
                 fieldCentricDrive.setBackdropAngle(90);
             else
                 fieldCentricDrive.setBackdropAngle(270);
@@ -115,7 +112,7 @@ public class MainTeleOp extends LinearOpMode {
         if (backdropAlignmentAutomationStarted && !fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)) {
             double rightX = fieldCentricDrive.backdropAlignment();
             fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), rightX, HWMap.readFromIMU());
-            if ((gamePad1.getRightX() >= 0.2 || gamePad1.getRightX() <= -0.2) || fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)) {
+            if ((gamePad1.getRightX() >= 0.2 || gamePad1.getRightX() <= -0.2)) {
                 backdropAlignmentAutomationStarted = false;
             }
         } else {

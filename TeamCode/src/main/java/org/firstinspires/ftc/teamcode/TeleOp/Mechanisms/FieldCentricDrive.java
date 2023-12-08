@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
@@ -12,19 +14,15 @@ public class FieldCentricDrive {
     private final MecanumDrive mecanumDrive;
     private final PIDController pidController;
     //private static final double P = 0.003, I = 0, D = 0; // Test Bench
-    private static final double P = 0.018, I = 0.0005, D = 0.004; //Robot
-    private static final double DELAY_MS = 1000;
-    private double backdropAngle = 90;
+    private static final double P = 0.003, I = 0, D = 0; //Robot
+    public double backdropAngle = 90;
     private final Telemetry telemetry;
-    private final ElapsedTime bufferTimer;
-    private double startTS;
 
 
-    public FieldCentricDrive(HWMap hwMap, Telemetry telemetry, ElapsedTime alignTime) {
+    public FieldCentricDrive(HWMap hwMap, Telemetry telemetry) {
 
-        this.telemetry = telemetry;
+        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());;
         mecanumDrive = hwMap.getMecanumDrive();
-        bufferTimer = alignTime;
 
         pidController = new PIDController(P, I, D);
     }
@@ -34,6 +32,7 @@ public class FieldCentricDrive {
     }
 
     public double backdropAlignment() {
+        pidController.setPID(P,I,D);
 
         double deltaAngle = shortestDistance(HWMap.readFromIMU());
         double dir = dir(HWMap.readFromIMU());
@@ -50,6 +49,7 @@ public class FieldCentricDrive {
 
         // Telemetry
         telemetry.addData("Heading: ", HWMap.readFromIMU());
+        telemetry.addData("Target Pos: ", backdropAngle);
         telemetry.addData("Error: ", error);
         telemetry.addData("Delta Angle: ", deltaAngle);
         telemetry.addData("Sign: ", dir);
@@ -73,19 +73,12 @@ public class FieldCentricDrive {
     }
 
     public boolean robotAtAngle(double buffer) {
-        return (((backdropAngle + buffer) >= normalizeDegrees(HWMap.readFromIMU())) && ((backdropAngle - buffer) <= normalizeDegrees(HWMap.readFromIMU())) && delay());
+        return (((backdropAngle + buffer) >= normalizeDegrees(HWMap.readFromIMU())) && ((backdropAngle - buffer) <= normalizeDegrees(HWMap.readFromIMU())));
     }
 
     public void setBackdropAngle(double backdropAngle) {
         this.backdropAngle = backdropAngle;
     }
 
-    private boolean delay() {
-        double finalTS = bufferTimer.milliseconds();
-        return (finalTS - startTS) >= DELAY_MS;
-    }
 
-    public void setAlignmentStartTS(double time) {
-        this.startTS = time;
-    }
 }
