@@ -5,9 +5,6 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.TeleOp.FSMs.Cycle;
-import org.firstinspires.ftc.teamcode.TeleOp.FSMs.MainTeleOp;
-
 @TeleOp(name = "controllerTest1")
 
 public class controllerTest1 extends LinearOpMode {

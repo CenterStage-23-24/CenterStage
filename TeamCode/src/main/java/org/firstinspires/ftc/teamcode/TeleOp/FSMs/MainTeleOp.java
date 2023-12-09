@@ -24,7 +24,7 @@ public class MainTeleOp extends LinearOpMode {
     }
 
     private RobotFSM state;
-    private Cycle1 cycle1;
+    private Cycle cycle;
     private GamepadEx gamePad1;
     private GamepadEx gamePad2;
     private FieldCentricDrive fieldCentricDrive;
@@ -53,7 +53,7 @@ public class MainTeleOp extends LinearOpMode {
             intakeController = new IntakeController(intake, gamePad1, gripper);
             transferController = new TransferController(arm, slides, telemetry);
             //FSMs
-            cycle1 = new Cycle1(gamePad1, telemetry, transferController, gripper);
+            cycle = new Cycle(gamePad1, telemetry, transferController, gripper);
 
             //Setup
             state = RobotFSM.cycleFSM;
@@ -86,7 +86,7 @@ public class MainTeleOp extends LinearOpMode {
                         telemetry.addData("-", "Quit Cycle State");
                         state = RobotFSM.start;
                     } else {
-                        cycle1.loop();
+                        cycle.loop();
                     }
                     break;
             }
@@ -96,8 +96,8 @@ public class MainTeleOp extends LinearOpMode {
     private void updateCycle(){
         //LeftY is normally supposed to be negative but this is inbuilt in the gamepadEx class
         fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), gamePad1.getRightX(), HWMap.readFromIMU());
-        intakeController.intakeControl(cycle1.getToTransfer());
-        slides.pid(cycle1.getToTransfer());
+        intakeController.intakeControl(cycle.getToTransfer());
+        slides.pid(cycle.getToTransfer());
         arm.updatePos();
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
