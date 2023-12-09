@@ -1,38 +1,41 @@
-package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
+package org.firstinspires.ftc.teamcode.TeleOp.Tuners;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.checkerframework.checker.units.qual.C;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 
-
-public class FieldCentricDrive {
-    private final MecanumDrive mecanumDrive;
+@Config
+public class IMUInheritedTuner extends FieldCentricDrive {
     private final PIDController pidController;
-    //private static final double P = 0.003, I = 0, D = 0; // Test Bench
-    private static final double P = 0.003, I = 0, D = 0; //Robot
-    public double backdropAngle = 90;
     private final Telemetry telemetry;
+    private final MecanumDrive mecanumDrive;
+    public static double BACKDROP_ANGLE = 270;
+    public static double p = 0.003, i = 0.0, d = 0.0;//Robot
 
-
-    public FieldCentricDrive(HWMap hwMap, Telemetry telemetry) {
-
-        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());;
+    public IMUInheritedTuner(HWMap hwMap, Telemetry telemetry) {
+        super(hwMap, telemetry);
+        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        pidController = new PIDController(p,i,d);
         mecanumDrive = hwMap.getMecanumDrive();
-
-        pidController = new PIDController(P, I, D);
     }
 
     public void drive(double strafe, double forward, double turn, double heading) {
         mecanumDrive.driveFieldCentric(strafe, forward, turn, heading);
     }
 
+
     public double backdropAlignment() {
-        pidController.setPID(P,I,D);
+        pidController.setPID(p,i,d);
+        double normalizeHeading = normalizeDegrees(HWMap.readFromIMU());
 
         double deltaAngle = shortestDistance(HWMap.readFromIMU());
         double dir = dir(HWMap.readFromIMU());
@@ -48,11 +51,15 @@ public class FieldCentricDrive {
         power = Math.abs(power) * Math.signum(power);
 
         // Telemetry
-        telemetry.addData("Heading: ", HWMap.readFromIMU());
-        telemetry.addData("Target Pos: ", backdropAngle);
+        telemetry.addData("P: ", p);
+        telemetry.addData("I: ", i);
+        telemetry.addData("D: ", d);
+        telemetry.addData("Heading: ", normalizeHeading);
+        telemetry.addData("Target Pos: ", BACKDROP_ANGLE);
         telemetry.addData("Error: ", error);
         telemetry.addData("Delta Angle: ", deltaAngle);
         telemetry.addData("Sign: ", dir);
+        telemetry.update();
 
         return power;
     }
@@ -64,21 +71,15 @@ public class FieldCentricDrive {
 
     private double shortestDistance(double position) {
         //This segment finds the shortest distance
-        return Math.min(normalizeDegrees(backdropAngle - position), 360 - normalizeDegrees(backdropAngle - position));
+        return Math.min(normalizeDegrees(BACKDROP_ANGLE - position), 360 - normalizeDegrees(BACKDROP_ANGLE - position));
     }
 
     // Finds the direction of the smallest distance between 2 angles
     private double dir(double position) {
-        return (Math.signum(normalizeDegrees(backdropAngle - position) - (360 - normalizeDegrees(backdropAngle - position))));
+        return (Math.signum(normalizeDegrees(BACKDROP_ANGLE - position) - (360 - normalizeDegrees(BACKDROP_ANGLE - position))));
     }
 
     public boolean robotAtAngle(double buffer) {
-        return (((backdropAngle + buffer) >= normalizeDegrees(HWMap.readFromIMU())) && ((backdropAngle - buffer) <= normalizeDegrees(HWMap.readFromIMU())));
+        return (((BACKDROP_ANGLE + buffer) >= HWMap.readFromIMU()) && ((BACKDROP_ANGLE - buffer) <= HWMap.readFromIMU()));
     }
-
-    public void setBackdropAngle(double backdropAngle) {
-        this.backdropAngle = backdropAngle;
-    }
-
-
 }
