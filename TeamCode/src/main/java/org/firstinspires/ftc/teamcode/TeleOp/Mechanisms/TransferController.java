@@ -8,13 +8,14 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 
 public class TransferController {
 //ROBOT MEASUREMENT CONSTANTS:
+
     private static final double index_increment = 6.6; //config as needed in CM
     private static final int OFFSET_INCREMENT = 1; //config as needed in CM
     private static final int MAX_SLIDE_HEIGHT = 60; //convert to CM
     private static final int SAFE_HEIGHT = 24;
 
 /*
-TEST BENCH MEASUREMENT CONSTANTS:
+//TEST BENCH MEASUREMENT CONSTANTS:
     private static final int index_increment = 2; //config as needed in CM
     private static final int OFFSET_INCREMENT = 5; //config as needed in CM
     private static final int MAX_SLIDE_HEIGHT = 17; //convert to CM

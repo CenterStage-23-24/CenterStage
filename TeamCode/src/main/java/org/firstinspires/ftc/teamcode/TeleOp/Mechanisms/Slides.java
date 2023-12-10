@@ -12,13 +12,14 @@ public class Slides {
     private static final double I = 0.01;
     private static final double D = 0.0007;
     private static final double F = 0.0005;
+
     private boolean ignoreZero = false;
 
 /*
-TEST BENCH CONSTANTS:
-    public static double P = 0.0032;
+//TEST BENCH CONSTANTS:
+    public static double P = 0.0027;
     public static double I = 0.01;
-    public static double D = 0.0007;
+    public static double D = 0.0004;
     public static double F = 0;
 */
     private final int tolerance = 50;
