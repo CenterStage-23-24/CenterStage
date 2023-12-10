@@ -10,7 +10,7 @@ public class TransferController {
 //ROBOT MEASUREMENT CONSTANTS:
     private static final double index_increment = 6.6; //config as needed in CM
     private static final int OFFSET_INCREMENT = 1; //config as needed in CM
-    private static final int MAX_SLIDE_HEIGHT = 64; //convert to CM
+    private static final int MAX_SLIDE_HEIGHT = 60; //convert to CM
     private static final int SAFE_HEIGHT = 24;
 
 /*
@@ -44,6 +44,7 @@ TEST BENCH MEASUREMENT CONSTANTS:
     }
 
     public boolean extend(){
+        slides.setIgnoreZero(false);
         telemetry.addData("atPos?", slides.atPos());
         slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         if (slides.atPos()) {
@@ -63,9 +64,11 @@ TEST BENCH MEASUREMENT CONSTANTS:
         boolean armAtPos = arm.axonAtPos(arm.getIntakePos(), BUFFER);
         telemetry.addData("armAtPos:", armAtPos);
         if (armAtPos && delay()) {
+            slides.setIgnoreZero(true);
             slides.setTargetPos(0);
             if(slides.atPos()){
                 retractState = RetractState.NOT_STARTED;
+                slides.resetToZero();
                 return true;
             }
         }
