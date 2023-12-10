@@ -24,10 +24,10 @@ public class Arm {
 
 /*
     //TEST BENCH CONSTANTS:
-        private static final double P = 0.0047;
-        private static final double I = 0;
-        private static final double D = 0;
-        private static final double A = 0;
+    private static final double P = 0.0047;
+    private static final double I = 0;
+    private static final double D = 0;
+    private static final double A = 0;
 */
 
     protected final AxonClass leftAxon;

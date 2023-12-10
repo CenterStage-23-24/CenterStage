@@ -13,11 +13,13 @@ public class Slides {
     private static final double D = 0.0007;
     private static final double F = 0.0005;
 
+    private boolean ignoreZero = false;
+
 /*
-TEST BENCH CONSTANTS:
-    public static double P = 0.0032;
+//TEST BENCH CONSTANTS:
+    public static double P = 0.0027;
     public static double I = 0.01;
-    public static double D = 0.0007;
+    public static double D = 0.0004;
     public static double F = 0;
 */
     private final int tolerance = 50;
@@ -37,16 +39,19 @@ TEST BENCH CONSTANTS:
     }
 
     public void pid(boolean toTransfer) {
-
-        double output;
-        if(toTransfer){
+        double output = 0;
+        if(toTransfer) {
             output = controller.calculate(LSL.getCurrentPosition(), targetPos);
-        } else{
-            output = controller.calculate(LSL.getCurrentPosition(), 0);
-        }
+            if(ignoreZero){
+                targetPos = 275;
+                if(LSL.getCurrentPosition() <= targetPos){
+                    output = 0;
+                }
+            }
 
-        LSL.set(output);
-        LSR.set(output);
+            LSL.set(output);
+            LSR.set(output);
+        }
 
         telemetry.addData("target Pos", targetPos);
         telemetry.addData("LSL POS", LSL.getCurrentPosition());
@@ -54,14 +59,27 @@ TEST BENCH CONSTANTS:
         telemetry.addData("tolerance", tolerance);
         telemetry.addData("LSL cm", ticksToCm(LSL.getCurrentPosition()));
         telemetry.addData("LSR cm", ticksToCm(LSR.getCurrentPosition()));
+        telemetry.addData("OUTPUT: ", output);
     }
+
 
     public void setTargetPos(int targetPos) {
         this.targetPos = targetPos;
     }
-
+    public void resetToZero(){
+        if(ignoreZero){
+            LSL.set(0);
+            LSL.set(0);
+        }
+    }
     public boolean atPos() {
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
+    }
+    public boolean atPos(int tolerance) {
+        return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
+    }
+    public void setIgnoreZero(boolean ignoreZero){
+        this.ignoreZero = ignoreZero;
     }
 
     public int mmToTicks(double cm) {
