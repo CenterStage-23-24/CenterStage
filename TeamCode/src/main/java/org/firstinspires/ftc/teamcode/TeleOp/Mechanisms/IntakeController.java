@@ -29,7 +29,6 @@ public class IntakeController {
     }
 
     public void intakeControl(boolean toTransfer) {
-        intake.CSTelem();
         gamepad.readButtons();
         if(gamepad.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
             jammingDisabled = !jammingDisabled;

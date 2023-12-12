@@ -20,8 +20,8 @@ public class Intake {
     private final Motor intakeMotor;
     private final RevColorSensorV3 trayLeftCS;
     private final RevColorSensorV3 trayRightCS;
-    private static final int LEFT_DISTANCE = 15;
-    private static final int RIGHT_DISTANCE = 15;
+    private static final int LEFT_DISTANCE = 35;
+    private static final int RIGHT_DISTANCE = 35;
     private static final int GREEN_THRESHOLD = 300;
 
 
@@ -58,6 +58,7 @@ public class Intake {
     }
 
     public void detectPixels() {
+        CSTelem();
         double csLeftDistance = trayLeftCS.getDistance(DistanceUnit.MM);
         double csRightDistance = trayRightCS.getDistance(DistanceUnit.MM);
 
