@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 
 public class TransferController {
-//ROBOT MEASUREMENT CONSTANTS:
+    //ROBOT MEASUREMENT CONSTANTS:
 
     private static final double index_increment = 6.6; //config as needed in CM
     private static final int OFFSET_INCREMENT = 1; //config as needed in CM
@@ -32,19 +32,20 @@ public class TransferController {
     private final ElapsedTime bufferTime = new ElapsedTime();
     private double startTS;
     private RetractState retractState;
-    private enum RetractState{
+
+    private enum RetractState {
         NOT_STARTED,
         STARTED,
     }
 
-    public TransferController(Arm arm, Slides slides, Telemetry telemetry){
+    public TransferController(Arm arm, Slides slides, Telemetry telemetry) {
         this.arm = arm;
         this.slides = slides;
         this.telemetry = telemetry;
         retractState = RetractState.NOT_STARTED;
     }
 
-    public boolean extend(){
+    public boolean extend() {
         slides.setIgnoreZero(false);
         telemetry.addData("atPos?", slides.atPos());
         slides.setTargetPos(slides.mmToTicks(slideIndexPos));
@@ -55,8 +56,8 @@ public class TransferController {
         return false;
     }
 
-    public boolean retract(){
-        if(retractState == RetractState.NOT_STARTED) {
+    public boolean retract() {
+        if (retractState == RetractState.NOT_STARTED) {
             startTS = bufferTime.milliseconds();
             retractState = RetractState.STARTED;
         }
@@ -67,7 +68,7 @@ public class TransferController {
         if (armAtPos && delay()) {
             slides.setIgnoreZero(true);
             slides.setTargetPos(0);
-            if(slides.atPos()){
+            if (slides.atPos()) {
                 retractState = RetractState.NOT_STARTED;
                 slides.resetToZero();
                 return true;
@@ -81,42 +82,43 @@ public class TransferController {
         return (finalTS - startTS) >= DELAY_MS;
     }
 
-    public void pos_up(){
+    public void pos_up() {
         double tempPos = slideIndexPos + index_increment;
-        if(tempPos < MAX_SLIDE_HEIGHT){
+        if (tempPos < MAX_SLIDE_HEIGHT) {
             slideIndexPos = tempPos;
             slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
 
-    public void pos_down(){
+    public void pos_down() {
         double tempPos = slideIndexPos - index_increment;
-        if(tempPos >= min_slide_height){
+        if (tempPos >= min_slide_height) {
             slideIndexPos = tempPos;
             slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
 
-    public void offset_up(){
+    public void offset_up() {
         double tempMinPos = min_slide_height + OFFSET_INCREMENT;
         double tempIndexPos = slideIndexPos + OFFSET_INCREMENT;
-        if(tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT){
-            min_slide_height = tempMinPos;
-            slideIndexPos = tempIndexPos;
-            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
-        }
-    }
-    public void offset_down(){
-        double tempMinPos = min_slide_height - OFFSET_INCREMENT;
-        double tempIndexPos = slideIndexPos - OFFSET_INCREMENT;
-        if(tempMinPos >= SAFE_HEIGHT && tempIndexPos >= SAFE_HEIGHT){
+        if (tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT) {
             min_slide_height = tempMinPos;
             slideIndexPos = tempIndexPos;
             slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
 
-    public void telem(){
+    public void offset_down() {
+        double tempMinPos = min_slide_height - OFFSET_INCREMENT;
+        double tempIndexPos = slideIndexPos - OFFSET_INCREMENT;
+        if (tempMinPos >= SAFE_HEIGHT && tempIndexPos >= SAFE_HEIGHT) {
+            min_slide_height = tempMinPos;
+            slideIndexPos = tempIndexPos;
+            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+        }
+    }
+
+    public void telem() {
         telemetry.addData("OFFSET: ", OFFSET_INCREMENT);
         telemetry.addData("INDEX INC: ", index_increment);
         telemetry.addData("SLIDE INDEX: ", slideIndexPos);
