@@ -116,5 +116,16 @@ public class Intake {
         return intakeVelocity <= JAMMED_THRESHOLD;
 
     }
+    public void CSTelem(){
+        telemetry.addData("Red left: ", trayLeftCS.red());
+        telemetry.addData("Blue left: ", trayLeftCS.blue());
+        telemetry.addData("Green left: ", trayLeftCS.green());
+        telemetry.addData("Red left: ", trayRightCS.red());
+        telemetry.addData("Blue left: ", trayRightCS.blue());
+        telemetry.addData("Greenleft: ", trayRightCS.green());
+        telemetry.addData("CS Left Distance:", trayLeftCS.getDistance(DistanceUnit.MM));
+        telemetry.addData("CS Right Distance:", trayRightCS.getDistance(DistanceUnit.MM));
+        telemetry.update();
+    }
 
 }
