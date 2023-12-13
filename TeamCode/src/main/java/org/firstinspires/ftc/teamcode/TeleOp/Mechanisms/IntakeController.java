@@ -35,38 +35,39 @@ public class IntakeController {
         }
         intakeRunning = false;
         powerEjecting = false;
+        
         if(intake.getIntakeVelocity() > 1500) {
             rampUp = false;
         }
 
-        if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT))
+        if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
             stopRequested = !stopRequested;
+        
+        intake.detectPixels();
+        if (intake.getPixelInLeft()) {
+            gripper.gripLeft();
+        }
+        if (intake.getPixelInRight()) {
+            gripper.gripRight();
+        }
 
-        if (!stopRequested) {
-
-            if (!toTransfer) {
-                intake.detectPixels();
-                if (intake.getPixelInLeft()) {
-                    gripper.gripLeft();
-                }
-                if (intake.getPixelInRight()) {
-                    gripper.gripRight();
-                }
+        if (!stopRequested){
+            if (!toTransfer){
                 if ((!intake.getPixelInLeft() || !intake.getPixelInRight())) {
                     intake.intake();
                 }
-            else {
+                else {
                     intake.eject();
                     rampUp = true;
                 }
             }else{
-                    intake.eject();
-                    rampUp = true;
-                }
-            }else{
-                    intake.intake(0);
-                    rampUp = true;
-                }
+                intake.eject();
+                rampUp = true;
+            }
+        }else{
+            intake.intake(0);
+            rampUp = true;
+        }
 
         if (intakeRunning && !rampUp && !jammingDisabled) {
 
