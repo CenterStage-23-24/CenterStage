@@ -72,20 +72,18 @@ public class IntakeController {
         if (intakeRunning && !rampUp && !jammingDisabled) {
 
             if (intake.intakeJammed()) {
-                    intake.powerEject();
-                    powerEjecting = true;
+                intake.powerEject();
+                powerEjecting = true;
                 if(intake.getIntakeVelocity() <= (POWER_EJECT_SET_VELOCITY)) {
-                      rampUp = true;
+                    rampUp = true;
                     intake.intake();
-                     }
-
-
-            }
+                }
 
             }
-
 
         }
+
+    }
     public boolean isRampUp() {
         return rampUp;
     }
