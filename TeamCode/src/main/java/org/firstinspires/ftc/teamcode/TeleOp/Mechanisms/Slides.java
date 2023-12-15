@@ -13,8 +13,6 @@ public class Slides {
     private static final double D = 0.0007;
     private static final double F = 0.0005;
 
-    private boolean ignoreZero = false;
-
 /*
 //TEST BENCH CONSTANTS:
     public static double P = 0.0027;
@@ -42,12 +40,6 @@ public class Slides {
         double output = 0;
         if(toTransfer) {
             output = controller.calculate(LSL.getCurrentPosition(), targetPos);
-            if(ignoreZero){
-                targetPos = 275;
-                if(LSL.getCurrentPosition() <= targetPos){
-                    output = 0;
-                }
-            }
 
             LSL.set(output);
             LSR.set(output);
@@ -66,20 +58,12 @@ public class Slides {
     public void setTargetPos(int targetPos) {
         this.targetPos = targetPos;
     }
-    public void resetToZero(){
-        if(ignoreZero){
-            LSL.set(0);
-            LSL.set(0);
-        }
-    }
+
     public boolean atPos() {
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
     }
     public boolean atPos(int tolerance) {
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
-    }
-    public void setIgnoreZero(boolean ignoreZero){
-        this.ignoreZero = ignoreZero;
     }
 
     public int mmToTicks(double cm) {

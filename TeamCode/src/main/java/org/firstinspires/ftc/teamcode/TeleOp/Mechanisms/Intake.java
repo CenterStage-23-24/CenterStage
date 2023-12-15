@@ -61,22 +61,22 @@ public class Intake {
         double csLeftDistance = trayLeftCS.getDistance(DistanceUnit.MM);
         double csRightDistance = trayRightCS.getDistance(DistanceUnit.MM);
 
-        int leftRed = trayLeftCS.red();
+/*        int leftRed = trayLeftCS.red();
         int leftBlue = trayLeftCS.blue();
         int leftGreen = trayLeftCS.green();
         int rightRed = trayRightCS.red();
         int rightBlue = trayRightCS.blue();
-        int rightGreen = trayRightCS.green();
+        int rightGreen = trayRightCS.green();*/
 
         if (csLeftDistance <= LEFT_DISTANCE) {
-            checkColor(leftRed, leftGreen, leftBlue);
+            //checkColor(leftRed, leftGreen, leftBlue);
             pixelInLeft = true;
         } else {
             telemetry.addData("-", "Nothing in the left compartment");
             pixelInLeft = false;
         }
         if (csRightDistance <= RIGHT_DISTANCE) {
-            checkColor(rightRed, rightGreen, rightBlue);
+            //checkColor(rightRed, rightGreen, rightBlue);
             pixelInRight = true;
         } else {
             telemetry.addData("-", "Nothing in right compartment");
