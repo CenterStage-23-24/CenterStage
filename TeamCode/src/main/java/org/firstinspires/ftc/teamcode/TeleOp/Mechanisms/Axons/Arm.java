@@ -129,4 +129,7 @@ public class Arm {
     public double getIntakePos() {
         return INTAKE_POS;
     }
+    public double getDepositPos() {
+        return depositPos;
+    }
 }
