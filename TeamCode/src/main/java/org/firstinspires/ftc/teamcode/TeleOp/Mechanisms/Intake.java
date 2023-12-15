@@ -20,8 +20,8 @@ public class Intake {
     private final Motor intakeMotor;
     private final RevColorSensorV3 trayLeftCS;
     private final RevColorSensorV3 trayRightCS;
-    private static final int LEFT_DISTANCE = 28;
-    private static final int RIGHT_DISTANCE = 30;
+    private static final int LEFT_DISTANCE = 60;
+    private static final int RIGHT_DISTANCE = 60;
     private static final int GREEN_THRESHOLD = 300;
 
 
