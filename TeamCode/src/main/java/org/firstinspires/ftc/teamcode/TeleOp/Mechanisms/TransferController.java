@@ -45,7 +45,6 @@ public class TransferController {
     }
 
     public boolean extend(){
-        slides.setIgnoreZero(false);
         telemetry.addData("atPos?", slides.atPos());
         slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         if (slides.atPos()) {
@@ -65,11 +64,9 @@ public class TransferController {
         boolean armAtPos = arm.axonAtPos(arm.getIntakePos(), BUFFER);
         telemetry.addData("armAtPos:", armAtPos);
         if (armAtPos && delay()) {
-            slides.setIgnoreZero(true);
             slides.setTargetPos(0);
             if(slides.atPos()){
                 retractState = RetractState.NOT_STARTED;
-                slides.resetToZero();
                 return true;
             }
         }
@@ -116,10 +113,5 @@ public class TransferController {
         }
     }
 
-    public void telem(){
-        telemetry.addData("OFFSET: ", OFFSET_INCREMENT);
-        telemetry.addData("INDEX INC: ", index_increment);
-        telemetry.addData("SLIDE INDEX: ", slideIndexPos);
-        telemetry.addData("MIN SLIDE HEIGHT: ", min_slide_height);
-    }
+
 }

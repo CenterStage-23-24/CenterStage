@@ -12,6 +12,7 @@ public class Slides {
     private static final double I = 0.01;
     private static final double D = 0.0007;
     private static final double F = 0.0005;
+    private double output = 0;
 
 /*
 //TEST BENCH CONSTANTS:
@@ -37,13 +38,14 @@ public class Slides {
     }
 
     public void pid(boolean toTransfer) {
-        double output = 0;
-        if(toTransfer) {
-            output = controller.calculate(LSL.getCurrentPosition(), targetPos);
 
-            LSL.set(output);
-            LSR.set(output);
-        }
+        if(toTransfer)
+            output = controller.calculate(LSL.getCurrentPosition(), targetPos);
+        else
+            output = controller.calculate(LSL.getCurrentPosition(), 0);
+
+        LSL.set(output);
+        LSR.set(output);
 
         telemetry.addData("target Pos", targetPos);
         telemetry.addData("LSL POS", LSL.getCurrentPosition());
