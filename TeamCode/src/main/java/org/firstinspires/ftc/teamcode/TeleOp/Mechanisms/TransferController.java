@@ -25,10 +25,10 @@ public class TransferController {
         private static final int ABS_SAFE_HEIGHT = 0;
         private static final int RETRACT_SAFE_HEIGHT = 15;
     */
-    private int min_slide_height = ABS_SAFE_HEIGHT; //config as needed in CM
+    private double min_slide_height = 7.9; //config as needed in CM
     private double slideIndexPos = min_slide_height;
     private static final int BUFFER = 20;
-    private static final int DELAY_MS = 25;
+    private static final int DELAY_MS = 50;
     private final Arm arm;
     private final Slides slides;
     private final Telemetry telemetry;
@@ -143,7 +143,7 @@ public class TransferController {
 
         if(!transfer_phases[2]){ //Phase 2: Arm Intake Transition
             arm.goToIntake();
-            if(arm.axonAtPos(arm.getIntakePos(), BUFFER)){
+            if(arm.axonAtPos(arm.getIntakePos(), BUFFER) && delay()){
                 transfer_phases[2] = true;
             }
             return false;
@@ -198,7 +198,7 @@ public class TransferController {
     }
 
     public void offset_up() {
-        int tempMinPos = min_slide_height + OFFSET_INCREMENT;
+        double tempMinPos = min_slide_height + OFFSET_INCREMENT;
         double tempIndexPos = round(slideIndexPos + OFFSET_INCREMENT);
         if (tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT) {
             min_slide_height = tempMinPos;
@@ -208,7 +208,7 @@ public class TransferController {
     }
 
     public void offset_down() {
-        int tempMinPos = min_slide_height - OFFSET_INCREMENT;
+        double tempMinPos = min_slide_height - OFFSET_INCREMENT;
         double tempIndexPos = round(slideIndexPos - OFFSET_INCREMENT);
         if (tempMinPos >= ABS_SAFE_HEIGHT && tempIndexPos >= ABS_SAFE_HEIGHT) {
             min_slide_height = tempMinPos;
