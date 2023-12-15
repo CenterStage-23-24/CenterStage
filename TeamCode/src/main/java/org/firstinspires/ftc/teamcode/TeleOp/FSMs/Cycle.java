@@ -27,7 +27,6 @@ public class Cycle {
         pos_down,
         offset_up,
         offset_down,
-        manual_eject
     }
 
     private CycleFSM state = CycleFSM.start;
@@ -38,23 +37,20 @@ public class Cycle {
 
     private final GamepadEx gamepad;
     private final Telemetry telemetry;
-    private final IntakeController intakeController;
 
     private final Gripper gripper;
     private double prev_left_trigger = 0.0;
     private double prev_right_trigger = 0.0;
     private boolean prev_dpad_up = false;
     private boolean prev_dpad_down = false;
-    private boolean manualEject = false;
 
-    public Cycle(GamepadEx gamepad, Telemetry telemetry, TransferController transferController, Gripper gripper, IntakeController intakeController) {
+    public Cycle(GamepadEx gamepad, Telemetry telemetry, TransferController transferController, Gripper gripper) {
         //Core
         this.gamepad = gamepad;
         this.telemetry = telemetry;
         //Controllers
         this.gripper = gripper;
         this.transferController = transferController;
-        this.intakeController = intakeController;
         telemetry.addData("INIT: ", "Cycle");
         telemetry.update();
     }
@@ -70,12 +66,6 @@ public class Cycle {
                 if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                     telemetry.addData("Left-Bumper pressed in cycle", 1);
                     state = CycleFSM.outtakeLeft;
-                }
-
-                if(gamepad.isDown(GamepadKeys.Button.B)){
-                    state = CycleFSM.manual_eject;
-                } else{
-                    manualEject = false;
                 }
 
                 //Outtake Right
@@ -150,12 +140,6 @@ public class Cycle {
                 state = CycleFSM.start;
                 break;
 
-            case manual_eject:
-                intakeController.eject();
-                manualEject = true;
-                state = CycleFSM.start;
-                break;
-
         }
 
     }
@@ -186,6 +170,7 @@ public class Cycle {
     public boolean getPrevUp(){return prev_dpad_up;}
 
     public boolean getPrevDown(){return prev_dpad_down;}
+
 }
 
 

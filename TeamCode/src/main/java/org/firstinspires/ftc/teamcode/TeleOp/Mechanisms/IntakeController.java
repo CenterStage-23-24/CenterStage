@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
@@ -43,22 +42,26 @@ public class IntakeController {
             stopRequested = !stopRequested;
 
         if (!stopRequested) {
-
-            if (!toTransfer) {
-                intake.detectPixels();
-                if (intake.getPixelInLeft()) {
-                    gripper.gripLeft();
-                }
-                if (intake.getPixelInRight()) {
-                    gripper.gripRight();
-                }
-                if ((!intake.getPixelInLeft() || !intake.getPixelInRight())) {
-                    intake.intake();
+            if(!gamepad.isDown(GamepadKeys.Button.B)) {
+                if (!toTransfer) {
+                    intake.detectPixels();
+                    if (intake.getPixelInLeft()) {
+                        gripper.gripLeft();
+                    }
+                    if (intake.getPixelInRight()) {
+                        gripper.gripRight();
+                    }
+                    if ((!intake.getPixelInLeft() || !intake.getPixelInRight())) {
+                        intake.intake();
+                    } else {
+                        intake.eject();
+                        rampUp = true;
+                    }
                 } else {
                     intake.eject();
                     rampUp = true;
                 }
-            } else {
+            } else{
                 intake.eject();
                 rampUp = true;
             }
