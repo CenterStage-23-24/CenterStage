@@ -48,7 +48,6 @@ public class TransferController {
     }
 
     public boolean extend() {
-        slides.setIgnoreZero(false);
         if(!notStarted){ //Init stage
             internalTargetPos = slideIndexPos;
             notStarted = true;
@@ -115,7 +114,7 @@ public class TransferController {
 
     private boolean extendToHeight(double cm) {
         slides.setTargetPos(slides.mmToTicks(cm));
-        if(slides.atTargetPos()){
+        if(slides.atPos()){
             return true;
         }
         return false;
@@ -168,7 +167,6 @@ public class TransferController {
         transfer_phases[4] = false;
         originPos = 0;
         notStarted = false;
-        slides.setIgnoreZero(false);
         extended = false;
         return true;
     }
