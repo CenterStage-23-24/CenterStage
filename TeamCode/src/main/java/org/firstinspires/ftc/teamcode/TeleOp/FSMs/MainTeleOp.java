@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
-@TeleOp(name = "TeleOp-1.4.1")
+@TeleOp(name = "TeleOp-1.5.0")
 public class MainTeleOp extends LinearOpMode {
 
     public enum RobotFSM {
@@ -124,6 +124,8 @@ public class MainTeleOp extends LinearOpMode {
         intakeController.intakeControl(cycle.getToTransfer());
         slides.pid(cycle.getToTransfer());
         arm.updatePos();
+
+        telemetry.addData("toTransfer?", cycle.getToTransfer());
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
         telemetry.addData("Intake Velocity",intake.getIntakeVelocity());

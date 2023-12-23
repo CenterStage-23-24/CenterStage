@@ -12,8 +12,7 @@ public class Slides {
     private static final double I = 0.01;
     private static final double D = 0.0007;
     private static final double F = 0.0005;
-
-    private boolean ignoreZero = false;
+    private double output = 0;
 
 /*
 //TEST BENCH CONSTANTS:
@@ -39,19 +38,14 @@ public class Slides {
     }
 
     public void pid(boolean toTransfer) {
-        double output = 0;
-        if(toTransfer) {
-            output = controller.calculate(LSL.getCurrentPosition(), targetPos);
-            if(ignoreZero){
-                targetPos = 275;
-                if(LSL.getCurrentPosition() <= targetPos){
-                    output = 0;
-                }
-            }
 
-            LSL.set(output);
-            LSR.set(output);
-        }
+        if(toTransfer)
+            output = controller.calculate(LSL.getCurrentPosition(), targetPos);
+        else
+            output = controller.calculate(LSL.getCurrentPosition(), 0);
+
+        LSL.set(output);
+        LSR.set(output);
 
         telemetry.addData("target Pos", targetPos);
         telemetry.addData("LSL POS", LSL.getCurrentPosition());
@@ -66,20 +60,12 @@ public class Slides {
     public void setTargetPos(int targetPos) {
         this.targetPos = targetPos;
     }
-    public void resetToZero(){
-        if(ignoreZero){
-            LSL.set(0);
-            LSL.set(0);
-        }
-    }
+
     public boolean atPos() {
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
     }
-    public boolean atPos(int tolerance) {
-        return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
-    }
-    public void setIgnoreZero(boolean ignoreZero){
-        this.ignoreZero = ignoreZero;
+    public boolean atSpecificPos(double specificPos) {
+        return ((specificPos + tolerance) >= LSL.getCurrentPosition()) && ((specificPos - tolerance) <= LSL.getCurrentPosition());
     }
 
     public int mmToTicks(double cm) {
