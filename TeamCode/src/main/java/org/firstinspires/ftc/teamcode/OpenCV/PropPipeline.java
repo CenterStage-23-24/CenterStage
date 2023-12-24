@@ -45,6 +45,18 @@ public class PropPipeline extends OpenCVPipeline {
     public static double greenMin = 0;
     public static double minAreaLeft = 1800;
     public static double minAreaCenter = 1700;
+
+    /*
+    ROBOT CONSTANTS:
+    public static double redMax = 50;
+    public static double redMin = 0;
+    public static double blueMax = 150;
+    public static double blueMin = 0;
+    public static double greenMax = 150;
+    public static double greenMin = 0;
+    public static double minAreaLeft = 500;
+    public static double minAreaCenter = 300;
+     */
     private String position;
     private int findContourNum;
     private int filterContourNum;
@@ -98,6 +110,7 @@ public class PropPipeline extends OpenCVPipeline {
         double filterContoursMinVertices = 0;
         double filterContoursMinRatio = 0;
         double filterContoursMaxRatio = 1000;
+        /*
         filterContours(filterContoursContours, minAreaLeft, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
         if(filterContourNum != 0){
             if(x >= x_pos_split){
@@ -107,12 +120,11 @@ public class PropPipeline extends OpenCVPipeline {
             }
         } else{
             position = "CENTER";
-        }
+        }*/
 
-        return cvErodeOutput;
-        /*
+        filterContours(filterContoursContours, minAreaCenter, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
         if(filterContourNum == 0){
-            filterContours(filterContoursContours, minAreaCenter, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
+            filterContours(filterContoursContours, minAreaLeft, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
             if(filterContourNum == 0){
                 position = "RIGHT";
             } else{
@@ -122,8 +134,8 @@ public class PropPipeline extends OpenCVPipeline {
             position = "LEFT";
         }
 
+        return cvErodeOutput;
 
-         */
     }
 
     /**
