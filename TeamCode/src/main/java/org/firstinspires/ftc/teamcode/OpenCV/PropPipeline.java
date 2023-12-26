@@ -36,13 +36,24 @@ public class PropPipeline extends OpenCVPipeline {
     private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
     private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<>();
     private ArrayList<Double> contourAreas = new ArrayList<>();
+
+    public static double redMax = 255;
+    public static double redMin = 0;
+    public static double blueMax = 255;
+    public static double blueMin = 0;
+    public static double greenMax = 255;
+    public static double greenMin = 0;
+    public static double minArea = 1000;
+    public static double maxArea = 10000;
+
+    /*
     public static double redMax = 25;
     public static double redMin = 0;
     public static double blueMax = 60;
     public static double blueMin = 0;
     public static double greenMax = 60;
     public static double greenMin = 0;
-    public static double minArea = 1000;
+     */
 
     /*
     ROBOT CONSTANTS:
@@ -71,12 +82,6 @@ public class PropPipeline extends OpenCVPipeline {
     public Mat processFrame(Mat input) {
         // Step RGB_Threshold0:
         Mat rgbThresholdInput = input;
-        /*
-        double[] rgbThresholdRed = {0, 255};
-        double[] rgbThresholdGreen = {0, 255};
-        double[] rgbThresholdBlue = {0, 255};
-
-         */
 
         double[] rgbThresholdRed = {redMin, redMax};
         double[] rgbThresholdGreen = {blueMin, blueMax};
@@ -110,15 +115,20 @@ public class PropPipeline extends OpenCVPipeline {
         double filterContoursMinVertices = 0;
         double filterContoursMinRatio = 0;
         double filterContoursMaxRatio = 1000;
-        filterContours(filterContoursContours, minArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
-        if(filterContourNum != 0){
+        filterContours(filterContoursContours, minArea, maxArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
+        if(redMax == 255){
+            redMax = 128;
+        }
+        if(filterContourNum > 1){
+            redMax /= 2;
+        } else if(filterContourNum == 0){
+            position = "RIGHT";
+        } else{
             if(x >= x_pos_split){
                 position = "CENTER";
             } else{
                 position = "LEFT";
             }
-        } else{
-            position = "RIGHT";
         }
 
         return cvErodeOutput;
@@ -219,7 +229,7 @@ public class PropPipeline extends OpenCVPipeline {
      * @param minRatio minimum ratio of width to height
      * @param maxRatio maximum ratio of width to height
      */
-    private void filterContours(List<MatOfPoint> inputContours, double minArea,
+    private void filterContours(List<MatOfPoint> inputContours, double minArea, double maxArea,
                                 double minPerimeter, double minWidth, double maxWidth, double minHeight, double
                                         maxHeight, double[] solidity, double maxVertexCount, double minVertexCount, double
                                         minRatio, double maxRatio, List<MatOfPoint> output) {
@@ -237,7 +247,7 @@ public class PropPipeline extends OpenCVPipeline {
             if(!collectDone){
                 contourAreas.add(area);
             }
-            if (area < minArea) continue;
+            if (area < minArea || area >= maxArea) continue;
             if (Imgproc.arcLength(new MatOfPoint2f(contour.toArray()), true) < minPerimeter) continue;
             Imgproc.convexHull(contour, hull);
             MatOfPoint mopHull = new MatOfPoint();
@@ -270,6 +280,9 @@ public class PropPipeline extends OpenCVPipeline {
     }
     public double getY(){
         return y;
+    }
+    public double getRedMax(){
+        return redMax;
     }
     public int getFindContourNum(){
         return findContourNum;
