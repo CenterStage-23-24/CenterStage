@@ -141,4 +141,5 @@ public class MainTeleOp extends LinearOpMode {
         telemetry.addData("PREV DPAD DOWN", cycle.getPrevDown());
         telemetry.update();
     }
+
 }

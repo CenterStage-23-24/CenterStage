@@ -23,6 +23,8 @@ public class Cycle {
         retract,
         outtakeLeft,
         outtakeRight,
+        gripLeft,
+        gripRight,
         pos_up,
         pos_down,
         offset_up,
@@ -43,6 +45,7 @@ public class Cycle {
     private double prev_right_trigger = 0.0;
     private boolean prev_dpad_up = false;
     private boolean prev_dpad_down = false;
+
 
     public Cycle(GamepadEx gamepad, Telemetry telemetry, TransferController transferController, Gripper gripper) {
         //Core
@@ -65,13 +68,19 @@ public class Cycle {
                 telemetry.addData("in start in cycle", 1);
                 if (gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
                     telemetry.addData("Left-Bumper pressed in cycle", 1);
-                    state = CycleFSM.outtakeLeft;
+                    if(gripper.getLeftClawGripped())
+                        state = CycleFSM.outtakeLeft;
+                    else
+                        state = CycleFSM.gripLeft;
                 }
 
                 //Outtake Right
                 if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
                     telemetry.addData("Left-Bumper in cycle", 1);
-                    state = CycleFSM.outtakeRight;
+                    if(gripper.getRightClawGripped())
+                        state = CycleFSM.outtakeRight;
+                    else
+                        state = CycleFSM.gripRight;
                 }
 
                 //Extend
@@ -107,15 +116,24 @@ public class Cycle {
                 }
                 break;
             case outtakeLeft:
-                telemetry.addData("-", "Ready to deposit left");
                 gripper.releaseLeft();
                 toTransfer = true;
                 state = CycleFSM.start;
                 break;
 
             case outtakeRight:
-                telemetry.addData("-", "Ready to deposit right");
                 gripper.releaseRight();
+                toTransfer = true;
+                state = CycleFSM.start;
+                break;
+            case gripLeft:
+                gripper.gripLeft();
+                toTransfer = true;
+                state = CycleFSM.start;
+                break;
+
+            case gripRight:
+                gripper.gripRight();
                 toTransfer = true;
                 state = CycleFSM.start;
                 break;
@@ -170,6 +188,7 @@ public class Cycle {
     public boolean getPrevUp(){return prev_dpad_up;}
 
     public boolean getPrevDown(){return prev_dpad_down;}
+
 
 }
 
