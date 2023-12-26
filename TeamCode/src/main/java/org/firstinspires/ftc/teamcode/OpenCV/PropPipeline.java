@@ -43,6 +43,19 @@ public class PropPipeline extends OpenCVPipeline {
     public static double greenMax = 60;
     public static double greenMin = 0;
     public static double minArea = 1000;
+
+    /*
+    ROBOT CONSTANTS:
+    public static double redMax = 50;
+    public static double redMin = 0;
+    public static double blueMax = 150;
+    public static double blueMin = 0;
+    public static double greenMax = 150;
+    public static double greenMin = 0;
+    public static double minAreaLeft = 500;
+    public static double minAreaCenter = 300;
+     */
+
     private String position;
     private int findContourNum;
     private int filterContourNum;
@@ -109,7 +122,6 @@ public class PropPipeline extends OpenCVPipeline {
         }
 
         return cvErodeOutput;
-
     }
 
     /**
