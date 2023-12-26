@@ -35,22 +35,21 @@ public class PropPipeline extends OpenCVPipeline {
     private Mat cvErodeOutput = new Mat();
     private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
     private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<>();
-    private double sum_x;
-    private double sum_y;
+    private ArrayList<Double> contourAreas = new ArrayList<>();
     public static double redMax = 25;
     public static double redMin = 0;
     public static double blueMax = 60;
     public static double blueMin = 0;
     public static double greenMax = 60;
     public static double greenMin = 0;
-    public static double minAreaLeft = 1800;
-    public static double minAreaCenter = 1700;
+    public static double minArea = 1000;
     private String position;
     private int findContourNum;
     private int filterContourNum;
     private double x;
     private double y;
     private double x_pos_split = 150;
+    private boolean collectDone = false;
 
     /**
      * This is the primary method that runs the entire pipeline and updates the outputs.
@@ -98,32 +97,19 @@ public class PropPipeline extends OpenCVPipeline {
         double filterContoursMinVertices = 0;
         double filterContoursMinRatio = 0;
         double filterContoursMaxRatio = 1000;
-        filterContours(filterContoursContours, minAreaLeft, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
+        filterContours(filterContoursContours, minArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
         if(filterContourNum != 0){
             if(x >= x_pos_split){
                 position = "CENTER";
-            } else if(x < x_pos_split){
+            } else{
                 position = "LEFT";
             }
         } else{
-            position = "CENTER";
+            position = "RIGHT";
         }
 
         return cvErodeOutput;
-        /*
-        if(filterContourNum == 0){
-            filterContours(filterContoursContours, minAreaCenter, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
-            if(filterContourNum == 0){
-                position = "RIGHT";
-            } else{
-                position = "CENTER";
-            }
-        } else{
-            position = "LEFT";
-        }
 
-
-         */
     }
 
     /**
@@ -236,6 +222,9 @@ public class PropPipeline extends OpenCVPipeline {
             if (bb.width < minWidth || bb.width > maxWidth) continue;
             if (bb.height < minHeight || bb.height > maxHeight) continue;
             final double area = Imgproc.contourArea(contour);
+            if(!collectDone){
+                contourAreas.add(area);
+            }
             if (area < minArea) continue;
             if (Imgproc.arcLength(new MatOfPoint2f(contour.toArray()), true) < minPerimeter) continue;
             Imgproc.convexHull(contour, hull);
@@ -258,6 +247,7 @@ public class PropPipeline extends OpenCVPipeline {
             x = contour.toArray()[0].x;
             y = contour.toArray()[0].y;
         }
+        collectDone = true;
         System.out.println("OUTPUT CONTOURS:");
         System.out.println(output.size());
         filterContourNum = output.size();
@@ -269,10 +259,6 @@ public class PropPipeline extends OpenCVPipeline {
     public double getY(){
         return y;
     }
-    public void resetSums(){
-        sum_x = 0;
-        sum_y = 0;
-    }
     public int getFindContourNum(){
         return findContourNum;
     }
@@ -281,6 +267,9 @@ public class PropPipeline extends OpenCVPipeline {
     }
     public String getPosition(){
         return position;
+    }
+    public ArrayList<Double> getContourAreas(){
+        return contourAreas;
     }
 }
 

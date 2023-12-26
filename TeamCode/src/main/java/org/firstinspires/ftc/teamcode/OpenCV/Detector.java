@@ -64,4 +64,7 @@ public class Detector {
     public String getPosition(){
         return propPipeline.getPosition();
     }
+    public ArrayList<Double> getContourAreas(){
+        return propPipeline.getContourAreas();
+    }
 }
