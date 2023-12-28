@@ -38,9 +38,6 @@ public class IntakeController {
             rampUp = false;
         }
 
-        if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT))
-            stopRequested = !stopRequested;
-
         if (!stopRequested) {
             if(!gamepad.isDown(GamepadKeys.Button.B)) {
                 if (!toTransfer) {
@@ -100,5 +97,11 @@ public class IntakeController {
         return jammingDisabled;
     }
 
+    public void setStopRequested(boolean stopRequested) {
+        this.stopRequested = stopRequested;
+    }
 
+    public boolean getStopRequested() {
+        return stopRequested;
+    }
 }

@@ -58,7 +58,7 @@ public class MainTeleOp extends LinearOpMode {
             intakeController = new IntakeController(intake, gamePad1, gripper);
             transferController = new TransferController(arm, slides, telemetry);
             //FSMs
-            cycle = new Cycle(gamePad1, telemetry, transferController, gripper);
+            cycle = new Cycle(gamePad1, telemetry, transferController,intakeController,gripper);
 
             //Setup
             state = RobotFSM.cycleFSM;
@@ -76,7 +76,6 @@ public class MainTeleOp extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-
             gamePad1.readButtons();
             gamePad2.readButtons();
             switch (state) {

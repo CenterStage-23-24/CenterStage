@@ -12,32 +12,40 @@ public class Gripper {
     private static final double RIGHT_GRIP_POS = 1;
     private boolean rightClawGripped = false;
     private boolean leftClawGripped = false;
-    public Gripper(HWMap hwMap){
+
+    public Gripper(HWMap hwMap) {
         outtakeServoLeft = hwMap.getOuttakeServoLeft();
         outtakeServoRight = hwMap.getOuttakeServoRight();
 
 
     }
 
-    public void releaseLeft(){
+    public void releaseLeft() {
         outtakeServoLeft.setPosition(LEFT_RELEASE_POS);
         leftClawGripped = false;
     }
 
-    public void releaseRight(){
+    public void releaseRight() {
         outtakeServoRight.setPosition(RIGHT_RELEASE_POS);
         rightClawGripped = false;
     }
-    public void gripLeft(){
+
+    public void gripLeft() {
         outtakeServoLeft.setPosition(LEFT_GRIP_POS);
         leftClawGripped = true;
     }
 
-    public void gripRight(){
+    public void gripRight() {
         outtakeServoRight.setPosition(RIGHT_GRIP_POS);
         rightClawGripped = true;
     }
-    public boolean getLeftClawGripped(){return leftClawGripped;}
-    public boolean getRightClawGripped(){return rightClawGripped;}
+
+    public boolean getLeftClawGripped() {
+        return leftClawGripped;
+    }
+
+    public boolean getRightClawGripped() {
+        return rightClawGripped;
+    }
 
 }
