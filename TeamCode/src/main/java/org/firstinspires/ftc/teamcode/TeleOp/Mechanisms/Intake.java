@@ -20,8 +20,9 @@ public class Intake {
     private final Motor intakeMotor;
     private final RevColorSensorV3 trayLeftCS;
     private final RevColorSensorV3 trayRightCS;
-    private static final int LEFT_DISTANCE = 60;
-    private static final int RIGHT_DISTANCE = 60;
+    private static final int LEFT_DISTANCE = 40;
+    private static final int RIGHT_DISTANCE = 40; //This is for the robot
+    //private static final int RIGHT_DISTANCE = 15; //This is for the test bench
 
 
     private boolean pixelInLeft;
@@ -92,8 +93,13 @@ public class Intake {
     public boolean intakeJammed() {
         telemetry.addData("in intake jammed method", 1);
         return intakeVelocity <= JAMMED_THRESHOLD;
+    }
 
-
+    public double getRightDistance(){
+        return trayRightCS.getDistance(DistanceUnit.MM);
+    }
+    public double getLeftDistance(){
+        return trayLeftCS.getDistance(DistanceUnit.MM);
     }
 
 }

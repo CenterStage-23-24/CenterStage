@@ -32,6 +32,7 @@ public class MainTeleOp extends LinearOpMode {
     private FieldCentricDrive fieldCentricDrive;
     private IntakeController intakeController;
     private TransferController transferController;
+    private FSMController fsmController;
     private Gripper gripper;
     private Arm arm;
     private Slides slides;
@@ -48,6 +49,7 @@ public class MainTeleOp extends LinearOpMode {
             HWMap hwMap = new HWMap(hardwareMap);
             gamePad1 = new GamepadEx(gamepad1);
             gamePad2 = new GamepadEx(gamepad2);
+            fsmController = new FSMController(gamePad1);
             //Mechanisms
             fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
             intake = new Intake(hwMap, telemetry);
@@ -58,7 +60,7 @@ public class MainTeleOp extends LinearOpMode {
             intakeController = new IntakeController(intake, gamePad1, gripper);
             transferController = new TransferController(arm, slides, telemetry);
             //FSMs
-            cycle = new Cycle(gamePad1, telemetry, transferController,intakeController,gripper);
+            cycle = new Cycle(gamePad1, telemetry, transferController, intakeController, gripper);
 
             //Setup
             state = RobotFSM.cycleFSM;
@@ -127,12 +129,8 @@ public class MainTeleOp extends LinearOpMode {
         telemetry.addData("toTransfer?", cycle.getToTransfer());
         telemetry.addData("Left pixel", intake.getPixelInLeft());
         telemetry.addData("Right pixel", intake.getPixelInRight());
-        telemetry.addData("Intake Velocity",intake.getIntakeVelocity());
-        telemetry.addData("Power Ejecting",intakeController.isPowerEjecting());
-        telemetry.addData("Intake Jammed",intake.intakeJammed());
-        telemetry.addData("Ramp up",intakeController.isRampUp());
-        telemetry.addData("Intake Running",intakeController.isIntakeRunning());
-        telemetry.addData("Jamming disabled",intakeController.isJammingDisabled());
+        telemetry.addData("L-CS distance: ", intake.getLeftDistance());
+        telemetry.addData("R-CS distance: ", intake.getRightDistance());
 
         telemetry.addData("SLIDE TARGET POS?", slides.mmToTicks(24));
         telemetry.addData("SLIDES AT POS?", slides.atPos());
