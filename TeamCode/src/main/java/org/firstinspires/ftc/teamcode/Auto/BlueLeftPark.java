@@ -43,9 +43,9 @@ public class BlueLeftPark extends LinearOpMode {
         //Initialize Mechanisms
         HWMap hwMap = new HWMap(hardwareMap);
         drive = new SampleMecanumDrive(hardwareMap);
-        transferController = new TransferController(arm, slides, telemetry, 0);
         arm =  new Arm(hwMap, telemetry);
         slides =  new Slides(hwMap, telemetry);
+        transferController = new TransferController(arm, slides, telemetry, 0);
         gripper = new Gripper(hwMap);
 
         while (!isStarted() && !isStopRequested()) {
