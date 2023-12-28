@@ -56,7 +56,7 @@ public class MainTeleOp extends LinearOpMode {
             //Controllers
             gripper = new Gripper(hwMap);
             intakeController = new IntakeController(intake, gamePad1, gripper);
-            transferController = new TransferController(arm, slides, telemetry);
+            transferController = new TransferController(arm, slides, telemetry, 7.9);
             //FSMs
             cycle = new Cycle(gamePad1, telemetry, transferController, gripper);
 

@@ -50,7 +50,7 @@ public class InheritedArmTuner extends Arm {
     public static double p = 0.006, i = 0.003, d = 0.015;
     public static double a = 0.07;
      */
-    public static final double intakePos = 115; // Angle for Intaking pixels
+    public static double intakePos = 115; // Angle for Intaking pixels
     public final double depositPos = super.normalizeRadiansTau(intakePos + 150); // Angle for depositing pixels, is 150 degrees from intake
     public static double intakeOffset = 60; // Degrees that the intake position is from vertically facing down
     public final double safeError = 10; // Position can be +- this many degrees from target for safe transfer
@@ -66,11 +66,11 @@ public class InheritedArmTuner extends Arm {
     public void loop() {
 
         // Jank code to use FTC dashboard for a boolean, 0 = intake pos, 1 = deposit pos
-        if (posVar == 0) {
+        /*if (posVar == 0) {
             targetPos = intakePos;
         } else {
             targetPos = depositPos;
-        }
+        }*/
 
         pidController.setPID(p, i, d);
         double measuredPos = leftAxon.getPos();

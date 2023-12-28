@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 
 @Autonomous
-public class BlueLeftPark extends LinearOpMode {
+public class BlueLeftSpike_Backdrop_Park extends LinearOpMode {
 
     /** Auto Constant Variables: **/
     private double startX = 12.0; // Start pos X
@@ -28,14 +28,18 @@ public class BlueLeftPark extends LinearOpMode {
     //TODO: Field Tuning Variables:
     private double autoDelay = 0.0; //Delay before auto starts
 
-
-
     //Declare Mechanisms
     private SampleMecanumDrive drive;
     private TransferController transferController;
     private Arm arm;
     private Slides slides;
     private Gripper gripper;
+
+    //Variables for spike mark
+    private String propPosition;
+    private double forwardDistance;
+    private double turnAngleSpike;
+    private double turnAnglePark;
 
     @Override
     public void runOpMode() {
@@ -51,6 +55,23 @@ public class BlueLeftPark extends LinearOpMode {
         while (!isStarted() && !isStopRequested()) {
             telemetry.addLine("Gaytorbytes om nom nom");
             telemetry.update();
+
+            propPosition = "RIGHT";
+        }
+
+        if(propPosition == "CENTER"){
+            forwardDistance = 30;
+            turnAngleSpike = 0;
+            turnAnglePark = 90-turnAngleSpike;
+
+        } else if(propPosition == "LEFT"){
+            forwardDistance = 25;
+            turnAngleSpike = 45;
+            turnAnglePark = 90-turnAngleSpike;
+        } else{
+            forwardDistance = 25;
+            turnAngleSpike = -45;
+            turnAnglePark = 90-turnAngleSpike;
         }
 
         startX += startXOff;
@@ -58,8 +79,13 @@ public class BlueLeftPark extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(startX, startY, startHeading));
         drive.setExternalHeading(startHeading);
         TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(startX, startY, startHeading))
-                .forward(5)
-                .turn(Math.toRadians(90))
+                .forward(forwardDistance)
+                .turn(Math.toRadians(turnAngleSpike))
+                .UNSTABLE_addTemporalMarkerOffset(3, () -> {
+                    //Add gripper drop code
+                })
+                .waitSeconds(2)
+                .turn(Math.toRadians(turnAnglePark))
                 .forward(36)
                 .build();
         drive.followTrajectorySequenceAsync(trajectory);

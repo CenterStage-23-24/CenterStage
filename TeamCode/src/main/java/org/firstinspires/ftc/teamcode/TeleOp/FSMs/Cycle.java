@@ -90,7 +90,7 @@ public class Cycle {
             case extend:
                 toTransfer = true;
                 checkIndexInputs();
-                if (transferController.extend()) {
+                if (transferController.extend("BACKDROP")) {
                     state = CycleFSM.start;
                 }
                 break;

@@ -25,7 +25,7 @@ public class TransferController {
         private static final int ABS_SAFE_HEIGHT = 0;
         private static final int RETRACT_SAFE_HEIGHT = 15;
     */
-    private double min_slide_height = 7.9; //config as needed in CM
+    private double min_slide_height; //config as needed in CM
     private double slideIndexPos = min_slide_height;
     private static final int BUFFER = 20;
     private static final int DELAY_MS = 50;
@@ -41,13 +41,15 @@ public class TransferController {
     private boolean notStarted = false;
     private boolean extended = false;
 
-    public TransferController(Arm arm, Slides slides, Telemetry telemetry) {
+    public TransferController(Arm arm, Slides slides, Telemetry telemetry, double minHeight) {
         this.arm = arm;
         this.slides = slides;
         this.telemetry = telemetry;
+        this.min_slide_height = minHeight;
+        slideIndexPos = minHeight;
     }
 
-    public boolean extend() {
+    public boolean extend(String depositType) {
         if(!notStarted){ //Init stage
             internalTargetPos = slideIndexPos;
             notStarted = true;
@@ -76,8 +78,8 @@ public class TransferController {
             }
             return false;
         } if(!transfer_phases[2]){ //Phase 2: Arm Deposit Transition
-            arm.goToDeposit();
-            if(arm.axonAtPos(arm.getDepositPos(), BUFFER)){
+            arm.goToDeposit(depositType);
+            if(arm.axonAtPos(arm.getDepositPos(depositType), BUFFER)){
                 transfer_phases[2] = true;
             }
             return false;
@@ -171,7 +173,7 @@ public class TransferController {
         return true;
     }
 
-    private boolean delay(){
+    public boolean delay(){
         resetTimer();
         double finalTS = bufferTime.milliseconds();
         if(finalTS - startTS >= DELAY_MS){
@@ -220,5 +222,16 @@ public class TransferController {
     private double round(double decimal) {
         BigDecimal bd = BigDecimal.valueOf(decimal);
         return bd.setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    public void tele(){
+        telemetry.addData("SLIDE INDEX POS", slideIndexPos);
+        telemetry.addData("MIN SLIDE HEIGHT", min_slide_height);
+        telemetry.addData("TRANSFER PHASE 0 ", transfer_phases[0]);
+        telemetry.addData("TRANSFER PHASE 1 ", transfer_phases[1]);
+        telemetry.addData("TRANSFER PHASE 2 ", transfer_phases[2]);
+        telemetry.addData("TRANSFER PHASE 3 ", transfer_phases[3]);
+        telemetry.addData("TRANSFER PHASE 4 ", transfer_phases[4]);
+        telemetry.update();
     }
 }
