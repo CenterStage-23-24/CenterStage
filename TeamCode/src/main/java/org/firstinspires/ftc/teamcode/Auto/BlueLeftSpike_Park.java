@@ -38,6 +38,7 @@ public class BlueLeftSpike_Park extends LinearOpMode {
     public static Arm arm;
     public static Slides slides;
     public static Gripper gripper;
+    private Detector detector;
 
     //Variables for spike mark
     private String propPosition;
@@ -53,45 +54,49 @@ public class BlueLeftSpike_Park extends LinearOpMode {
         drive = new SampleMecanumDrive(hardwareMap);
         arm =  new Arm(hwMap, telemetry);
         slides =  new Slides(hwMap, telemetry);
-        transferController = new TransferController(arm, slides, telemetry, 0);
+        transferController = new TransferController(arm, slides, telemetry);
         gripper = new Gripper(hwMap);
-        gripper.releaseRight();
-        gripper.releaseLeft();
+        detector = new Detector(hardwareMap, telemetry);
 
         while (!isStarted() && !isStopRequested()) {
-            telemetry.addLine("Gaytorbytes om nom nom");
-            telemetry.update();
+            propPosition = "RIGHT";
+            detector.detect();
             gripper.gripLeft();
             gripper.gripRight();
-            sleep(1000);
-            while(!transferController.delay()){
-                continue;
-            }
+            sleep(2000);
             while(!transferController.extend("SPIKE")){
                 slides.pid(true);
                 arm.updatePos();
-                transferController.tele();
+
             }
 
             telemetry.addData("-", "INIT DONE");
+            telemetry.addData("FIND CONTOUR NUM: ", detector.getFindContourNum());
+            telemetry.addData("FILTER CONTOUR NUM: ", detector.getFilterContourNum());
+            telemetry.addData("POSITION: ", detector.getPosition());
+            telemetry.addData("x", detector.getX());
+            telemetry.addData("y", detector.getY());
+            //telemetry.addData("contour areas: ", contourAreas);
+            telemetry.addData("redMax: ", detector.getRedMax());
             telemetry.update();
-            propPosition = "RIGHT";
 
         }
 
+        propPosition = detector.getPosition();
+
         if(propPosition == "CENTER"){
-            //forwardDistance = 30;
+            forwardDistance = 0;
             turnAngleSpike = 0;
-            turnAnglePark = 90-turnAngleSpike;
+            turnAnglePark = -turnAngleSpike;
 
         } else if(propPosition == "LEFT"){
-            //forwardDistance = 25;
-            turnAngleSpike = 60;
-            turnAnglePark = 90-turnAngleSpike;
+            forwardDistance = 1;
+            turnAngleSpike = 90;
+            turnAnglePark = -turnAngleSpike;
         } else{
-            //forwardDistance = 25;
-            turnAngleSpike = -75;
-            turnAnglePark = 90-turnAngleSpike;
+            forwardDistance = 2;
+            turnAngleSpike = -90;
+            turnAnglePark = -turnAngleSpike;
         }
 
         startX += startXOff;
@@ -99,15 +104,24 @@ public class BlueLeftSpike_Park extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(startX, startY, startHeading));
         drive.setExternalHeading(startHeading);
         TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(startX, startY, startHeading))
-                .forward(27)
+                .forward(28)
                 .turn(Math.toRadians(turnAngleSpike))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
                 })
-                .waitSeconds(1)
-                .back(6)
+                .waitSeconds(0.5)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    while(!transferController.retract()){
+                        slides.pid(true);
+                        arm.updatePos();
+                    }
+                })
+                .waitSeconds(2)
                 .turn(Math.toRadians(turnAnglePark))
-                .forward(30)
+                .back(24)
+                .turn(Math.toRadians(90))
+                .forward(32)
+                .strafeRight(24)
                 .build();
         drive.followTrajectorySequenceAsync(trajectory);
 

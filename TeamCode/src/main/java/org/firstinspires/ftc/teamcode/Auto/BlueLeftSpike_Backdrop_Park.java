@@ -47,7 +47,7 @@ public class BlueLeftSpike_Backdrop_Park extends LinearOpMode {
         //Initialize Mechanisms
         HWMap hwMap = new HWMap(hardwareMap);
         drive = new SampleMecanumDrive(hardwareMap);
-        transferController = new TransferController(arm, slides, telemetry, 0);
+        transferController = new TransferController(arm, slides, telemetry);
         arm =  new Arm(hwMap, telemetry);
         slides =  new Slides(hwMap, telemetry);
         gripper = new Gripper(hwMap);

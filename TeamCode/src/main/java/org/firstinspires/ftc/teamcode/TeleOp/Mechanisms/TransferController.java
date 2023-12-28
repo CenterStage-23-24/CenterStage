@@ -25,7 +25,7 @@ public class TransferController {
         private static final int ABS_SAFE_HEIGHT = 0;
         private static final int RETRACT_SAFE_HEIGHT = 15;
     */
-    private double min_slide_height; //config as needed in CM
+    private double min_slide_height = 7.9; //config as needed in CM
     private double slideIndexPos = min_slide_height;
     private static final int BUFFER = 20;
     private static final int DELAY_MS = 50;
@@ -41,12 +41,10 @@ public class TransferController {
     private boolean notStarted = false;
     private boolean extended = false;
 
-    public TransferController(Arm arm, Slides slides, Telemetry telemetry, double minHeight) {
+    public TransferController(Arm arm, Slides slides, Telemetry telemetry) {
         this.arm = arm;
         this.slides = slides;
         this.telemetry = telemetry;
-        this.min_slide_height = minHeight;
-        slideIndexPos = minHeight;
     }
 
     public boolean extend(String depositType) {

@@ -52,7 +52,7 @@ public class Arm {
 
     private static final double INTAKE_POS = 115; // Angle for Intaking pixels
     private final double depositPos = normalizeRadiansTau(INTAKE_POS + 150); // Angle for depositing pixels, is 150 degrees from intake
-    private final double SPIKE_POS = 240;
+    private final double SPIKE_POS = 220;
     private static double INTAKE_OFFSET = 60; // Degrees that the intake position is from vertically facing down
     private static final double safeError = 10; // Position can be +- this many degrees from target for safe transfer
     private final double safeIntake = normalizeRadiansTau(INTAKE_POS - safeError); // Safe range to start transfer from intake pos

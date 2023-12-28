@@ -22,9 +22,9 @@ public class PropDetection extends LinearOpMode {
         detector = new Detector(hardwareMap, telemetry);
         telemetry.addData("-", "INIT DONE");
         telemetry.update();
-        detector.detect();
         
         waitForStart();
+        detector.detect();
         contourAreas = detector.getContourAreas();
 
         while(opModeIsActive()) {
