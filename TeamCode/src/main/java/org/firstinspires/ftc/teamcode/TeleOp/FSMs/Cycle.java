@@ -115,20 +115,24 @@ public class Cycle {
                 break;
             case outtakeLeft:
                 gripper.releaseLeft();
+                toTransfer = true;
                 state = CycleFSM.start;
                 break;
 
             case outtakeRight:
                 gripper.releaseRight();
+                toTransfer = true;
                 state = CycleFSM.start;
                 break;
             case gripLeft:
                 gripper.gripLeft();
+                toTransfer = true;
                 state = CycleFSM.start;
                 break;
 
             case gripRight:
                 gripper.gripRight();
+                toTransfer = true;
                 state = CycleFSM.start;
                 break;
 
