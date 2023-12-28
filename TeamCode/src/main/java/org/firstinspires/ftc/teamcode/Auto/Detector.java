@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OpenCV;
+package org.firstinspires.ftc.teamcode.Auto;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -13,8 +13,6 @@ import java.util.ArrayList;
 
 public class Detector {
     OpenCvWebcam camera;
-    ArrayList<Double> avg_x_list = new ArrayList<>();
-    ArrayList<Double> avg_y_list = new ArrayList<>();
     PropPipeline propPipeline;
     public Detector(HardwareMap hardwareMap, Telemetry telemetry){
         propPipeline = new PropPipeline();
@@ -22,7 +20,7 @@ public class Detector {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         camera = OpenCvCameraFactory.getInstance().createWebcam(webcamName, cameraMonitorViewId);
-        camera.setMillisecondsPermissionTimeout(5000);
+        //camera.setMillisecondsPermissionTimeout(5000);
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
@@ -30,7 +28,6 @@ public class Detector {
             {
                 camera.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
                 telemetry.addData("-", "Camera Streaming!");
-                telemetry.update();
             }
             @Override
             public void onError(int errorCode)

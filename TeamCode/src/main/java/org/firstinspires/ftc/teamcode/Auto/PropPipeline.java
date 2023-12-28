@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.OpenCV;
+package org.firstinspires.ftc.teamcode.Auto;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -19,6 +19,7 @@ import org.opencv.core.Core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.*;
 import org.opencv.objdetect.*;
+import org.openftc.easyopencv.OpenCvPipeline;
 
 /**
  * GripPipeline class.
@@ -28,7 +29,7 @@ import org.opencv.objdetect.*;
  * @author GRIP
  */
 @Config
-public class PropPipeline extends OpenCVPipeline {
+public class PropPipeline extends OpenCvPipeline {
 
     //Outputs
     private Mat rgbThresholdOutput = new Mat();
@@ -116,21 +117,38 @@ public class PropPipeline extends OpenCVPipeline {
         double filterContoursMinRatio = 0;
         double filterContoursMaxRatio = 1000;
         filterContours(filterContoursContours, minArea, maxArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
+
+        /*
+        if(redMax < 8){
+            position = "RIGHT";
+        } else{
+            if(filterContourNum != 1){
+                redMax /= 2;
+            }
+            else{
+                if(x >= x_pos_split){
+                    position = "CENTER";
+                } else{
+                    position = "LEFT";
+                }
+            }
+        }
+*/
+
         if(redMax == 255){
             redMax = 128;
         }
         if(filterContourNum > 1){
             redMax /= 2;
         } else if(filterContourNum == 0){
-            position = "RIGHT";
+            position = "LEFT";
         } else{
             if(x >= x_pos_split){
                 position = "CENTER";
             } else{
-                position = "LEFT";
+                position = "RIGHT";
             }
         }
-
         return cvErodeOutput;
     }
 
