@@ -94,12 +94,12 @@ public class Updated_BLSP extends LinearOpMode {
 
         } else if(propPosition == "LEFT"){
             dropPosition = 40;
-            dropPositionCompensationX = 2;
+            dropPositionCompensationX = 1;
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
         } else{
             dropPosition = 40;
-            dropPositionCompensationX = -2;
+            dropPositionCompensationX = -1;
             dropPositionCompensationY = 2;
             turnAngleSpike = -75;
         }
