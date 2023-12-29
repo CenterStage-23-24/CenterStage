@@ -15,16 +15,16 @@ public class Cycle {
         extend,
         retract,
         outtakeLeft,
-        outtakeRight,
+        releaseRight,
         gripLeft,
         gripRight,
-        pos_up,
-        pos_down,
-        offset_up,
-        offset_down,
-        stop_intake,
-        outtake_both,
-        grip_both
+        posUp,
+        posDown,
+        offsetUp,
+        offsetDown,
+        stopIntake,
+        releaseBoth,
+        gripBoth
     }
 
     private CycleFSM state = CycleFSM.start;
@@ -38,14 +38,15 @@ public class Cycle {
     private final Telemetry telemetry;
 
     private final Gripper gripper;
-    private double prev_left_trigger = 0.0;
-    private double prev_right_trigger = 0.0;
-    private boolean prev_dpad_up = false;
-    private boolean prev_dpad_down = false;
-    private boolean prev_right_bumper = false;
-    private boolean prev_left_bumper = false;
-    private boolean prev_dpad_right = false;
-
+    private double prevLeftTrigger = 0.0;
+    private double prevRightTrigger = 0.0;
+    private boolean prevDpadUp = false;
+    private boolean prevDpadDown = false;
+    private boolean prevRightBumper = false;
+    private boolean prevLeftBumper = false;
+    private boolean prevDpadRight = false;
+    private boolean prevY = false;
+    private boolean prevA = false;
 
     public Cycle(GamepadEx gamepadEx, Telemetry telemetry, TransferController transferController, IntakeController intakeController, Gripper gripper) {
         //Core
@@ -61,41 +62,29 @@ public class Cycle {
 
 
     public void loop() {
-        checkInputs();
         switch (state) {
             case start:
                 checkInputs();
-                //Outtake Left
-                telemetry.addData("in start in cycle", 1);
-                //Extend
-                if (gamepadEx.isDown(GamepadKeys.Button.Y)) {
-                    state = CycleFSM.extend;
-                }
-
-                //Retract
-                if (gamepadEx.isDown(GamepadKeys.Button.A)) {
-                    state = CycleFSM.retract;
-                }
                 break;
-
             case extend:
                 toTransfer = true;
-                checkInputs();
                 if (transferController.extend()) {
                     state = CycleFSM.start;
-                }
+                } else
+                    checkInputs();//Just to see if the driver wants to retract
 
                 break;
 
             case retract:
                 toTransfer = true;
-                checkInputs();
                 gripper.releaseRight();
                 gripper.releaseLeft();
                 if (transferController.retract()) {
-                    state = CycleFSM.start;
                     toTransfer = false;
+                    state = CycleFSM.start;
                     break;
+                }else{
+                    checkInputs();//Just to see if the driver wants to extend
                 }
                 break;
             case outtakeLeft:
@@ -104,7 +93,7 @@ public class Cycle {
                 state = CycleFSM.start;
                 break;
 
-            case outtakeRight:
+            case releaseRight:
                 gripper.releaseRight();
                 toTransfer = true;
                 state = CycleFSM.start;
@@ -121,34 +110,34 @@ public class Cycle {
                 state = CycleFSM.start;
                 break;
 
-            case pos_up:
+            case posUp:
                 transferController.pos_up();
                 state = CycleFSM.start;
                 break;
 
-            case pos_down:
+            case posDown:
                 transferController.pos_down();
                 state = CycleFSM.start;
                 break;
 
-            case offset_up:
+            case offsetUp:
                 transferController.offset_up();
                 state = CycleFSM.start;
                 break;
 
-            case offset_down:
+            case offsetDown:
                 transferController.offset_down();
                 state = CycleFSM.start;
                 break;
-            case stop_intake:
+            case stopIntake:
                 intakeController.setStopRequested(!intakeController.getStopRequested());
                 state = CycleFSM.start;
                 break;
-            case outtake_both:
+            case releaseBoth:
                 gripper.releaseLeft();
                 gripper.releaseRight();
                 state = CycleFSM.start;
-            case grip_both:
+            case gripBoth:
                 gripper.gripLeft();
                 gripper.gripRight();
                 state = CycleFSM.start;
@@ -157,46 +146,63 @@ public class Cycle {
     }
 
     public void checkInputs() {
-        if (gamepadEx.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) == 1.0 & prev_left_trigger != 1.0) {
+        //Index Up
+        if (gamepadEx.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) == 1.0 & prevLeftTrigger != 1.0) {
             transferController.pos_up();
         }
-        if (gamepadEx.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) == 1.0 & prev_right_trigger != 1.0) {
+        //Index down
+        if (gamepadEx.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) == 1.0 & prevRightTrigger != 1.0) {
             transferController.pos_down();
         }
-        if (gamepadEx.isDown(GamepadKeys.Button.DPAD_UP) & !prev_dpad_up) {
+        //Offset up
+        if (gamepadEx.isDown(GamepadKeys.Button.DPAD_UP) & !prevDpadUp) {
             transferController.offset_up();
         }
-        if (gamepadEx.isDown(GamepadKeys.Button.DPAD_DOWN) & !prev_dpad_down) {
+        //Offset down
+        if (gamepadEx.isDown(GamepadKeys.Button.DPAD_DOWN) & !prevDpadDown) {
             transferController.offset_down();
         }
-        if (gamepadEx.isDown(GamepadKeys.Button.RIGHT_BUMPER) & !prev_right_bumper) {
+        //Extend
+        if (gamepadEx.isDown(GamepadKeys.Button.Y) & !prevY)
+            state = CycleFSM.extend;
+        //Retract
+        if (gamepadEx.isDown(GamepadKeys.Button.A) & !prevA)
+            state = CycleFSM.retract;
+        //Gripping and ungripping pixels on the right claw.
+        if (gamepadEx.isDown(GamepadKeys.Button.RIGHT_BUMPER) & !prevRightBumper) {
             if (gripper.getRightClawGripped())
-                state = CycleFSM.outtakeRight;
+                state = CycleFSM.releaseRight;
             else
                 state = CycleFSM.gripRight;
         }
-        if (gamepadEx.isDown(GamepadKeys.Button.LEFT_BUMPER) & !prev_left_bumper) {
+        //Gripping and ungripping pixels on the left claw.
+        if (gamepadEx.isDown(GamepadKeys.Button.LEFT_BUMPER) & !prevLeftBumper) {
             if (gripper.getLeftClawGripped())
                 state = CycleFSM.outtakeLeft;
             else
                 state = CycleFSM.gripLeft;
         }
-        if (gamepadEx.isDown(GamepadKeys.Button.DPAD_RIGHT) & !prev_dpad_right) {
-            state = CycleFSM.stop_intake;
+        //Stopping the intake
+        if (gamepadEx.isDown(GamepadKeys.Button.DPAD_RIGHT) & !prevDpadRight) {
+            state = CycleFSM.stopIntake;
         }
-        if (gamepadEx.isDown(GamepadKeys.Button.RIGHT_BUMPER) & !prev_right_bumper & gamepadEx.isDown(GamepadKeys.Button.LEFT_BUMPER) & !prev_left_bumper) {
+        //Release and grip pixels at the same time
+        if (gamepadEx.isDown(GamepadKeys.Button.RIGHT_BUMPER) & !prevRightBumper & gamepadEx.isDown(GamepadKeys.Button.LEFT_BUMPER) & !prevLeftBumper) {
             if (gripper.getLeftClawGripped() && gripper.getRightClawGripped())
-                state = CycleFSM.outtake_both;
+                state = CycleFSM.releaseBoth;
             else
-                state = CycleFSM.grip_both;
+                state = CycleFSM.gripBoth;
         }
-        prev_left_trigger = gamepadEx.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
-        prev_right_trigger = gamepadEx.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-        prev_dpad_up = gamepadEx.isDown(GamepadKeys.Button.DPAD_UP);
-        prev_dpad_down = gamepadEx.isDown(GamepadKeys.Button.DPAD_DOWN);
-        prev_right_bumper = gamepadEx.isDown(GamepadKeys.Button.RIGHT_BUMPER);
-        prev_left_bumper = gamepadEx.isDown(GamepadKeys.Button.LEFT_BUMPER);
-        prev_dpad_right = gamepadEx.isDown(GamepadKeys.Button.DPAD_RIGHT);
+
+        prevLeftTrigger = gamepadEx.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+        prevRightTrigger = gamepadEx.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+        prevDpadUp = gamepadEx.isDown(GamepadKeys.Button.DPAD_UP);
+        prevDpadDown = gamepadEx.isDown(GamepadKeys.Button.DPAD_DOWN);
+        prevY = gamepadEx.isDown(GamepadKeys.Button.Y);
+        prevA = gamepadEx.isDown(GamepadKeys.Button.A);
+        prevRightBumper = gamepadEx.isDown(GamepadKeys.Button.RIGHT_BUMPER);
+        prevLeftBumper = gamepadEx.isDown(GamepadKeys.Button.LEFT_BUMPER);
+        prevDpadRight = gamepadEx.isDown(GamepadKeys.Button.DPAD_RIGHT);
 
     }
 
@@ -205,11 +211,11 @@ public class Cycle {
     }
 
     public boolean getPrevUp() {
-        return prev_dpad_up;
+        return prevDpadUp;
     }
 
     public boolean getPrevDown() {
-        return prev_dpad_down;
+        return prevDpadDown;
     }
 
 
