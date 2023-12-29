@@ -11,11 +11,12 @@ import java.math.RoundingMode;
 
 public class TransferController {
     //ROBOT MEASUREMENT CONSTANTS:
-    private static final double index_increment = 6.6; //config as needed in CM
-    private static final int OFFSET_INCREMENT = 1; //config as needed in CM
-    private static final int MAX_SLIDE_HEIGHT = 64; //convert to CM
+    private static final double index_increment = 6.6;
+    private static final int OFFSET_INCREMENT = 1;
+    private static final int MAX_SLIDE_HEIGHT = 64;
     private static final int ABS_SAFE_HEIGHT = 0;
-    private static final int RETRACT_SAFE_HEIGHT = 24;
+    private static final int RETRACT_SAFE_HEIGHT = 25;
+    //Everything above is in CM
 
     /*
         //TEST BENCH MEASUREMENT CONSTANTS:
@@ -40,6 +41,7 @@ public class TransferController {
     private boolean[] transfer_phases = {false, false, false, false, false};
     private boolean notStarted = false;
     private boolean extended = false;
+    private boolean inRetract = false;
 
     public TransferController(Arm arm, Slides slides, Telemetry telemetry) {
         this.arm = arm;
@@ -48,46 +50,44 @@ public class TransferController {
     }
 
     public boolean extend() {
-        if(!notStarted){ //Init stage
-            internalTargetPos = slideIndexPos;
+        if (!notStarted) { //Init stage
             notStarted = true;
+            inRetract = false;
 
-            if(extended){
+            if (extended) {
                 return true;
             }
 
             //Refactored Area 1 - Needs Testing
-            if(slideIndexPos >= RETRACT_SAFE_HEIGHT){
+            if (slideIndexPos >= RETRACT_SAFE_HEIGHT) {
                 transfer_phases[3] = true;
                 transfer_phases[4] = true;
-            } else{
+            } else {
                 internalTargetPos = RETRACT_SAFE_HEIGHT;
             }
         }
 
-        if(!transfer_phases[0]){ //Phase 0: Internal Target Pos Extension
-            if(extendToHeight(internalTargetPos)){
+        if (!transfer_phases[0]) { //Phase 0: Internal Target Pos Extension
+            if (extendToHeight(internalTargetPos) || slides.currentPos() >= RETRACT_SAFE_HEIGHT) {
                 transfer_phases[0] = true;
             }
             return false;
-        } if(!transfer_phases[1]){ //Phase 1: Delay
-            if(delay()){
-                transfer_phases[1] = true;
-            }
-            return false;
-        } if(!transfer_phases[2]){ //Phase 2: Arm Deposit Transition
+        }
+        if (!transfer_phases[2]) { //Phase 2: Arm Deposit Transition
             arm.goToDeposit();
-            if(arm.axonAtPos(arm.getDepositPos(), BUFFER)){
+            if (arm.axonAtPos(arm.getDepositPos(), BUFFER)) {
                 transfer_phases[2] = true;
             }
             return false;
-        } if(!transfer_phases[3]){ //Phase 3: Delay
-            if(delay()){
+        }
+        if (!transfer_phases[3]) { //Phase 3: Delay
+            if (delay()) {
                 transfer_phases[3] = true;
             }
             return false;
-        } if(!transfer_phases[4]){ //Phase 4: Slide Index Extension
-            if(extendToHeight(slideIndexPos)){
+        }
+        if (!transfer_phases[4]) { //Phase 4: Slide Index Extension
+            if (extendToHeight(slideIndexPos)) {
                 transfer_phases[4] = true;
             }
             return false;
@@ -114,7 +114,7 @@ public class TransferController {
 
     private boolean extendToHeight(double cm) {
         slides.setTargetPos(slides.mmToTicks(cm));
-        if(slides.atPos()){
+        if (slides.atPos()) {
             return true;
         }
         return false;
@@ -122,38 +122,43 @@ public class TransferController {
 
     public boolean retract() {
         //Init Stage
-        if(!notStarted){
+        if (!notStarted) {
             notStarted = true;
+            originPos = slides.ticksToCm((int) slides.currentPos());
+            inRetract = true;
         }
 
         //Special Case: Safe Height Retraction
-        if(originPos < RETRACT_SAFE_HEIGHT){
-            if(!transfer_phases[0]){ //Phase 0: Safe Height Retraction
-                if(extendToHeight(RETRACT_SAFE_HEIGHT)){
+        if (originPos < RETRACT_SAFE_HEIGHT) {
+            if (!transfer_phases[0]) { //Phase 0: Safe Height Retraction
+                if (extendToHeight(RETRACT_SAFE_HEIGHT)) {
                     transfer_phases[0] = true;
                 }
                 return false;
-            } if(!transfer_phases[1]){ //Phase 1: Delay
-                if(delay()){
+            }
+            if (!transfer_phases[1]) { //Phase 1: Delay
+                if (delay()) {
                     transfer_phases[1] = true;
                 }
                 return false;
             }
         }
 
-        if(!transfer_phases[2]){ //Phase 2: Arm Intake Transition
+        if (!transfer_phases[2]) { //Phase 2: Arm Intake Transition
             arm.goToIntake();
-            if(arm.axonAtPos(arm.getIntakePos(), BUFFER) && delay()){
+            if (arm.axonAtPos(arm.getIntakePos(), BUFFER) && delay()) {
                 transfer_phases[2] = true;
             }
             return false;
-        } if(!transfer_phases[3]){ //Phase 3: Delay
-            if(delay()){
+        }
+        if (!transfer_phases[3]) { //Phase 3: Delay
+            if (delay()) {
                 transfer_phases[3] = true;
             }
             return false;
-        } if(!transfer_phases[4]){ //Phase 4: Ground-Level Retraction
-            if(extendToHeight(ABS_SAFE_HEIGHT)){
+        }
+        if (!transfer_phases[4]) { //Phase 4: Ground-Level Retraction
+            if (extendToHeight(ABS_SAFE_HEIGHT)) {
                 transfer_phases[4] = true;
             }
             return false;
@@ -165,16 +170,17 @@ public class TransferController {
         transfer_phases[2] = false;
         transfer_phases[3] = false;
         transfer_phases[4] = false;
+        inRetract = false;
         originPos = 0;
         notStarted = false;
         extended = false;
         return true;
     }
 
-    private boolean delay(){
+    private boolean delay() {
         resetTimer();
         double finalTS = bufferTime.milliseconds();
-        if(finalTS - startTS >= DELAY_MS){
+        if (finalTS - startTS >= DELAY_MS) {
             setTSBefore = false;
             return true;
         }
@@ -185,7 +191,8 @@ public class TransferController {
         double tempPos = round(slideIndexPos + index_increment);
         if (tempPos < MAX_SLIDE_HEIGHT) {
             slideIndexPos = tempPos;
-            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+            if (!inRetract)
+                slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
 
@@ -193,7 +200,8 @@ public class TransferController {
         double tempPos = round(slideIndexPos - index_increment);
         if (tempPos >= min_slide_height) {
             slideIndexPos = tempPos;
-            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+            if (!inRetract)
+                slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
 
@@ -203,7 +211,8 @@ public class TransferController {
         if (tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT) {
             min_slide_height = tempMinPos;
             slideIndexPos = tempIndexPos;
-            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+            if (!inRetract)
+                slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
 
@@ -213,7 +222,8 @@ public class TransferController {
         if (tempMinPos >= ABS_SAFE_HEIGHT && tempIndexPos >= ABS_SAFE_HEIGHT) {
             min_slide_height = tempMinPos;
             slideIndexPos = tempIndexPos;
-            slides.setTargetPos(slides.mmToTicks(slideIndexPos));
+            if (!inRetract)
+                slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
 

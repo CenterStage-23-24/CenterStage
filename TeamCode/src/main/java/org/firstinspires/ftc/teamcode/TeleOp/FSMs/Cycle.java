@@ -137,10 +137,12 @@ public class Cycle {
                 gripper.releaseLeft();
                 gripper.releaseRight();
                 state = CycleFSM.start;
+                break;
             case gripBoth:
                 gripper.gripLeft();
                 gripper.gripRight();
                 state = CycleFSM.start;
+                break;
         }
 
     }
