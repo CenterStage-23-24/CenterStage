@@ -191,7 +191,7 @@ public class TransferController {
         double tempPos = round(slideIndexPos + index_increment);
         if (tempPos < MAX_SLIDE_HEIGHT) {
             slideIndexPos = tempPos;
-            if (!inRetract)
+            //if (!inRetract)
                 slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
@@ -200,7 +200,7 @@ public class TransferController {
         double tempPos = round(slideIndexPos - index_increment);
         if (tempPos >= min_slide_height) {
             slideIndexPos = tempPos;
-            if (!inRetract)
+            //if (!inRetract)
                 slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
@@ -211,7 +211,7 @@ public class TransferController {
         if (tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT) {
             min_slide_height = tempMinPos;
             slideIndexPos = tempIndexPos;
-            if (!inRetract)
+            //if (!inRetract)
                 slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
@@ -222,7 +222,7 @@ public class TransferController {
         if (tempMinPos >= ABS_SAFE_HEIGHT && tempIndexPos >= ABS_SAFE_HEIGHT) {
             min_slide_height = tempMinPos;
             slideIndexPos = tempIndexPos;
-            if (!inRetract)
+            //if (!inRetract)
                 slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }

@@ -68,9 +68,9 @@ public class Cycle {
                 break;
             case extend:
                 toTransfer = true;
-                if (transferController.extend()) {
+                if (transferController.extend())
                     state = CycleFSM.start;
-                } else
+                else
                     checkInputs();//Just to see if the driver wants to retract
 
                 break;
@@ -83,9 +83,8 @@ public class Cycle {
                     toTransfer = false;
                     state = CycleFSM.start;
                     break;
-                }else{
+                } else
                     checkInputs();//Just to see if the driver wants to extend
-                }
                 break;
             case outtakeLeft:
                 gripper.releaseLeft();
