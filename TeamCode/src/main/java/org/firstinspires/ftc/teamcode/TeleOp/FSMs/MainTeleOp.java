@@ -132,10 +132,7 @@ public class MainTeleOp extends LinearOpMode {
         telemetry.addData("L-CS distance: ", intake.getLeftDistance());
         telemetry.addData("R-CS distance: ", intake.getRightDistance());
 
-        telemetry.addData("SLIDE TARGET POS?", slides.mmToTicks(24));
-        telemetry.addData("SLIDES AT POS?", slides.atPos());
-        telemetry.addData("PREV DPAD UP", cycle.getPrevUp());
-        telemetry.addData("PREV DPAD DOWN", cycle.getPrevDown());
+        telemetry.addData("Internal Target Pos", transferController.getInternalTargetPos());
         telemetry.update();
     }
 

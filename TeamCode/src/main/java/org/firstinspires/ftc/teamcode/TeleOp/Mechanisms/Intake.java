@@ -20,8 +20,8 @@ public class Intake {
     private final Motor intakeMotor;
     private final RevColorSensorV3 trayLeftCS;
     private final RevColorSensorV3 trayRightCS;
-    private static final int LEFT_DISTANCE = 40;
-    private static final int RIGHT_DISTANCE = 40; //This is for the robot
+    private static final int LEFT_DISTANCE = 35;
+    private static final int RIGHT_DISTANCE = 35; //This is for the robot
     //private static final int RIGHT_DISTANCE = 15; //This is for the test bench
 
 

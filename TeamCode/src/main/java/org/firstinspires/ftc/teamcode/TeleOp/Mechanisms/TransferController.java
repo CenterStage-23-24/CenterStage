@@ -15,7 +15,7 @@ public class TransferController {
     private static final int OFFSET_INCREMENT = 1;
     private static final int MAX_SLIDE_HEIGHT = 64;
     private static final int ABS_SAFE_HEIGHT = 0;
-    private static final int RETRACT_SAFE_HEIGHT = 25;
+    private static final int RETRACT_SAFE_HEIGHT = 28;
     //Everything above is in CM
 
     /*
@@ -66,7 +66,6 @@ public class TransferController {
                 internalTargetPos = RETRACT_SAFE_HEIGHT;
             }
         }
-
         if (!transfer_phases[0]) { //Phase 0: Internal Target Pos Extension
             if (extendToHeight(internalTargetPos) || slides.currentPos() >= RETRACT_SAFE_HEIGHT) {
                 transfer_phases[0] = true;
@@ -99,7 +98,6 @@ public class TransferController {
         transfer_phases[2] = false;
         transfer_phases[3] = false;
         transfer_phases[4] = false;
-        internalTargetPos = 0;
         notStarted = false;
         extended = true;
         return true;
@@ -191,7 +189,7 @@ public class TransferController {
         double tempPos = round(slideIndexPos + index_increment);
         if (tempPos < MAX_SLIDE_HEIGHT) {
             slideIndexPos = tempPos;
-            //if (!inRetract)
+            if (!inRetract)
                 slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
@@ -200,7 +198,7 @@ public class TransferController {
         double tempPos = round(slideIndexPos - index_increment);
         if (tempPos >= min_slide_height) {
             slideIndexPos = tempPos;
-            //if (!inRetract)
+            if (!inRetract)
                 slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
@@ -211,7 +209,7 @@ public class TransferController {
         if (tempMinPos < MAX_SLIDE_HEIGHT && tempIndexPos < MAX_SLIDE_HEIGHT) {
             min_slide_height = tempMinPos;
             slideIndexPos = tempIndexPos;
-            //if (!inRetract)
+            if (!inRetract)
                 slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
@@ -222,7 +220,7 @@ public class TransferController {
         if (tempMinPos >= ABS_SAFE_HEIGHT && tempIndexPos >= ABS_SAFE_HEIGHT) {
             min_slide_height = tempMinPos;
             slideIndexPos = tempIndexPos;
-            //if (!inRetract)
+            if (!retract())
                 slides.setTargetPos(slides.mmToTicks(slideIndexPos));
         }
     }
@@ -230,5 +228,9 @@ public class TransferController {
     private double round(double decimal) {
         BigDecimal bd = BigDecimal.valueOf(decimal);
         return bd.setScale(2, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    public double getInternalTargetPos() {
+        return internalTargetPos;
     }
 }
