@@ -47,6 +47,9 @@ public class Updated_BLSP extends LinearOpMode {
     public static double dropPositionCompensationX;
     public static double dropPositionCompensationY;
     public static double turnAngleSpike;
+    public static double aprilTagReadingPosition;
+    public static double aprilTagCompensation;
+
 
     @Override
     public void runOpMode() {
@@ -69,7 +72,6 @@ public class Updated_BLSP extends LinearOpMode {
             while(!transferController.extend("SPIKE")){
                 slides.pid(true);
                 arm.updatePos();
-
             }
 
             telemetry.addData("-", "INIT DONE");
@@ -91,17 +93,20 @@ public class Updated_BLSP extends LinearOpMode {
             dropPositionCompensationX = 0.001;
             dropPositionCompensationY = 0.001;
             turnAngleSpike = 0;
+            aprilTagReadingPosition = 30;
 
         } else if(propPosition == "LEFT"){
             dropPosition = 40;
             dropPositionCompensationX = 1;
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
+            aprilTagReadingPosition = 24;
         } else{
             dropPosition = 40;
             dropPositionCompensationX = -1;
             dropPositionCompensationY = 2;
             turnAngleSpike = -75;
+            aprilTagReadingPosition = 36;
         }
 
         startX += startXOff;
@@ -126,7 +131,13 @@ public class Updated_BLSP extends LinearOpMode {
                 .lineToConstantHeading(new Vector2d(startX, 59))
                 .turn(Math.toRadians(90))
                 .lineToConstantHeading(new Vector2d(startX+32, 59))
-                .strafeRight(23)
+                .strafeRight(aprilTagReadingPosition)
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    //add algorithm for reading april tags
+                    aprilTagReadingPosition = 0;
+                })
+                .waitSeconds(5)
+                .turn(aprilTagCompensation)
                 .build();
         drive.followTrajectorySequenceAsync(trajectory);
 

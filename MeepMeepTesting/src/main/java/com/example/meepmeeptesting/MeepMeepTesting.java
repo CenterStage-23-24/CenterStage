@@ -35,7 +35,7 @@ public class MeepMeepTesting {
                                 .lineToConstantHeading(new Vector2d(12, 59))
                                 .turn(Math.toRadians(90))
                                 .lineToConstantHeading(new Vector2d(12+32, 59))
-                                .strafeRight(23)
+                                .strafeRight(17)
                                 .build()
                 );
 
