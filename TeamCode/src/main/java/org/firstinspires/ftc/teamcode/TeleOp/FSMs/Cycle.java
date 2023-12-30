@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 public class Cycle {
@@ -30,14 +31,12 @@ public class Cycle {
     private CycleFSM state = CycleFSM.start;
     private final TransferController transferController;
     private final IntakeController intakeController;
-
+    private final Gripper gripper;
+    private final GamepadEx gamepadEx;
+    private final Telemetry telemetry;
     private boolean toTransfer = false;
 
 
-    private final GamepadEx gamepadEx;
-    private final Telemetry telemetry;
-
-    private final Gripper gripper;
     private double prevLeftTrigger = 0.0;
     private double prevRightTrigger = 0.0;
     private boolean prevDpadUp = false;
@@ -209,14 +208,6 @@ public class Cycle {
 
     public boolean getToTransfer() {
         return toTransfer;
-    }
-
-    public boolean getPrevUp() {
-        return prevDpadUp;
-    }
-
-    public boolean getPrevDown() {
-        return prevDpadDown;
     }
 
 

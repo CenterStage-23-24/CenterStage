@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
-@TeleOp(name = "TeleOp-1.5.1")
+@TeleOp(name = "TeleOp-1.5.5")
 public class MainTeleOp extends LinearOpMode {
 
     public enum RobotFSM {
@@ -28,15 +28,10 @@ public class MainTeleOp extends LinearOpMode {
     private RobotFSM state;
     private Cycle cycle;
     private GamepadEx gamePad1;
-    private GamepadEx gamePad2;
     private FieldCentricDrive fieldCentricDrive;
     private IntakeController intakeController;
-    private TransferController transferController;
-    private FSMController fsmController;
-    private Gripper gripper;
     private Arm arm;
     private Slides slides;
-    private Intake intake;
     private boolean backdropAlignmentAutomationStarted = false;
     private static final double ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE = 12;
 
@@ -48,24 +43,20 @@ public class MainTeleOp extends LinearOpMode {
             //Core
             HWMap hwMap = new HWMap(hardwareMap);
             gamePad1 = new GamepadEx(gamepad1);
-            gamePad2 = new GamepadEx(gamepad2);
-            fsmController = new FSMController(gamePad1);
             //Mechanisms
             fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
-            intake = new Intake(hwMap, telemetry);
+            Intake intake = new Intake(hwMap, telemetry);
             arm = new Arm(hwMap, telemetry);
             slides = new Slides(hwMap, telemetry);
             //Controllers
-            gripper = new Gripper(hwMap);
-            intakeController = new IntakeController(intake, gamePad1, gripper);
-            transferController = new TransferController(arm, slides, telemetry);
+            Gripper gripper = new Gripper(hwMap);
+            TransferController transferController = new TransferController(arm, slides);
+            intakeController = new IntakeController(intake, gamePad1, gripper, telemetry);
             //FSMs
             cycle = new Cycle(gamePad1, telemetry, transferController, intakeController, gripper);
 
             //Setup
             state = RobotFSM.cycleFSM;
-            gripper.releaseLeft();
-            gripper.releaseRight();
 
 
             telemetry.addData("INIT: ", "MainTeleOp");
@@ -78,18 +69,14 @@ public class MainTeleOp extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+            //Reading the gamepad
             gamePad1.readButtons();
-            gamePad2.readButtons();
             switch (state) {
                 case start:
-                    telemetry.addData("in start", 1);
                     state = RobotFSM.cycleFSM;
                     break;
                 case cycleFSM:
-                    telemetry.addData("in cycle state", 1);
-
-                    if (gamePad1.wasJustPressed(GamepadKeys.Button.B)) {
-                        telemetry.addData("-", "Quit Cycle State");
+                    if (gamePad1.wasJustPressed(GamepadKeys.Button.X)) {
                         state = RobotFSM.start;
                     } else {
                         cycle.loop();
@@ -101,15 +88,16 @@ public class MainTeleOp extends LinearOpMode {
     }
 
     private void updateCycle() {
+        //Setting alignment angle
         if (gamePad1.isDown(GamepadKeys.Button.RIGHT_STICK_BUTTON)) {
             backdropAlignmentAutomationStarted = true;
-
             if ((HWMap.readFromIMU() >= 1) && (HWMap.readFromIMU() <= 179))
                 fieldCentricDrive.setBackdropAngle(90);
             else
                 fieldCentricDrive.setBackdropAngle(270);
         }
 
+        //Backdrop Alignment Logic
         if (backdropAlignmentAutomationStarted && !fieldCentricDrive.robotAtAngle(ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE)) {
             double rightX = fieldCentricDrive.backdropAlignment();
             fieldCentricDrive.drive(gamePad1.getLeftX(), gamePad1.getLeftY(), rightX, HWMap.readFromIMU());
@@ -122,17 +110,13 @@ public class MainTeleOp extends LinearOpMode {
         }
 
 
+        // Transfer logic
         intakeController.intakeControl(cycle.getToTransfer());
         slides.pid(cycle.getToTransfer());
         arm.updatePos();
 
-        telemetry.addData("toTransfer?", cycle.getToTransfer());
-        telemetry.addData("Left pixel", intake.getPixelInLeft());
-        telemetry.addData("Right pixel", intake.getPixelInRight());
-        telemetry.addData("L-CS distance: ", intake.getLeftDistance());
-        telemetry.addData("R-CS distance: ", intake.getRightDistance());
-
-        telemetry.addData("Internal Target Pos", transferController.getInternalTargetPos());
+        //Telemetry
+        intakeController.getTelemetry();
         telemetry.update();
     }
 
