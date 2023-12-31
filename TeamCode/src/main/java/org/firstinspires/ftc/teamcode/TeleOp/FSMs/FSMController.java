@@ -10,6 +10,7 @@ public class FSMController {
     private boolean rightBumper;
     private boolean YButton;
     private boolean AButton;
+    private boolean rightDpad;
 
 
     private final GamepadEx gamepad;
@@ -27,11 +28,14 @@ public class FSMController {
         if (gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) {
             rightBumper = true;
         }
-        if(gamepad.isDown(GamepadKeys.Button.Y)){
+        if(gamepad.wasJustPressed(GamepadKeys.Button.Y)){
             YButton = true;
         }
-        if(gamepad.isDown(GamepadKeys.Button.A)){
+        if(gamepad.wasJustPressed(GamepadKeys.Button.A)){
             AButton = true;
+        }
+        if(gamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)){
+            rightDpad = true;
         }
     }
 
@@ -48,6 +52,9 @@ public class FSMController {
     public boolean getAButton(){
         return AButton;
     }
+    public boolean getRightDpad() {
+        return rightDpad;
+    }
 
     //Setter Methods
     public void setLeftBumper(boolean leftBumper) {
@@ -62,4 +69,9 @@ public class FSMController {
     public void setAButton(boolean XButton) {
         this.AButton = XButton;
     }
+
+    public void setRightDpad(boolean rightDpad) {
+        this.rightDpad = rightDpad;
+    }
 }
+
