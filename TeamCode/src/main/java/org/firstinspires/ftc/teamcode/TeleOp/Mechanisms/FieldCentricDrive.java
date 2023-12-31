@@ -32,7 +32,7 @@ public class FieldCentricDrive {
     }
 
     public double backdropAlignment() {
-        pidController.setPID(P,I,D);
+        //pidController.setPID(P,I,D);
 
         double deltaAngle = shortestDistance(HWMap.readFromIMU());
         double dir = dir(HWMap.readFromIMU());
@@ -75,10 +75,15 @@ public class FieldCentricDrive {
     public boolean robotAtAngle(double buffer) {
         return (((backdropAngle + buffer) >= normalizeDegrees(HWMap.readFromIMU())) && ((backdropAngle - buffer) <= normalizeDegrees(HWMap.readFromIMU())));
     }
+    public boolean robotAtAngle(double alignmentAngle, double buffer) {
+        return (((alignmentAngle + buffer) >= normalizeDegrees(HWMap.readFromIMU())) && ((alignmentAngle - buffer) <= normalizeDegrees(HWMap.readFromIMU())));
+    }
 
     public void setBackdropAngle(double backdropAngle) {
         this.backdropAngle = backdropAngle;
     }
-
+    public void setBackdropPID(double p, double i, double d){
+        pidController.setPID(p,i,d);
+    }
 
 }

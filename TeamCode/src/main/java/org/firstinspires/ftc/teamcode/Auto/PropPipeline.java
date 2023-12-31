@@ -69,6 +69,10 @@ public class PropPipeline extends OpenCvPipeline {
      */
 
     private String position;
+    private String final_position = "";
+    private String prev_position;
+    private int iteration_threshold = 50;
+    private int iterations;
     private int findContourNum;
     private int filterContourNum;
     private double x;
@@ -135,6 +139,7 @@ public class PropPipeline extends OpenCvPipeline {
         }
 */
 
+
         if(redMax == 255){
             redMax = 128;
         }
@@ -148,6 +153,17 @@ public class PropPipeline extends OpenCvPipeline {
             } else{
                 position = "RIGHT";
             }
+        }
+
+        if(prev_position == position){
+            iterations += 1;
+        } else{
+            prev_position = position;
+            iterations = 0;
+        }
+
+        if(iterations >= iteration_threshold){
+            final_position = position;
         }
         return cvErodeOutput;
     }
@@ -309,7 +325,7 @@ public class PropPipeline extends OpenCvPipeline {
         return filterContourNum;
     }
     public String getPosition(){
-        return position;
+        return final_position;
     }
     public ArrayList<Double> getContourAreas(){
         return contourAreas;
