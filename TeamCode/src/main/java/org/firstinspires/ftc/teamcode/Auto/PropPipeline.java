@@ -34,6 +34,7 @@ public class PropPipeline extends OpenCvPipeline {
     //Outputs
     private Mat rgbThresholdOutput = new Mat();
     private Mat cvErodeOutput = new Mat();
+    private Mat hsvThresholdOutput = new Mat();
     private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
     private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<>();
     private ArrayList<Double> contourAreas = new ArrayList<>();
@@ -86,15 +87,21 @@ public class PropPipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
         // Step RGB_Threshold0:
-        Mat rgbThresholdInput = input;
+        Mat hsvThresholdInput = input;
 
+        /*
         double[] rgbThresholdRed = {redMin, redMax};
         double[] rgbThresholdGreen = {blueMin, blueMax};
         double[] rgbThresholdBlue = {greenMin, greenMax};
-        rgbThreshold(rgbThresholdInput, rgbThresholdRed, rgbThresholdGreen, rgbThresholdBlue, rgbThresholdOutput);
+         */
+        double[] hsvThresholdHue = {0.0, 180.0};
+        double[] hsvThresholdSaturation = {98.50882930019621, 255.0};
+        double[] hsvThresholdValue = {20.83460504323813, 255.0};
+        hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
 
         // Step CV_erode0:
-        Mat cvErodeSrc = rgbThresholdOutput;
+        //Mat cvErodeSrc = rgbThresholdOutput;
+        Mat cvErodeSrc = hsvThresholdOutput;
         Mat cvErodeKernel = new Mat();
         Point cvErodeAnchor = new Point(-1, -1);
         double cvErodeIterations = 1.0;
@@ -123,6 +130,7 @@ public class PropPipeline extends OpenCvPipeline {
         filterContours(filterContoursContours, minArea, maxArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
 
         /*
+        V1:
         if(redMax < 8){
             position = "RIGHT";
         } else{
@@ -137,9 +145,22 @@ public class PropPipeline extends OpenCvPipeline {
                 }
             }
         }
+
+        if(prev_position == position){
+            iterations += 1;
+        } else{
+            prev_position = position;
+            iterations = 0;
+        }
+
+        if(iterations >= iteration_threshold){
+            final_position = position;
+        }
+        return cvErodeOutput;
 */
 
-
+/*
+//V2:
         if(redMax == 255){
             redMax = 128;
         }
@@ -166,7 +187,34 @@ public class PropPipeline extends OpenCvPipeline {
             final_position = position;
         }
         return cvErodeOutput;
+*/
+
+        //V3: (FOR HSV THRESHOLD)
+        if(filterContourNum == 1){
+            if(x >= x_pos_split){
+                position = "CENTER";
+            } else{
+                position = "RIGHT";
+            }
+        } else{
+            position = "LEFT";
+        }
+
+        if(prev_position == position){
+            iterations += 1;
+        } else{
+            prev_position = position;
+            iterations = 0;
+        }
+
+        if(iterations >= iteration_threshold){
+            final_position = position;
+        }
+        return cvErodeOutput;
+
+
     }
+
 
     /**
      * This method is a generated getter for the output of a RGB_Threshold.
@@ -307,6 +355,29 @@ public class PropPipeline extends OpenCvPipeline {
         System.out.println("OUTPUT CONTOURS:");
         System.out.println(output.size());
         filterContourNum = output.size();
+    }
+
+    /**
+     * Segment an image based on hue, saturation, and value ranges.
+     *
+     * @param input The image on which to perform the HSL threshold.
+     * @param hue The min and max hue
+     * @param sat The min and max saturation
+     * @param val The min and max value
+     */
+    private void hsvThreshold(Mat input, double[] hue, double[] sat, double[] val,
+                              Mat out) {
+        Imgproc.cvtColor(input, out, Imgproc.COLOR_BGR2HSV);
+        Core.inRange(out, new Scalar(hue[0], sat[0], val[0]),
+                new Scalar(hue[1], sat[1], val[1]), out);
+    }
+
+    /**
+     * This method is a generated getter for the output of a HSV_Threshold.
+     * @return Mat output from HSV_Threshold.
+     */
+    public Mat hsvThresholdOutput() {
+        return hsvThresholdOutput;
     }
 
     public double getX(){
