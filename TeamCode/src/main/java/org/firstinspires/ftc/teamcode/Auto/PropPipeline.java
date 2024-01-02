@@ -118,7 +118,7 @@ public class PropPipeline extends OpenCvPipeline {
         double filterContoursMaxRatio = 1000;
         filterContours(filterContoursContours, minArea, maxArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
 
-        /*
+
         if(redMax < 8){
             position = "RIGHT";
         } else{
@@ -133,8 +133,8 @@ public class PropPipeline extends OpenCvPipeline {
                 }
             }
         }
-*/
 
+/*
         if(redMax == 255){
             redMax = 128;
         }
@@ -149,6 +149,7 @@ public class PropPipeline extends OpenCvPipeline {
                 position = "RIGHT";
             }
         }
+        */
         return cvErodeOutput;
     }
 

@@ -47,13 +47,13 @@ public class Slides {
         LSL.set(output);
         LSR.set(output);
 
-        telemetry.addData("target Pos", targetPos);
+/*        telemetry.addData("target Pos", targetPos);
         telemetry.addData("LSL POS", LSL.getCurrentPosition());
         telemetry.addData("LSR POS", LSR.getCurrentPosition());
         telemetry.addData("tolerance", tolerance);
         telemetry.addData("LSL cm", ticksToCm(LSL.getCurrentPosition()));
         telemetry.addData("LSR cm", ticksToCm(LSR.getCurrentPosition()));
-        telemetry.addData("OUTPUT: ", output);
+        telemetry.addData("OUTPUT: ", output);*/
     }
 
 

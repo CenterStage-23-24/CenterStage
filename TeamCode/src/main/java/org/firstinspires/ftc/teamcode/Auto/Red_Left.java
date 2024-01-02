@@ -1,29 +1,30 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
-import android.transition.Slide;
-
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 
-@Autonomous
+@Autonomous(name = "Red Left")
 @Config
-public class BlueLeftSpike_Park extends LinearOpMode {
+public class Red_Left extends LinearOpMode {
 
     /** Auto Constant Variables: **/
-    public static double startX = 12.0; // Start pos X
-    public static double startY = 65.0; // Start pos Y
-    public static double startHeading = Math.toRadians(270);
+    public static double startX = -36.0; // Start pos X
+    public static double startY = -65.0; // Start pos Y
+    public static double startHeading = Math.toRadians(90);
 
     /**Robot Tuning Variables**/
     public static double startXOff = 0.0; // Start pos X offset
@@ -38,13 +39,18 @@ public class BlueLeftSpike_Park extends LinearOpMode {
     public static Arm arm;
     public static Slides slides;
     public static Gripper gripper;
+    private FieldCentricDrive fieldCentricDrive;
     private Detector detector;
 
     //Variables for spike mark
     private String propPosition;
-    public static double forwardDistance;
+    public static double dropPosition;
+    public static double dropPositionCompensationX;
+    public static double dropPositionCompensationY;
     public static double turnAngleSpike;
-    public static double turnAnglePark;
+    public static double aprilTagReadingPosition;
+    public static double aprilTagCompensation;
+    private static final double P = 0.035, I = 0, D = 0;
 
     @Override
     public void runOpMode() {
@@ -57,46 +63,46 @@ public class BlueLeftSpike_Park extends LinearOpMode {
         transferController = new TransferController(arm, slides, telemetry);
         gripper = new Gripper(hwMap);
         detector = new Detector(hardwareMap, telemetry);
+        fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
+
+        propPosition = "LEFT";
+        detector.detect();
+        gripper.gripLeft();
+        gripper.gripRight();
+        sleep(2000);
 
         while (!isStarted() && !isStopRequested()) {
-            propPosition = "RIGHT";
-            detector.detect();
-            gripper.gripLeft();
-            gripper.gripRight();
-            sleep(2000);
-            while(!transferController.extend("SPIKE")){
-                slides.pid(true);
-                arm.updatePos();
-
-            }
-
             telemetry.addData("-", "INIT DONE");
             telemetry.addData("FIND CONTOUR NUM: ", detector.getFindContourNum());
             telemetry.addData("FILTER CONTOUR NUM: ", detector.getFilterContourNum());
             telemetry.addData("POSITION: ", detector.getPosition());
             telemetry.addData("x", detector.getX());
             telemetry.addData("y", detector.getY());
-            //telemetry.addData("contour areas: ", contourAreas);
             telemetry.addData("redMax: ", detector.getRedMax());
             telemetry.update();
-
         }
 
-        propPosition = detector.getPosition();
+        propPosition = "LEFT";
 
         if(propPosition == "CENTER"){
-            forwardDistance = 0;
+            dropPosition = -38.5;
+            dropPositionCompensationX = 0.001;
+            dropPositionCompensationY = 0.001;
             turnAngleSpike = 0;
-            turnAnglePark = -turnAngleSpike;
+            aprilTagReadingPosition = -23;
 
         } else if(propPosition == "LEFT"){
-            forwardDistance = 1;
-            turnAngleSpike = 90;
-            turnAnglePark = -turnAngleSpike;
+            dropPosition = -40;
+            dropPositionCompensationX = 1;
+            dropPositionCompensationY = 2;
+            turnAngleSpike = 60;
+            aprilTagReadingPosition = -29;
         } else{
-            forwardDistance = 2;
-            turnAngleSpike = -90;
-            turnAnglePark = -turnAngleSpike;
+            dropPosition = -40;
+            dropPositionCompensationX = -1;
+            dropPositionCompensationY = 2;
+            turnAngleSpike = -75;
+            aprilTagReadingPosition = -17;
         }
 
         startX += startXOff;
@@ -104,8 +110,15 @@ public class BlueLeftSpike_Park extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(startX, startY, startHeading));
         drive.setExternalHeading(startHeading);
         TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(startX, startY, startHeading))
-                .forward(28)
-                .turn(Math.toRadians(turnAngleSpike))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    while(!transferController.extend("SPIKE")){
+                        slides.pid(true);
+                        arm.updatePos();
+                    }
+                })
+                .waitSeconds(1)
+                .lineToConstantHeading(new Vector2d(startX, dropPosition))
+                .lineToLinearHeading(new Pose2d(startX+dropPositionCompensationX, dropPosition-dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
                 })
@@ -117,15 +130,37 @@ public class BlueLeftSpike_Park extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .turn(Math.toRadians(turnAnglePark))
-                .back(24)
-                .turn(Math.toRadians(90))
-                .forward(32)
-                .strafeRight(24)
+                .lineToLinearHeading(new Pose2d(startX, dropPosition, startHeading))
+                .lineToConstantHeading(new Vector2d(startX, -61))
+                .turn(Math.toRadians(-91))
+                .lineToConstantHeading(new Vector2d(startX+28+48, -61))
+                .strafeRight(aprilTagReadingPosition)
+                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                    while (!transferController.extend("BACKDROP")) {
+                        slides.pid(true);
+                        arm.updatePos();
+                    }
+                })
+                .waitSeconds(2)
+                .forward(11)
+                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                    gripper.releaseRight();
+                })
+                .waitSeconds(0.5)
+                .back(5)
+                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                    while (!transferController.retract()) {
+                        slides.pid(true);
+                        arm.updatePos();
+                    }
+                })
+                .waitSeconds(2)
                 .build();
         drive.followTrajectorySequenceAsync(trajectory);
 
         while(opModeIsActive()){
+            telemetry.addData("IMU", HWMap.readFromIMU());
+            telemetry.update();
             drive.update();
             slides.pid(true);
             arm.updatePos();

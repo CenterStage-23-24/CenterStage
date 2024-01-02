@@ -17,8 +17,8 @@ public class MeepMeepTesting {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(30, 30, Math.toRadians(180), Math.toRadians(180), 14)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(12, 65, Math.toRadians(270)))
-                                .lineToConstantHeading(new Vector2d(12, 40))
+                        drive.trajectorySequenceBuilder(new Pose2d(36, -65, Math.toRadians(90)))
+                                .lineToConstantHeading(new Vector2d(-36, 40))
                                 .lineToLinearHeading(new Pose2d(10, 38, Math.toRadians(270+turnAngleSpike)))
                                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                                     //gripper.releaseLeft();

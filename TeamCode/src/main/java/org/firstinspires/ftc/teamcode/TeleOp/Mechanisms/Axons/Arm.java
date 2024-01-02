@@ -122,10 +122,10 @@ public class Arm {
         rightAxon.setPower(power);
 
         // Telemetry
-        telemetry.addData("Measured Pos: ", measuredPos);
+        /*telemetry.addData("Measured Pos: ", measuredPos);
         telemetry.addData("Target Pos: ", targetPos);
         telemetry.addData("Delta: ", delta);
-        telemetry.addData("Sign: ", sign);
+        telemetry.addData("Sign: ", sign);*/
     }
 
     //This method returns TRUE if the axons are within the buffered range of the target position or it will return FALSE.
