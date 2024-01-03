@@ -51,9 +51,11 @@ public class HWMap {
     private final RevColorSensorV3 trayRightCS;
     private final DistanceSensor distanceSensorLeft;
     private final DistanceSensor distanceSensorRight;
+    private static HardwareMap hardwareMap;
 
     public HWMap(HardwareMap hardwareMap) {
         //Drive Motors
+        this.hardwareMap = hardwareMap;
         rightFrontMotor = new Motor(hardwareMap, "RF", Motor.GoBILDA.RPM_435); //CH Port 0
         leftFrontMotor = new Motor(hardwareMap, "LF", Motor.GoBILDA.RPM_435);//CH Port 1. The right odo pod accesses this motor's encoder port
         leftBackMotor = new Motor(hardwareMap, "LB", Motor.GoBILDA.RPM_435); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
@@ -73,8 +75,12 @@ public class HWMap {
         intakeMotor = new Motor(hardwareMap, "IM", Motor.GoBILDA.RPM_435); //EH Port 0
 
         //IMU mapped and initialized in SampleMecanumDrive - CH 12C BUS 0
+//        if(imu == null){
         imu = hardwareMap.get(IMU.class, "imu");
         initializeIMU();
+//        }
+
+
 
         //Outtake Servos
         outtakeServoLeft = hardwareMap.get(Servo.class, "OSL"); //EH Port 4
@@ -223,5 +229,8 @@ public class HWMap {
 
     public MecanumDrive getMecanumDrive() {
         return mecanumDrive;
+    }
+    public static void setIMU(){
+
     }
 }

@@ -60,7 +60,7 @@ public class Red_Left extends LinearOpMode {
         drive = new SampleMecanumDrive(hardwareMap);
         arm =  new Arm(hwMap, telemetry);
         slides =  new Slides(hwMap, telemetry);
-        transferController = new TransferController(arm, slides, telemetry);
+        transferController = new TransferController(arm, slides);
         gripper = new Gripper(hwMap);
         detector = new Detector(hardwareMap, telemetry);
         fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
@@ -89,20 +89,20 @@ public class Red_Left extends LinearOpMode {
             dropPositionCompensationX = 0.001;
             dropPositionCompensationY = 0.001;
             turnAngleSpike = 0;
-            aprilTagReadingPosition = -23;
+            aprilTagReadingPosition = 23;
 
         } else if(propPosition == "LEFT"){
             dropPosition = -40;
             dropPositionCompensationX = 1;
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
-            aprilTagReadingPosition = -29;
+            aprilTagReadingPosition = 29;
         } else{
             dropPosition = -40;
             dropPositionCompensationX = -1;
             dropPositionCompensationY = 2;
             turnAngleSpike = -75;
-            aprilTagReadingPosition = -17;
+            aprilTagReadingPosition = 17;
         }
 
         startX += startXOff;
@@ -134,7 +134,7 @@ public class Red_Left extends LinearOpMode {
                 .lineToConstantHeading(new Vector2d(startX, -61))
                 .turn(Math.toRadians(-91))
                 .lineToConstantHeading(new Vector2d(startX+28+48, -61))
-                .strafeRight(aprilTagReadingPosition)
+                .strafeLeft(aprilTagReadingPosition)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.extend("BACKDROP")) {
                         slides.pid(true);

@@ -66,7 +66,7 @@ public class Cycle {
                 break;
             case extend:
                 toTransfer = true;
-                if (transferController.extend())
+                if (transferController.extend("BACKDROP"))
                     state = CycleFSM.start;
                 else
                     checkInputs();//Just to see if the driver wants to retract

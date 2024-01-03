@@ -61,7 +61,7 @@ public class CVBackdropNav extends LinearOpMode {
         drive = new SampleMecanumDrive(hardwareMap);
         arm = new Arm(hwMap, telemetry);
         slides = new Slides(hwMap, telemetry);
-        transferController = new TransferController(arm, slides, telemetry);
+        transferController = new TransferController(arm, slides);
         fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
         gripper = new Gripper(hwMap);
         detector = new AprilTagDetector();
