@@ -3,11 +3,14 @@ package org.firstinspires.ftc.teamcode.TeleOp.Mechanisms;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class IntakeController {
 
     private final Intake intake;
     private final Gripper gripper;
     private final GamepadEx gamepad;
+    private final Telemetry telemetry;
     private boolean stopRequested = false;
 
     private boolean intakeRunning = false;
@@ -17,10 +20,11 @@ public class IntakeController {
     private boolean jammingDisabled = false;
 
 
-    public IntakeController(Intake intake, GamepadEx gamepad, Gripper gripper) {
+    public IntakeController(Intake intake, GamepadEx gamepad, Gripper gripper, Telemetry telemetry) {
         this.intake = intake;
         this.gamepad = gamepad;
         this.gripper = gripper;
+        this.telemetry = telemetry;
     }
 
     public boolean isPowerEjecting() {
@@ -38,11 +42,8 @@ public class IntakeController {
             rampUp = false;
         }
 
-        if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT))
-            stopRequested = !stopRequested;
-
         if (!stopRequested) {
-            if(!gamepad.isDown(GamepadKeys.Button.B)) {
+            if (!gamepad.isDown(GamepadKeys.Button.B)) {
                 if (!toTransfer) {
                     intake.detectPixels();
                     if (intake.getPixelInLeft()) {
@@ -61,7 +62,7 @@ public class IntakeController {
                     intake.eject();
                     rampUp = true;
                 }
-            } else{
+            } else {
                 intake.eject();
                 rampUp = true;
             }
@@ -100,5 +101,18 @@ public class IntakeController {
         return jammingDisabled;
     }
 
+    public void setStopRequested(boolean stopRequested) {
+        this.stopRequested = stopRequested;
+    }
 
+    public boolean getStopRequested() {
+        return stopRequested;
+    }
+
+    public void getTelemetry() {
+        telemetry.addData("Left pixel", intake.getPixelInLeft());
+        telemetry.addData("Right pixel", intake.getPixelInRight());
+        telemetry.addData("L-CS distance: ", intake.getLeftDistance());
+        telemetry.addData("R-CS distance: ", intake.getRightDistance());
+    }
 }

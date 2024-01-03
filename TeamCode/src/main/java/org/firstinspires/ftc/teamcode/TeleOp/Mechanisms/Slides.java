@@ -64,8 +64,8 @@ public class Slides {
     public boolean atPos() {
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
     }
-    public boolean atSpecificPos(double specificPos) {
-        return ((specificPos + tolerance) >= LSL.getCurrentPosition()) && ((specificPos - tolerance) <= LSL.getCurrentPosition());
+    public double currentPos() {
+        return LSL.getCurrentPosition();
     }
 
     public int mmToTicks(double cm) {
