@@ -62,7 +62,4 @@ public class Detector {
     public ArrayList<Double> getContourAreas(){
         return propPipeline.getContourAreas();
     }
-    public double getRedMax(){
-        return propPipeline.getRedMax();
-    }
 }

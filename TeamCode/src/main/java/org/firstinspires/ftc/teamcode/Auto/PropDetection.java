@@ -39,7 +39,6 @@ public class PropDetection extends LinearOpMode {
         telemetry.addData("x", detector.getX());
         telemetry.addData("y", detector.getY());
         telemetry.addData("contour areas: ", contourAreas);
-        telemetry.addData("redMax: ", detector.getRedMax());
         telemetry.update();
     }
 }

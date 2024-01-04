@@ -78,12 +78,11 @@ public class Red_Left extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested()) {
             telemetry.addData("-", "INIT DONE");
-            telemetry.addData("FIND CONTOUR NUM: ", detector.getFindContourNum());
-            telemetry.addData("FILTER CONTOUR NUM: ", detector.getFilterContourNum());
             telemetry.addData("POSITION: ", detector.getPosition());
+            telemetry.addData("FILTER CONTOUR NUM: ", detector.getFilterContourNum());
             telemetry.addData("x", detector.getX());
             telemetry.addData("y", detector.getY());
-            telemetry.addData("redMax: ", detector.getRedMax());
+            telemetry.addData("contour areas: ", detector.getContourAreas());
             telemetry.update();
         }
 
@@ -115,6 +114,8 @@ public class Red_Left extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(startX, startY, startHeading));
         drive.setExternalHeading(startHeading);
         TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(startX, startY, startHeading))
+
+                //Extension for Spike Mark Delivery
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     while(!transferController.extend("SPIKE")){
                         slides.pid(true);
@@ -122,7 +123,11 @@ public class Red_Left extends LinearOpMode {
                     }
                 })
                 .waitSeconds(1)
+
+                //Approach to Spike Mark
                 .lineToConstantHeading(new Vector2d(startX, dropPosition))
+
+                //Spike Mark Compensation and Delivery
                 .lineToLinearHeading(new Pose2d(startX-dropPositionCompensationX, dropPosition+dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
@@ -136,10 +141,16 @@ public class Red_Left extends LinearOpMode {
                 })
                 .waitSeconds(2)
                 .lineToLinearHeading(new Pose2d(startX, dropPosition-backDistance, startHeading))
+
+                //Reset to Original Position
                 .lineToConstantHeading(new Vector2d(startX, -61))
+
+                //Approach to Backdrop
                 .turn(Math.toRadians(-91))
                 .lineToConstantHeading(new Vector2d(startX+28+48, -61))
                 .strafeLeft(aprilTagReadingPosition)
+
+                //Delivery
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.gripRight();
                 })
@@ -157,6 +168,8 @@ public class Red_Left extends LinearOpMode {
                 })
                 .waitSeconds(0.5)
                 .back(7)
+
+                //Reset for TeleOp
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.retract()) {
                         slides.pid(true);

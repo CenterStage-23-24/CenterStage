@@ -13,7 +13,7 @@ public class Odometry {
 
         public static double leftRetract = 0.05;
         public static double rightRetract = 0.75;
-        public static double middleRetract = 0.5;
+        public static double middleRetract = 0.6;
         public static double leftExtend = 0.4;
         public static double rightExtend = 0.4;
         public static double middleExtend = 1.0;

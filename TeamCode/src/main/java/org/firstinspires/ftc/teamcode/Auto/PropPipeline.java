@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.HashMap;
 
@@ -38,36 +39,8 @@ public class PropPipeline extends OpenCvPipeline {
     private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
     private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<>();
     private ArrayList<Double> contourAreas = new ArrayList<>();
-
-    public static double redMax = 255;
-    public static double redMin = 0;
-    public static double blueMax = 255;
-    public static double blueMin = 0;
-    public static double greenMax = 255;
-    public static double greenMin = 0;
     public static double minArea = 1500;
     public static double maxArea = 10000;
-
-    /*
-    public static double redMax = 25;
-    public static double redMin = 0;
-    public static double blueMax = 60;
-    public static double blueMin = 0;
-    public static double greenMax = 60;
-    public static double greenMin = 0;
-     */
-
-    /*
-    ROBOT CONSTANTS:
-    public static double redMax = 50;
-    public static double redMin = 0;
-    public static double blueMax = 150;
-    public static double blueMin = 0;
-    public static double greenMax = 150;
-    public static double greenMin = 0;
-    public static double minAreaLeft = 500;
-    public static double minAreaCenter = 300;
-     */
 
     private String position;
     private String final_position = "";
@@ -89,18 +62,12 @@ public class PropPipeline extends OpenCvPipeline {
         // Step RGB_Threshold0:
         Mat hsvThresholdInput = input;
 
-        /*
-        double[] rgbThresholdRed = {redMin, redMax};
-        double[] rgbThresholdGreen = {blueMin, blueMax};
-        double[] rgbThresholdBlue = {greenMin, greenMax};
-         */
         double[] hsvThresholdHue = {0.0, 180.0};
         double[] hsvThresholdSaturation = {98.50882930019621, 255.0};
         double[] hsvThresholdValue = {20.83460504323813, 255.0};
         hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
 
         // Step CV_erode0:
-        //Mat cvErodeSrc = rgbThresholdOutput;
         Mat cvErodeSrc = hsvThresholdOutput;
         Mat cvErodeKernel = new Mat();
         Point cvErodeAnchor = new Point(-1, -1);
@@ -113,7 +80,6 @@ public class PropPipeline extends OpenCvPipeline {
         Mat findContoursInput = cvErodeOutput;
         boolean findContoursExternalOnly = false;
         findContours(findContoursInput, findContoursExternalOnly, findContoursOutput);
-
 
         // Step Filter_Contours0:
         ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
@@ -129,66 +95,6 @@ public class PropPipeline extends OpenCvPipeline {
         double filterContoursMaxRatio = 1000;
         filterContours(filterContoursContours, minArea, maxArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
 
-        /*
-        V1:
-        if(redMax < 8){
-            position = "RIGHT";
-        } else{
-            if(filterContourNum != 1){
-                redMax /= 2;
-            }
-            else{
-                if(x >= x_pos_split){
-                    position = "CENTER";
-                } else{
-                    position = "LEFT";
-                }
-            }
-        }
-
-        if(prev_position == position){
-            iterations += 1;
-        } else{
-            prev_position = position;
-            iterations = 0;
-        }
-
-        if(iterations >= iteration_threshold){
-            final_position = position;
-        }
-        return cvErodeOutput;
-*/
-
-/*
-//V2:
-        if(redMax == 255){
-            redMax = 128;
-        }
-        if(filterContourNum > 1){
-            redMax /= 2;
-        } else if(filterContourNum == 0){
-            position = "LEFT";
-        } else{
-            if(x >= x_pos_split){
-                position = "CENTER";
-            } else{
-                position = "RIGHT";
-            }
-        }
-
-        if(prev_position == position){
-            iterations += 1;
-        } else{
-            prev_position = position;
-            iterations = 0;
-        }
-
-        if(iterations >= iteration_threshold){
-            final_position = position;
-        }
-        return cvErodeOutput;
-*/
-
         //V3: (FOR HSV THRESHOLD)
         if(filterContourNum == 1){
             if(x >= x_pos_split){
@@ -200,7 +106,7 @@ public class PropPipeline extends OpenCvPipeline {
             position = "LEFT";
         }
 
-        if(prev_position == position){
+        if(Objects.equals(prev_position, position)){
             iterations += 1;
         } else{
             prev_position = position;
@@ -213,15 +119,6 @@ public class PropPipeline extends OpenCvPipeline {
         return cvErodeOutput;
 
 
-    }
-
-
-    /**
-     * This method is a generated getter for the output of a RGB_Threshold.
-     * @return Mat output from RGB_Threshold.
-     */
-    public Mat rgbThresholdOutput() {
-        return rgbThresholdOutput;
     }
 
     /**
@@ -238,21 +135,6 @@ public class PropPipeline extends OpenCvPipeline {
      */
     public ArrayList<MatOfPoint> filterContoursOutput() {
         return filterContoursOutput;
-    }
-
-
-    /**
-     * Segment an image based on color ranges.
-     * @param input The image on which to perform the RGB threshold.
-     * @param red The min and max red.
-     * @param green The min and max green.
-     * @param blue The min and max blue.
-     */
-    private void rgbThreshold(Mat input, double[] red, double[] green, double[] blue,
-                              Mat out) {
-        Imgproc.cvtColor(input, out, Imgproc.COLOR_BGR2RGB);
-        Core.inRange(out, new Scalar(red[0], green[0], blue[0]),
-                new Scalar(red[1], green[1], blue[1]), out);
     }
 
     /**
@@ -317,8 +199,6 @@ public class PropPipeline extends OpenCvPipeline {
                                         minRatio, double maxRatio, List<MatOfPoint> output) {
         final MatOfInt hull = new MatOfInt();
         output.clear();
-        System.out.println("INPUT CONTOURS:");
-        System.out.println(inputContours.size());
         //operation
         for (int i = 0; i < inputContours.size(); i++) {
             final MatOfPoint contour = inputContours.get(i);
@@ -345,15 +225,10 @@ public class PropPipeline extends OpenCvPipeline {
             final double ratio = bb.width / (double)bb.height;
             if (ratio < minRatio || ratio > maxRatio) continue;
             output.add(contour);
-            System.out.println("X AND Y:");
-            System.out.println(contour.toArray()[0].x);
-            System.out.println(contour.toArray()[0].y);
             x = contour.toArray()[0].x;
             y = contour.toArray()[0].y;
         }
         collectDone = true;
-        System.out.println("OUTPUT CONTOURS:");
-        System.out.println(output.size());
         filterContourNum = output.size();
     }
 
@@ -385,9 +260,6 @@ public class PropPipeline extends OpenCvPipeline {
     }
     public double getY(){
         return y;
-    }
-    public double getRedMax(){
-        return redMax;
     }
     public int getFindContourNum(){
         return findContourNum;
