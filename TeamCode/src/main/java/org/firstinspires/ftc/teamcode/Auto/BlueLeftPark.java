@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 
-@Autonomous
 public class BlueLeftPark extends LinearOpMode {
 
     /** Auto Constant Variables: **/

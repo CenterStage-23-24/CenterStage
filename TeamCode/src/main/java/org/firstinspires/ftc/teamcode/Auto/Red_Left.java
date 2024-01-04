@@ -50,6 +50,7 @@ public class Red_Left extends LinearOpMode {
     public static double turnAngleSpike;
     public static double aprilTagReadingPosition;
     public static double aprilTagCompensation;
+    public static double backDistance;
     private static final double P = 0.035, I = 0, D = 0;
 
     @Override
@@ -82,21 +83,21 @@ public class Red_Left extends LinearOpMode {
             telemetry.update();
         }
 
-        propPosition = "LEFT";
-
+        propPosition = detector.getPosition();
         if(propPosition == "CENTER"){
-            dropPosition = -38.5;
+            dropPosition = -36.5;
             dropPositionCompensationX = 0.001;
-            dropPositionCompensationY = 0.001;
+            dropPositionCompensationY = -3;
             turnAngleSpike = 0;
-            aprilTagReadingPosition = 23;
+            aprilTagReadingPosition = 25;
+            backDistance = 3;
 
         } else if(propPosition == "LEFT"){
             dropPosition = -40;
             dropPositionCompensationX = 1;
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
-            aprilTagReadingPosition = 29;
+            aprilTagReadingPosition = 31;
         } else{
             dropPosition = -40;
             dropPositionCompensationX = -1;
@@ -118,7 +119,7 @@ public class Red_Left extends LinearOpMode {
                 })
                 .waitSeconds(1)
                 .lineToConstantHeading(new Vector2d(startX, dropPosition))
-                .lineToLinearHeading(new Pose2d(startX+dropPositionCompensationX, dropPosition-dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
+                .lineToLinearHeading(new Pose2d(startX-dropPositionCompensationX, dropPosition+dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
                 })
@@ -130,11 +131,15 @@ public class Red_Left extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .lineToLinearHeading(new Pose2d(startX, dropPosition, startHeading))
+                .lineToLinearHeading(new Pose2d(startX, dropPosition-backDistance, startHeading))
                 .lineToConstantHeading(new Vector2d(startX, -61))
                 .turn(Math.toRadians(-91))
                 .lineToConstantHeading(new Vector2d(startX+28+48, -61))
                 .strafeLeft(aprilTagReadingPosition)
+                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                    gripper.gripRight();
+                })
+                .waitSeconds(1)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.extend("BACKDROP")) {
                         slides.pid(true);
@@ -147,7 +152,7 @@ public class Red_Left extends LinearOpMode {
                     gripper.releaseRight();
                 })
                 .waitSeconds(0.5)
-                .back(5)
+                .back(7)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.retract()) {
                         slides.pid(true);

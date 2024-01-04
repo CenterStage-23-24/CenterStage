@@ -45,7 +45,7 @@ public class PropPipeline extends OpenCvPipeline {
     public static double blueMin = 0;
     public static double greenMax = 255;
     public static double greenMin = 0;
-    public static double minArea = 1000;
+    public static double minArea = 1500;
     public static double maxArea = 10000;
 
     /*

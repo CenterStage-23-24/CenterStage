@@ -142,6 +142,10 @@ public class Blue_Right extends LinearOpMode {
                 .lineToConstantHeading(new Vector2d(startX+28+48, 62))
                 .strafeRight(aprilTagReadingPosition)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                    gripper.gripRight();
+                })
+                .waitSeconds(1)
+                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.extend("BACKDROP")) {
                         slides.pid(true);
                         arm.updatePos();

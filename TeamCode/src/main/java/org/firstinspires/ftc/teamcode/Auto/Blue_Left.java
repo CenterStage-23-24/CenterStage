@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Odometry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
@@ -45,6 +46,7 @@ public class Blue_Left extends LinearOpMode {
     public static Gripper gripper;
     private FieldCentricDrive fieldCentricDrive;
     private Detector detector;
+    private Odometry odometry;
 
     //Variables for spike mark
     private String propPosition;
@@ -54,6 +56,8 @@ public class Blue_Left extends LinearOpMode {
     public static double turnAngleSpike;
     public static double aprilTagReadingPosition;
     public static double aprilTagAngleCompensation;
+    public static double backDistance;
+    public static double leftCompensation;
     private static final double P = 0.035, I = 0, D = 0;
 
     @Override
@@ -68,11 +72,13 @@ public class Blue_Left extends LinearOpMode {
         gripper = new Gripper(hwMap);
         detector = new Detector(hardwareMap, telemetry);
         fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
+        odometry = new Odometry(hwMap);
 
         //CODE STARTS HERE
         propPosition = "LEFT";
         gripper.gripLeft();
         gripper.gripRight();
+        odometry.retractOdo();
         sleep(2000);
 
         while (!isStarted() && !isStopRequested()) {
@@ -89,17 +95,20 @@ public class Blue_Left extends LinearOpMode {
 
         propPosition = detector.getPosition();
         if (propPosition == "CENTER") {
-            dropPosition = 38.5;
+            dropPosition = 40.5;
             dropPositionCompensationX = 0.001;
-            dropPositionCompensationY = 0.001;
+            dropPositionCompensationY = 4;
             turnAngleSpike = 0;
-            aprilTagReadingPosition = 22;
+            aprilTagReadingPosition = 20;
+            backDistance = 4;
+
         } else if (propPosition == "LEFT") {
             dropPosition = 40;
             dropPositionCompensationX = 1;
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
-            aprilTagReadingPosition = 16;
+            aprilTagReadingPosition = 14;
+            leftCompensation = 1;
         } else {
             dropPosition = 40;
             dropPositionCompensationX = -1;
@@ -120,7 +129,7 @@ public class Blue_Left extends LinearOpMode {
                     }
                 })
                 .waitSeconds(1)
-                .lineToConstantHeading(new Vector2d(startX, dropPosition))
+                .lineToConstantHeading(new Vector2d(startX+1, dropPosition))
                 .lineToLinearHeading(new Pose2d(startX + dropPositionCompensationX, dropPosition - dropPositionCompensationY, startHeading + Math.toRadians(turnAngleSpike)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
@@ -133,11 +142,15 @@ public class Blue_Left extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .lineToLinearHeading(new Pose2d(startX, dropPosition, startHeading))
-                .lineToConstantHeading(new Vector2d(startX, 60))
+                .lineToLinearHeading(new Pose2d(startX+1, dropPosition-backDistance, startHeading))
+                .lineToConstantHeading(new Vector2d(startX+leftCompensation, 60))
                 .turn(Math.toRadians(90))
                 .lineToConstantHeading(new Vector2d(startX + 28, 60))
                 .strafeRight(aprilTagReadingPosition)
+                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                    gripper.gripRight();
+                })
+                .waitSeconds(1)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.extend("BACKDROP")) {
                         slides.pid(true);
@@ -145,7 +158,7 @@ public class Blue_Left extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .forward(12)
+                .forward(13)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.releaseRight();
                 })
@@ -157,7 +170,11 @@ public class Blue_Left extends LinearOpMode {
                         arm.updatePos();
                     }
                 })
-                .waitSeconds(2)
+                .UNSTABLE_addTemporalMarkerOffset(0, ()->{
+                    odometry.extendOdo();
+                    HWMap.imuAngle = drive.getRawExternalHeading();
+                })
+                .waitSeconds(1)
                 .build();
         drive.followTrajectorySequenceAsync(trajectory);
 
@@ -168,5 +185,8 @@ public class Blue_Left extends LinearOpMode {
             slides.pid(true);
             arm.updatePos();
         }
+    }
+    private void endRR(){
+
     }
 }

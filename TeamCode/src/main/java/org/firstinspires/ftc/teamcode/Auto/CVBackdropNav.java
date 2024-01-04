@@ -16,7 +16,6 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 
-@Autonomous
 @Config
 public class CVBackdropNav extends LinearOpMode {
 

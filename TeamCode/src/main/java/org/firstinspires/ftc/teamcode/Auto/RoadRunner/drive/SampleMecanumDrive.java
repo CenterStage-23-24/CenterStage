@@ -33,6 +33,7 @@ import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.Traject
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.TrajectorySequenceRunner;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.util.LynxModuleUtil;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,6 +56,7 @@ import static org.firstinspires.ftc.teamcode.Auto.RoadRunner.drive.DriveConstant
  */
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
+
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(7, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(4, 0, 0);
 
@@ -95,10 +97,8 @@ public class SampleMecanumDrive extends MecanumDrive {
         }
 
         // TODO: adjust the names of the following hardware devices to match your configuration
-        imu = hardwareMap.get(IMU.class, "imu");
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                DriveConstants.LOGO_FACING_DIR, DriveConstants.USB_FACING_DIR));
-        imu.initialize(parameters);
+        HWMap hwMap = new HWMap(hardwareMap);
+        HWMap.initializeIMU();
 
         leftFront = hardwareMap.get(DcMotorEx.class, "LF");
         leftRear = hardwareMap.get(DcMotorEx.class, "LB");

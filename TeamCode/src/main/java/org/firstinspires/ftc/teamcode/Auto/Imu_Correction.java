@@ -17,7 +17,6 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 
-@Autonomous
 @Config
 public class Imu_Correction extends LinearOpMode {
 

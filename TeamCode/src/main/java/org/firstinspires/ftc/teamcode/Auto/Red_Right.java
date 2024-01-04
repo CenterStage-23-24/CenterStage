@@ -50,6 +50,7 @@ public class Red_Right extends LinearOpMode {
     public static double turnAngleSpike;
     public static double aprilTagReadingPosition;
     public static double aprilTagCompensation;
+    public static double backDistance;
     private static final double P = 0.035, I = 0, D = 0;
 
 
@@ -87,10 +88,11 @@ public class Red_Right extends LinearOpMode {
         propPosition = detector.getPosition();
         if(propPosition == "CENTER"){
             dropPosition = -36.5;
-            dropPositionCompensationX = 38.5;
-            dropPositionCompensationY = 0;
+            dropPositionCompensationX = 0.001;
+            dropPositionCompensationY = -3;
             turnAngleSpike = 0;
             aprilTagReadingPosition = 24;
+            backDistance = 3;
 
 
         } else if(propPosition == "LEFT"){
@@ -98,13 +100,15 @@ public class Red_Right extends LinearOpMode {
             dropPositionCompensationX = 1;
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
-            aprilTagReadingPosition = 26;
+            aprilTagReadingPosition = 31;
+            backDistance = 0;
         } else{
             dropPosition = -40;
             dropPositionCompensationX = -1;
             dropPositionCompensationY = 2;
             turnAngleSpike = -75;
             aprilTagReadingPosition = 17;
+            backDistance = 0;
         }
 
         startX += startXOff;
@@ -132,11 +136,15 @@ public class Red_Right extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .lineToLinearHeading(new Pose2d(startX, dropPosition, startHeading))
+                .lineToLinearHeading(new Pose2d(startX, dropPosition-backDistance, startHeading))
                 .lineToConstantHeading(new Vector2d(startX, -60))
                 .turn(Math.toRadians(-90))
                 .lineToConstantHeading(new Vector2d(startX+28, -60))
                 .strafeLeft(aprilTagReadingPosition)
+                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                    gripper.gripRight();
+                })
+                .waitSeconds(1)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.extend("BACKDROP")) {
                         slides.pid(true);
