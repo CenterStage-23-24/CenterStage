@@ -78,7 +78,7 @@ public class Blue_Left extends LinearOpMode {
         propPosition = "LEFT";
         gripper.gripLeft();
         gripper.gripRight();
-        odometry.retractOdo();
+        odometry.extendOdo();
         sleep(2000);
 
         while (!isStarted() && !isStopRequested()) {
@@ -171,8 +171,7 @@ public class Blue_Left extends LinearOpMode {
                     }
                 })
                 .UNSTABLE_addTemporalMarkerOffset(0, ()->{
-                    odometry.extendOdo();
-                    HWMap.imuAngle = drive.getRawExternalHeading();
+                    odometry.retractOdo();
                 })
                 .waitSeconds(1)
                 .build();

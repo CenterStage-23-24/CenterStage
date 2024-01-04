@@ -12,11 +12,11 @@ public class Odometry {
         private Servo OdoRetractionMiddle;
 
         public static double leftRetract = 0.05;
-        public static double rightRetract = 0;
-        public static double middleRetract = 0;
+        public static double rightRetract = 0.75;
+        public static double middleRetract = 0.5;
         public static double leftExtend = 0.4;
-        public static double rightExtend = 0;
-        public static double middleExtend = 0;
+        public static double rightExtend = 0.4;
+        public static double middleExtend = 1.0;
 
 
         public Odometry(HWMap hwMap) {

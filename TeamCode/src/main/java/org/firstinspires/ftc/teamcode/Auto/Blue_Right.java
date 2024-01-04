@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Odometry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
@@ -38,6 +39,7 @@ public class Blue_Right extends LinearOpMode {
     public static TransferController transferController;
     public static Arm arm;
     public static Slides slides;
+    public static Odometry odometry;
     public static Gripper gripper;
     private FieldCentricDrive fieldCentricDrive;
     private Detector detector;
@@ -66,12 +68,14 @@ public class Blue_Right extends LinearOpMode {
         gripper = new Gripper(hwMap);
         detector = new Detector(hardwareMap, telemetry);
         fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
+        odometry = new Odometry(hwMap);
 
 
         propPosition = "LEFT";
         detector.detect();
         gripper.gripLeft();
         gripper.gripRight();
+        odometry.extendOdo();
         sleep(2000);
 
         while (!isStarted() && !isStopRequested()) {
@@ -95,20 +99,20 @@ public class Blue_Right extends LinearOpMode {
             dropPositionCompensationX = 0.001;
             dropPositionCompensationY = 0.001;
             turnAngleSpike = 0;
-            aprilTagReadingPosition = 23;
+            aprilTagReadingPosition = 25;
 
         } else if(propPosition == "LEFT"){
             dropPosition = 40;
-            dropPositionCompensationX = 1;
+            dropPositionCompensationX = 0.5;
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
-            aprilTagReadingPosition = 15;
+            aprilTagReadingPosition = 18;
         } else{
             dropPosition = 40;
-            dropPositionCompensationX = -1;
+            dropPositionCompensationX = -0.5;
             dropPositionCompensationY = 2;
             turnAngleSpike = -75;
-            aprilTagReadingPosition = 26;
+            aprilTagReadingPosition = 30;
         }
 
         startX += startXOff;
@@ -138,9 +142,9 @@ public class Blue_Right extends LinearOpMode {
                 .waitSeconds(2)
                 .lineToLinearHeading(new Pose2d(startX, dropPosition, startHeading))
                 .lineToConstantHeading(new Vector2d(startX, 62))
-                .turn(Math.toRadians(93))
+                .turn(Math.toRadians(92))
                 .lineToConstantHeading(new Vector2d(startX+28+48, 62))
-                .strafeRight(aprilTagReadingPosition)
+                .lineToConstantHeading(new Vector2d(startX+28+48, 65-aprilTagReadingPosition))
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.gripRight();
                 })
@@ -152,19 +156,22 @@ public class Blue_Right extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .forward(11)
+                .lineToConstantHeading(new Vector2d(startX+28+48+11, 65-aprilTagReadingPosition))
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.releaseRight();
                 })
                 .waitSeconds(0.5)
-                .back(5)
+                .lineToConstantHeading(new Vector2d(startX+28+48+4, 65-aprilTagReadingPosition))
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.retract()) {
                         slides.pid(true);
                         arm.updatePos();
                     }
                 })
-                .waitSeconds(2)
+                .UNSTABLE_addTemporalMarkerOffset(0, ()->{
+                    odometry.retractOdo();
+                })
+                .waitSeconds(1)
                 .build();
         drive.followTrajectorySequenceAsync(trajectory);
 
@@ -174,7 +181,6 @@ public class Blue_Right extends LinearOpMode {
             drive.update();
             slides.pid(true);
             arm.updatePos();
-
         }
     }
 }

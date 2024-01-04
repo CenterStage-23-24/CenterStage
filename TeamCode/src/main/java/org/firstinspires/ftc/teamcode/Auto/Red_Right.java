@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Odometry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
@@ -38,6 +39,7 @@ public class Red_Right extends LinearOpMode {
     public static TransferController transferController;
     public static Arm arm;
     public static Slides slides;
+    public static Odometry odometry;
     public static Gripper gripper;
     private FieldCentricDrive fieldCentricDrive;
     private Detector detector;
@@ -62,6 +64,7 @@ public class Red_Right extends LinearOpMode {
         drive = new SampleMecanumDrive(hardwareMap);
         arm =  new Arm(hwMap, telemetry);
         slides =  new Slides(hwMap, telemetry);
+        odometry = new Odometry(hwMap);
         transferController = new TransferController(arm, slides);
         gripper = new Gripper(hwMap);
         detector = new Detector(hardwareMap, telemetry);
@@ -71,6 +74,7 @@ public class Red_Right extends LinearOpMode {
         detector.detect();
         gripper.gripLeft();
         gripper.gripRight();
+        odometry.extendOdo();
         sleep(2000);
 
         while (!isStarted() && !isStopRequested()) {
@@ -164,7 +168,10 @@ public class Red_Right extends LinearOpMode {
                         arm.updatePos();
                     }
                 })
-                .waitSeconds(2)
+                .UNSTABLE_addTemporalMarkerOffset(0, ()->{
+                    odometry.retractOdo();
+                })
+                .waitSeconds(1)
                 .build();
         drive.followTrajectorySequenceAsync(trajectory);
 
