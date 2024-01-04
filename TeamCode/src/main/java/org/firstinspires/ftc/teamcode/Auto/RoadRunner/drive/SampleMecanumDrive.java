@@ -98,6 +98,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
         // TODO: adjust the names of the following hardware devices to match your configuration
         HWMap hwMap = new HWMap(hardwareMap);
+        imu = hwMap.getImu();
         HWMap.initializeIMU();
 
         leftFront = hardwareMap.get(DcMotorEx.class, "LF");
