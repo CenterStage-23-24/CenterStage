@@ -36,8 +36,6 @@ public class Detector {
             }
         });
         telemetry.addData("-", "Detector construction over!");
-
-
     }
 
     public void detect(){

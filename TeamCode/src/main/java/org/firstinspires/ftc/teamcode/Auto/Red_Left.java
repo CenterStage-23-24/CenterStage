@@ -151,7 +151,7 @@ public class Red_Left extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .forward(11)
+                .forward(9)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.releaseRight();
                 })

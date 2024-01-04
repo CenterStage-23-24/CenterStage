@@ -95,12 +95,12 @@ public class Blue_Left extends LinearOpMode {
 
         propPosition = detector.getPosition();
         if (propPosition == "CENTER") {
-            dropPosition = 40.5;
+            dropPosition = 36.5;
             dropPositionCompensationX = 0.001;
-            dropPositionCompensationY = 4;
+            dropPositionCompensationY = 3;
             turnAngleSpike = 0;
             aprilTagReadingPosition = 20;
-            backDistance = 4;
+            backDistance = 3;
 
         } else if (propPosition == "LEFT") {
             dropPosition = 40;
@@ -130,7 +130,7 @@ public class Blue_Left extends LinearOpMode {
                 })
                 .waitSeconds(1)
                 .lineToConstantHeading(new Vector2d(startX+1, dropPosition))
-                .lineToLinearHeading(new Pose2d(startX + dropPositionCompensationX, dropPosition - dropPositionCompensationY, startHeading + Math.toRadians(turnAngleSpike)))
+                .lineToLinearHeading(new Pose2d(startX + dropPositionCompensationX, dropPosition + dropPositionCompensationY, startHeading + Math.toRadians(turnAngleSpike)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
                 })
@@ -142,7 +142,7 @@ public class Blue_Left extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .lineToLinearHeading(new Pose2d(startX+1, dropPosition-backDistance, startHeading))
+                .lineToLinearHeading(new Pose2d(startX+1, dropPosition+backDistance, startHeading))
                 .lineToConstantHeading(new Vector2d(startX+leftCompensation, 60))
                 .turn(Math.toRadians(90))
                 .lineToConstantHeading(new Vector2d(startX + 28, 60))

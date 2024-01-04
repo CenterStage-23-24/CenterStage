@@ -52,6 +52,7 @@ public class Blue_Right extends LinearOpMode {
     public static double turnAngleSpike;
     public static double aprilTagReadingPosition;
     public static double aprilTagCompensation;
+    public static double backDistance;
     private static final double P = 0.035, I = 0, D = 0;
 
 
@@ -95,11 +96,12 @@ public class Blue_Right extends LinearOpMode {
         propPosition = detector.getPosition();
 
         if(propPosition == "CENTER"){
-            dropPosition = 38.5;
+            dropPosition = 36.5;
             dropPositionCompensationX = 0.001;
-            dropPositionCompensationY = 0.001;
+            dropPositionCompensationY = 3;
             turnAngleSpike = 0;
             aprilTagReadingPosition = 25;
+            backDistance = 3;
 
         } else if(propPosition == "LEFT"){
             dropPosition = 40;
@@ -107,12 +109,14 @@ public class Blue_Right extends LinearOpMode {
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
             aprilTagReadingPosition = 18;
+            backDistance = 0;
         } else{
             dropPosition = 40;
             dropPositionCompensationX = -0.5;
             dropPositionCompensationY = 2;
             turnAngleSpike = -75;
             aprilTagReadingPosition = 30;
+            backDistance = 0;
         }
 
         startX += startXOff;
@@ -128,7 +132,7 @@ public class Blue_Right extends LinearOpMode {
                 })
                 .waitSeconds(1)
                 .lineToConstantHeading(new Vector2d(startX, dropPosition))
-                .lineToLinearHeading(new Pose2d(startX+dropPositionCompensationX, dropPosition-dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
+                .lineToLinearHeading(new Pose2d(startX+dropPositionCompensationX, dropPosition+dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
                 })
@@ -140,7 +144,7 @@ public class Blue_Right extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .lineToLinearHeading(new Pose2d(startX, dropPosition, startHeading))
+                .lineToLinearHeading(new Pose2d(startX, dropPosition+backDistance, startHeading))
                 .lineToConstantHeading(new Vector2d(startX, 62))
                 .turn(Math.toRadians(92))
                 .lineToConstantHeading(new Vector2d(startX+28+48, 62))
