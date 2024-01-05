@@ -32,7 +32,32 @@ public class FieldCentricDrive {
     }
 
     public double backdropAlignment() {
-        pidController.setPID(P,I,D);
+        //pidController.setPID(P,I,D);
+
+        double deltaAngle = shortestDistance(HWMap.readFromIMU());
+        double dir = dir(HWMap.readFromIMU());
+
+        // Distance between measured and target position * the sign of that distance
+        double error = deltaAngle * dir;
+
+        /*It is 0 because we already figure the error out in the deltaAngle variable
+         *where we set it equal to the targetPos - measured Pos.*/
+        double power = pidController.calculate(0, error);
+
+        //This is just as a safety measure if something goes wrong inside the code.
+        power = Math.abs(power) * Math.signum(power);
+
+        // Telemetry
+        telemetry.addData("Heading: ", HWMap.readFromIMU());
+        telemetry.addData("Target Pos: ", backdropAngle);
+        telemetry.addData("Error: ", error);
+        telemetry.addData("Delta Angle: ", deltaAngle);
+        telemetry.addData("Sign: ", dir);
+
+        return power;
+    }
+    public double backdropAlignment(double p, double i, double d) {
+        pidController.setPID(p,i,d);
 
         double deltaAngle = shortestDistance(HWMap.readFromIMU());
         double dir = dir(HWMap.readFromIMU());
@@ -75,10 +100,15 @@ public class FieldCentricDrive {
     public boolean robotAtAngle(double buffer) {
         return (((backdropAngle + buffer) >= normalizeDegrees(HWMap.readFromIMU())) && ((backdropAngle - buffer) <= normalizeDegrees(HWMap.readFromIMU())));
     }
+    public boolean robotAtAngle(double alignmentAngle, double buffer) {
+        return (((alignmentAngle + buffer) >= normalizeDegrees(HWMap.readFromIMU())) && ((alignmentAngle - buffer) <= normalizeDegrees(HWMap.readFromIMU())));
+    }
 
     public void setBackdropAngle(double backdropAngle) {
         this.backdropAngle = backdropAngle;
     }
-
+    public void setBackdropPID(double p, double i, double d){
+        pidController.setPID(p,i,d);
+    }
 
 }

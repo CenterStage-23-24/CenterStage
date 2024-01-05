@@ -15,7 +15,8 @@ public class TransferController {
     private static final int OFFSET_INCREMENT = 1;
     private static final int MAX_SLIDE_HEIGHT = 64;
     private static final int ABS_SAFE_HEIGHT = 0;
-    private static final int RETRACT_SAFE_HEIGHT = 30;
+    private static final int RETRACT_SAFE_HEIGHT = 24;
+    private static final double EXTEND_SAFE_HEIGHT = 7.6;
     //Everything above is in CM
 
     /*
@@ -47,7 +48,7 @@ public class TransferController {
         this.slides = slides;
     }
 
-    public boolean extend() {
+    public boolean extend(String typeOfDeposit) {
         if (!notStarted) { //Init stage
             notStarted = true;
             inRetract = false;
@@ -66,14 +67,14 @@ public class TransferController {
             }
         }
         if (!TRANSFER_PHASES[0]) { //Phase 0: Internal Target Pos Extension
-            if (extendToHeight(internalTargetPos) || slides.currentPos() >= RETRACT_SAFE_HEIGHT) {
+            if (slides.ticksToCm(slides.currentPos()) >= (EXTEND_SAFE_HEIGHT) || extendToHeight(internalTargetPos)) {
                 TRANSFER_PHASES[0] = true;
             }
             return false;
         }
         if (!TRANSFER_PHASES[2]) { //Phase 2: Arm Deposit Transition
-            arm.goToDeposit();
-            if (arm.axonAtPos(arm.getDepositPos(), BUFFER)) {
+            arm.goToDeposit(typeOfDeposit);
+            if (arm.axonAtPos(arm.getDepositPos(typeOfDeposit), BUFFER)) {
                 TRANSFER_PHASES[2] = true;
             }
             return false;
@@ -121,7 +122,7 @@ public class TransferController {
         //Init Stage
         if (!notStarted) {
             notStarted = true;
-            originPos = slides.ticksToCm((int) slides.currentPos());
+            originPos = slides.ticksToCm(slides.currentPos());
             inRetract = true;
         }
 

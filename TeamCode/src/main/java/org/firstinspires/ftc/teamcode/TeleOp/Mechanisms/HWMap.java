@@ -33,6 +33,7 @@ public class HWMap {
     private final Motor intakeMotor;
     //IMU
     private static IMU imu;
+    public static double imuAngle;
 
     //Servos
     private final Servo outtakeServoLeft;
@@ -51,9 +52,11 @@ public class HWMap {
     private final RevColorSensorV3 trayRightCS;
     private final DistanceSensor distanceSensorLeft;
     private final DistanceSensor distanceSensorRight;
+    private HardwareMap hardwareMap;
 
     public HWMap(HardwareMap hardwareMap) {
         //Drive Motors
+        this.hardwareMap = hardwareMap;
         rightFrontMotor = new Motor(hardwareMap, "RF", Motor.GoBILDA.RPM_435); //CH Port 0
         leftFrontMotor = new Motor(hardwareMap, "LF", Motor.GoBILDA.RPM_435);//CH Port 1. The right odo pod accesses this motor's encoder port
         leftBackMotor = new Motor(hardwareMap, "LB", Motor.GoBILDA.RPM_435); //CH Port 2. The perpendicular odo pod accesses this motor's encoder port
@@ -73,8 +76,11 @@ public class HWMap {
         intakeMotor = new Motor(hardwareMap, "IM", Motor.GoBILDA.RPM_435); //EH Port 0
 
         //IMU mapped and initialized in SampleMecanumDrive - CH 12C BUS 0
-        imu = hardwareMap.get(IMU.class, "imu");
-        initializeIMU();
+        if(imu == null){
+            imu = hardwareMap.get(IMU.class, "imu");
+            initializeIMU();
+            linearSlidesLeft.resetEncoder();
+        }
 
         //Outtake Servos
         outtakeServoLeft = hardwareMap.get(Servo.class, "OSL"); //EH Port 4
@@ -129,8 +135,8 @@ public class HWMap {
 
 
     public static double readFromIMU() {
-
-        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        imuAngle = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        return imuAngle;
     }
 
     public static void initializeIMU() {
@@ -221,7 +227,23 @@ public class HWMap {
         return leftFrontMotor.getCurrentPosition();
     }
 
+    public Servo getOdoRetractionLeft() {
+        return OdoRetractionLeft;
+    }
+
+    public Servo getOdoRetractionRight() {
+        return OdoRetractionRight;
+    }
+
+    public Servo getOdoRetractionMiddle() {
+        return OdoRetractionMiddle;
+    }
+
     public MecanumDrive getMecanumDrive() {
         return mecanumDrive;
+    }
+
+    public IMU getImu() {
+        return imu;
     }
 }

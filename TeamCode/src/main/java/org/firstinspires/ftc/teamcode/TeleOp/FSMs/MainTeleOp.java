@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Odometry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
@@ -32,6 +33,7 @@ public class MainTeleOp extends LinearOpMode {
     private IntakeController intakeController;
     private Arm arm;
     private Slides slides;
+    private Odometry odometry;
     private boolean backdropAlignmentAutomationStarted = false;
     private static final double ROBOT_ANGLE_ACCEPTABLE_ERROR_RANGE = 12;
 
@@ -48,6 +50,7 @@ public class MainTeleOp extends LinearOpMode {
             Intake intake = new Intake(hwMap, telemetry);
             arm = new Arm(hwMap, telemetry);
             slides = new Slides(hwMap, telemetry);
+            odometry = new Odometry(hwMap);
             //Controllers
             Gripper gripper = new Gripper(hwMap);
             TransferController transferController = new TransferController(arm, slides);
@@ -70,6 +73,7 @@ public class MainTeleOp extends LinearOpMode {
 
         while (opModeIsActive()) {
             //Reading the gamepad
+            odometry.retractOdo();
             gamePad1.readButtons();
             switch (state) {
                 case start:

@@ -6,7 +6,6 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.IntakeController;
-import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 public class Cycle {
@@ -67,7 +66,7 @@ public class Cycle {
                 break;
             case extend:
                 toTransfer = true;
-                if (transferController.extend())
+                if (transferController.extend("BACKDROP"))
                     state = CycleFSM.start;
                 else
                     checkInputs();//Just to see if the driver wants to retract

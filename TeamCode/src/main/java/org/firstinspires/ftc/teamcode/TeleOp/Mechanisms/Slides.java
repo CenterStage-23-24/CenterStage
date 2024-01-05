@@ -8,14 +8,23 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Slides {
     protected final Motor LSL;
     protected final Motor LSR;
+    private static final double P = 0.0087;
+    private static final double I = 0;
+    private static final double D = 0.0003;
+    private static final double F = 0.0003;
+    private double output = 0;
+
+/*
+BACKUP Slides without delrin constants:
     private static final double P = 0.013;
     private static final double I = 0.01;
     private static final double D = 0.0007;
     private static final double F = 0.0005;
-    private double output = 0;
+
+*/
 
 /*
-//TEST BENCH CONSTANTS:
+TEST BENCH CONSTANTS:
     public static double P = 0.0027;
     public static double I = 0.01;
     public static double D = 0.0004;
@@ -47,13 +56,13 @@ public class Slides {
         LSL.set(output);
         LSR.set(output);
 
-        telemetry.addData("target Pos", targetPos);
+/*        telemetry.addData("target Pos", targetPos);
         telemetry.addData("LSL POS", LSL.getCurrentPosition());
         telemetry.addData("LSR POS", LSR.getCurrentPosition());
         telemetry.addData("tolerance", tolerance);
         telemetry.addData("LSL cm", ticksToCm(LSL.getCurrentPosition()));
         telemetry.addData("LSR cm", ticksToCm(LSR.getCurrentPosition()));
-        telemetry.addData("OUTPUT: ", output);
+        telemetry.addData("OUTPUT: ", output);*/
     }
 
 
@@ -64,7 +73,7 @@ public class Slides {
     public boolean atPos() {
         return ((targetPos + tolerance) >= LSL.getCurrentPosition()) && ((targetPos - tolerance) <= LSL.getCurrentPosition());
     }
-    public double currentPos() {
+    public int currentPos() {
         return LSL.getCurrentPosition();
     }
 

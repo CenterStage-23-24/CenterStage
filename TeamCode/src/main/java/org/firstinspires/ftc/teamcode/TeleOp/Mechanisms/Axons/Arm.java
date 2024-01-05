@@ -52,6 +52,7 @@ public class Arm {
 
     private static final double INTAKE_POS = 115; // Angle for Intaking pixels
     private final double depositPos = normalizeRadiansTau(INTAKE_POS + 150); // Angle for depositing pixels, is 150 degrees from intake
+    private final double SPIKE_POS = 220;
     private static double INTAKE_OFFSET = 60; // Degrees that the intake position is from vertically facing down
     private static final double safeError = 10; // Position can be +- this many degrees from target for safe transfer
     private final double safeIntake = normalizeRadiansTau(INTAKE_POS - safeError); // Safe range to start transfer from intake pos
@@ -82,13 +83,19 @@ public class Arm {
         return (angle + 360) % 360;
     }
 
-    public void goToDeposit() {
-        targetPos = depositPos;
+    public void goToDeposit(String typeOfDeposit) {
+        if(typeOfDeposit == "SPIKE"){
+            targetPos = SPIKE_POS;
+        }else {
+            targetPos = depositPos;
+        }
     }
 
     public void goToIntake() {
         targetPos = INTAKE_POS;
     }
+
+    public void goToSpikePos(){ targetPos = SPIKE_POS;}
 
     public void updatePos() {
         measuredPos = leftAxon.getPos();
@@ -115,10 +122,10 @@ public class Arm {
         rightAxon.setPower(power);
 
         // Telemetry
-        telemetry.addData("Measured Pos: ", measuredPos);
+        /*telemetry.addData("Measured Pos: ", measuredPos);
         telemetry.addData("Target Pos: ", targetPos);
         telemetry.addData("Delta: ", delta);
-        telemetry.addData("Sign: ", sign);
+        telemetry.addData("Sign: ", sign);*/
     }
 
     //This method returns TRUE if the axons are within the buffered range of the target position or it will return FALSE.
@@ -129,7 +136,11 @@ public class Arm {
     public double getIntakePos() {
         return INTAKE_POS;
     }
-    public double getDepositPos() {
-        return depositPos;
+    public double getDepositPos(String typeOfDeposit) {
+        if(typeOfDeposit == "SPIKE") {
+            return SPIKE_POS;
+        } else {
+            return depositPos;
+        }
     }
 }
