@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Odometry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
-@TeleOp(name = "TeleOp-1.5.5")
+@TeleOp(name = "TeleOp-1.6.0")
 public class MainTeleOp extends LinearOpMode {
 
     public enum RobotFSM {
