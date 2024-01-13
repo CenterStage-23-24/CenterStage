@@ -5,7 +5,6 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.TrajectorySequence;
@@ -18,9 +17,9 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 
-@Autonomous(name = "Red Left")
+@Autonomous(name = "Red (SPIKE ONLY)")
 @Config
-public class Red_Left extends LinearOpMode {
+public class Red_Spike extends LinearOpMode {
 
     /** Auto Constant Variables: **/
     public static double startX = -36.0; // Start pos X
@@ -78,11 +77,11 @@ public class Red_Left extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested()) {
             telemetry.addData("-", "INIT DONE");
-            telemetry.addData("POSITION: ", detector.getPosition());
+            telemetry.addData("FIND CONTOUR NUM: ", detector.getFindContourNum());
             telemetry.addData("FILTER CONTOUR NUM: ", detector.getFilterContourNum());
+            telemetry.addData("POSITION: ", detector.getPosition());
             telemetry.addData("x", detector.getX());
             telemetry.addData("y", detector.getY());
-            telemetry.addData("contour areas: ", detector.getContourAreas());
             telemetry.update();
         }
 
@@ -116,8 +115,6 @@ public class Red_Left extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(startX, startY, startHeading));
         drive.setExternalHeading(startHeading);
         TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(startX, startY, startHeading))
-
-                //Extension for Spike Mark Delivery
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     while(!transferController.extend("SPIKE")){
                         slides.pid(true);
@@ -125,11 +122,7 @@ public class Red_Left extends LinearOpMode {
                     }
                 })
                 .waitSeconds(1)
-
-                //Approach to Spike Mark
                 .lineToConstantHeading(new Vector2d(startX, dropPosition))
-
-                //Spike Mark Compensation and Delivery
                 .lineToLinearHeading(new Pose2d(startX-dropPositionCompensationX, dropPosition+dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
@@ -143,41 +136,6 @@ public class Red_Left extends LinearOpMode {
                 })
                 .waitSeconds(2)
                 .lineToLinearHeading(new Pose2d(startX, dropPosition-backDistance, startHeading))
-
-                //Reset to Original Position
-                .lineToConstantHeading(new Vector2d(startX, -61))
-
-                //Approach to Backdrop
-                .turn(Math.toRadians(-91))
-                .lineToConstantHeading(new Vector2d(startX+28+48, -61))
-                .strafeLeft(aprilTagReadingPosition)
-
-                //Delivery
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    gripper.gripRight();
-                })
-                .waitSeconds(1)
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    while (!transferController.extend("BACKDROP")) {
-                        slides.pid(true);
-                        arm.updatePos();
-                    }
-                })
-                .waitSeconds(2)
-                .forward(9)
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    gripper.releaseRight();
-                })
-                .waitSeconds(0.5)
-                .back(7)
-
-                //Reset for TeleOp
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    while (!transferController.retract()) {
-                        slides.pid(true);
-                        arm.updatePos();
-                    }
-                })
                 .UNSTABLE_addTemporalMarkerOffset(0, ()->{
                     odometry.retractOdo();
                 })
