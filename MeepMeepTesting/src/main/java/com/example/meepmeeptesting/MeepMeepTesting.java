@@ -39,10 +39,20 @@ public class MeepMeepTesting {
                                 .build()
                 );
 
+        RoadRunnerBotEntity myBot1 = new DefaultBotBuilder(meepMeep)
+                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+                .setConstraints(30, 30, Math.toRadians(180), Math.toRadians(180), 14)
+                .followTrajectorySequence(drive ->
+                        drive.trajectorySequenceBuilder(new Pose2d(12, 30, Math.toRadians(180)))
+                                .splineToLinearHeading(new Pose2d(60, 60, Math.toRadians(0)), Math.toRadians(270))
+                                .build()
+                );
+
         meepMeep.setBackground(MeepMeep.Background.FIELD_CENTERSTAGE_JUICE_DARK)
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
                 .addEntity(myBot)
+                .addEntity(myBot1)
                 .start();
     }
 }

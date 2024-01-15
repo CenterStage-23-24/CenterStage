@@ -1,12 +1,12 @@
-package org.firstinspires.ftc.teamcode.Auto;
+package org.firstinspires.ftc.teamcode.Auto.V1Trajectories;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Auto.Detector;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
@@ -18,14 +18,14 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 
-@Autonomous(name = "Blue Right")
+@Autonomous(name = "Red (SPIKE ONLY)")
 @Config
-public class Blue_Right extends LinearOpMode {
+public class Red_Spike extends LinearOpMode {
 
     /** Auto Constant Variables: **/
     public static double startX = -36.0; // Start pos X
-    public static double startY = 65.0; // Start pos Y
-    public static double startHeading = Math.toRadians(270);
+    public static double startY = -65.0; // Start pos Y
+    public static double startHeading = Math.toRadians(90);
 
     /**Robot Tuning Variables**/
     public static double startXOff = 0.0; // Start pos X offset
@@ -55,8 +55,6 @@ public class Blue_Right extends LinearOpMode {
     public static double backDistance;
     private static final double P = 0.035, I = 0, D = 0;
 
-
-
     @Override
     public void runOpMode() {
 
@@ -65,12 +63,11 @@ public class Blue_Right extends LinearOpMode {
         drive = new SampleMecanumDrive(hardwareMap);
         arm =  new Arm(hwMap, telemetry);
         slides =  new Slides(hwMap, telemetry);
+        odometry = new Odometry(hwMap);
         transferController = new TransferController(arm, slides);
         gripper = new Gripper(hwMap);
         detector = new Detector(hardwareMap, telemetry);
         fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
-        odometry = new Odometry(hwMap);
-
 
         propPosition = "LEFT";
         detector.detect();
@@ -81,38 +78,36 @@ public class Blue_Right extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested()) {
             telemetry.addData("-", "INIT DONE");
-            telemetry.addData("POSITION: ", detector.getPosition());
+            telemetry.addData("FIND CONTOUR NUM: ", detector.getFindContourNum());
             telemetry.addData("FILTER CONTOUR NUM: ", detector.getFilterContourNum());
+            telemetry.addData("POSITION: ", detector.getPosition());
             telemetry.addData("x", detector.getX());
             telemetry.addData("y", detector.getY());
-            telemetry.addData("contour areas: ", detector.getContourAreas());
             telemetry.update();
-
         }
 
         propPosition = detector.getPosition();
-
         if(propPosition == "CENTER"){
-            dropPosition = 36.5;
+            dropPosition = -36.5;
             dropPositionCompensationX = 0.001;
-            dropPositionCompensationY = 3;
+            dropPositionCompensationY = -3;
             turnAngleSpike = 0;
             aprilTagReadingPosition = 25;
             backDistance = 3;
 
         } else if(propPosition == "LEFT"){
-            dropPosition = 40;
-            dropPositionCompensationX = 0.5;
+            dropPosition = -40;
+            dropPositionCompensationX = 1;
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
-            aprilTagReadingPosition = 18;
+            aprilTagReadingPosition = 31;
             backDistance = 0;
         } else{
-            dropPosition = 40;
-            dropPositionCompensationX = -0.5;
+            dropPosition = -40;
+            dropPositionCompensationX = -1;
             dropPositionCompensationY = 2;
             turnAngleSpike = -75;
-            aprilTagReadingPosition = 30;
+            aprilTagReadingPosition = 17;
             backDistance = 0;
         }
 
@@ -121,8 +116,6 @@ public class Blue_Right extends LinearOpMode {
         drive.setPoseEstimate(new Pose2d(startX, startY, startHeading));
         drive.setExternalHeading(startHeading);
         TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(startX, startY, startHeading))
-
-                //Extension for Spike Mark Delivery
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     while(!transferController.extend("SPIKE")){
                         slides.pid(true);
@@ -130,12 +123,8 @@ public class Blue_Right extends LinearOpMode {
                     }
                 })
                 .waitSeconds(1)
-
-                //Approach to Spike Mark
                 .lineToConstantHeading(new Vector2d(startX, dropPosition))
-
-                //Spike Mark Compensation and Delivery
-                .lineToLinearHeading(new Pose2d(startX+dropPositionCompensationX, dropPosition+dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
+                .lineToLinearHeading(new Pose2d(startX-dropPositionCompensationX, dropPosition+dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
                 })
@@ -147,42 +136,7 @@ public class Blue_Right extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .lineToLinearHeading(new Pose2d(startX, dropPosition+backDistance, startHeading))
-
-                //Reset to Original Position
-                .lineToConstantHeading(new Vector2d(startX, 62))
-
-                //Approach to Backdrop
-                .turn(Math.toRadians(92))
-                .lineToConstantHeading(new Vector2d(startX+28+48, 62))
-                .lineToConstantHeading(new Vector2d(startX+28+48, 65-aprilTagReadingPosition))
-
-                //Delivery
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    gripper.gripRight();
-                })
-                .waitSeconds(1)
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    while (!transferController.extend("BACKDROP")) {
-                        slides.pid(true);
-                        arm.updatePos();
-                    }
-                })
-                .waitSeconds(2)
-                .lineToConstantHeading(new Vector2d(startX+28+48+11, 65-aprilTagReadingPosition))
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    gripper.releaseRight();
-                })
-                .waitSeconds(0.5)
-                .lineToConstantHeading(new Vector2d(startX+28+48+4, 65-aprilTagReadingPosition))
-
-                //Reset for TeleOp
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    while (!transferController.retract()) {
-                        slides.pid(true);
-                        arm.updatePos();
-                    }
-                })
+                .lineToLinearHeading(new Pose2d(startX, dropPosition-backDistance, startHeading))
                 .UNSTABLE_addTemporalMarkerOffset(0, ()->{
                     odometry.retractOdo();
                 })

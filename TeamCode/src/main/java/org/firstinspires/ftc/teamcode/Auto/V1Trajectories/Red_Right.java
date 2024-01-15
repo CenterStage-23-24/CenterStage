@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto;
+package org.firstinspires.ftc.teamcode.Auto.V1Trajectories;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Auto.Detector;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
@@ -18,12 +19,12 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 
-@Autonomous(name = "Red Left")
+@Autonomous(name = "Red Right")
 @Config
-public class Red_Left extends LinearOpMode {
+public class Red_Right extends LinearOpMode {
 
     /** Auto Constant Variables: **/
-    public static double startX = -36.0; // Start pos X
+    public static double startX = 12.0; // Start pos X
     public static double startY = -65.0; // Start pos Y
     public static double startHeading = Math.toRadians(90);
 
@@ -55,6 +56,7 @@ public class Red_Left extends LinearOpMode {
     public static double backDistance;
     private static final double P = 0.035, I = 0, D = 0;
 
+
     @Override
     public void runOpMode() {
 
@@ -68,7 +70,7 @@ public class Red_Left extends LinearOpMode {
         gripper = new Gripper(hwMap);
         detector = new Detector(hardwareMap, telemetry);
         fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
-
+        //HWMap.setIMU();
         propPosition = "LEFT";
         detector.detect();
         gripper.gripLeft();
@@ -92,8 +94,9 @@ public class Red_Left extends LinearOpMode {
             dropPositionCompensationX = 0.001;
             dropPositionCompensationY = -3;
             turnAngleSpike = 0;
-            aprilTagReadingPosition = 25;
+            aprilTagReadingPosition = 24;
             backDistance = 3;
+
 
         } else if(propPosition == "LEFT"){
             dropPosition = -40;
@@ -145,11 +148,11 @@ public class Red_Left extends LinearOpMode {
                 .lineToLinearHeading(new Pose2d(startX, dropPosition-backDistance, startHeading))
 
                 //Reset to Original Position
-                .lineToConstantHeading(new Vector2d(startX, -61))
+                .lineToConstantHeading(new Vector2d(startX, -60))
 
                 //Approach to Backdrop
-                .turn(Math.toRadians(-91))
-                .lineToConstantHeading(new Vector2d(startX+28+48, -61))
+                .turn(Math.toRadians(-90))
+                .lineToConstantHeading(new Vector2d(startX+28, -60))
                 .strafeLeft(aprilTagReadingPosition)
 
                 //Delivery
@@ -164,12 +167,12 @@ public class Red_Left extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .forward(9)
+                .forward(11)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.releaseRight();
                 })
                 .waitSeconds(0.5)
-                .back(7)
+                .back(5)
 
                 //Reset for TeleOp
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{

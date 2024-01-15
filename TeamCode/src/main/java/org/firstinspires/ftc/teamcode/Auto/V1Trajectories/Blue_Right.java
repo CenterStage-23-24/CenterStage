@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Auto;
+package org.firstinspires.ftc.teamcode.Auto.V1Trajectories;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Auto.Detector;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
@@ -18,14 +19,14 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 
-@Autonomous(name = "Red Right")
+@Autonomous(name = "Blue Right")
 @Config
-public class Red_Right extends LinearOpMode {
+public class Blue_Right extends LinearOpMode {
 
     /** Auto Constant Variables: **/
-    public static double startX = 12.0; // Start pos X
-    public static double startY = -65.0; // Start pos Y
-    public static double startHeading = Math.toRadians(90);
+    public static double startX = -36.0; // Start pos X
+    public static double startY = 65.0; // Start pos Y
+    public static double startHeading = Math.toRadians(270);
 
     /**Robot Tuning Variables**/
     public static double startXOff = 0.0; // Start pos X offset
@@ -56,6 +57,7 @@ public class Red_Right extends LinearOpMode {
     private static final double P = 0.035, I = 0, D = 0;
 
 
+
     @Override
     public void runOpMode() {
 
@@ -64,12 +66,13 @@ public class Red_Right extends LinearOpMode {
         drive = new SampleMecanumDrive(hardwareMap);
         arm =  new Arm(hwMap, telemetry);
         slides =  new Slides(hwMap, telemetry);
-        odometry = new Odometry(hwMap);
         transferController = new TransferController(arm, slides);
         gripper = new Gripper(hwMap);
         detector = new Detector(hardwareMap, telemetry);
         fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
-        //HWMap.setIMU();
+        odometry = new Odometry(hwMap);
+
+
         propPosition = "LEFT";
         detector.detect();
         gripper.gripLeft();
@@ -85,31 +88,32 @@ public class Red_Right extends LinearOpMode {
             telemetry.addData("y", detector.getY());
             telemetry.addData("contour areas: ", detector.getContourAreas());
             telemetry.update();
+
         }
 
         propPosition = detector.getPosition();
+
         if(propPosition == "CENTER"){
-            dropPosition = -36.5;
+            dropPosition = 36.5;
             dropPositionCompensationX = 0.001;
-            dropPositionCompensationY = -3;
+            dropPositionCompensationY = 3;
             turnAngleSpike = 0;
-            aprilTagReadingPosition = 24;
+            aprilTagReadingPosition = 25;
             backDistance = 3;
 
-
         } else if(propPosition == "LEFT"){
-            dropPosition = -40;
-            dropPositionCompensationX = 1;
+            dropPosition = 40;
+            dropPositionCompensationX = 0.5;
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
-            aprilTagReadingPosition = 31;
+            aprilTagReadingPosition = 18;
             backDistance = 0;
         } else{
-            dropPosition = -40;
-            dropPositionCompensationX = -1;
+            dropPosition = 40;
+            dropPositionCompensationX = -0.5;
             dropPositionCompensationY = 2;
             turnAngleSpike = -75;
-            aprilTagReadingPosition = 17;
+            aprilTagReadingPosition = 30;
             backDistance = 0;
         }
 
@@ -132,7 +136,7 @@ public class Red_Right extends LinearOpMode {
                 .lineToConstantHeading(new Vector2d(startX, dropPosition))
 
                 //Spike Mark Compensation and Delivery
-                .lineToLinearHeading(new Pose2d(startX-dropPositionCompensationX, dropPosition+dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
+                .lineToLinearHeading(new Pose2d(startX+dropPositionCompensationX, dropPosition+dropPositionCompensationY, startHeading+Math.toRadians(turnAngleSpike)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
                 })
@@ -144,15 +148,15 @@ public class Red_Right extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .lineToLinearHeading(new Pose2d(startX, dropPosition-backDistance, startHeading))
+                .lineToLinearHeading(new Pose2d(startX, dropPosition+backDistance, startHeading))
 
                 //Reset to Original Position
-                .lineToConstantHeading(new Vector2d(startX, -60))
+                .lineToConstantHeading(new Vector2d(startX, 62))
 
                 //Approach to Backdrop
-                .turn(Math.toRadians(-90))
-                .lineToConstantHeading(new Vector2d(startX+28, -60))
-                .strafeLeft(aprilTagReadingPosition)
+                .turn(Math.toRadians(92))
+                .lineToConstantHeading(new Vector2d(startX+28+48, 62))
+                .lineToConstantHeading(new Vector2d(startX+28+48, 65-aprilTagReadingPosition))
 
                 //Delivery
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
@@ -166,12 +170,12 @@ public class Red_Right extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .forward(11)
+                .lineToConstantHeading(new Vector2d(startX+28+48+11, 65-aprilTagReadingPosition))
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.releaseRight();
                 })
                 .waitSeconds(0.5)
-                .back(5)
+                .lineToConstantHeading(new Vector2d(startX+28+48+4, 65-aprilTagReadingPosition))
 
                 //Reset for TeleOp
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
