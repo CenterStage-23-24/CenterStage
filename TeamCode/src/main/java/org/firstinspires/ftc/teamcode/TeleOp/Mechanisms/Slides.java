@@ -39,8 +39,6 @@ TEST BENCH CONSTANTS:
         this.telemetry = telemetry;
         LSL = hwMap.getLinearSlidesLeft();
         LSR = hwMap.getLinearSlidesRight();
-        LSL.resetEncoder();
-        LSR.resetEncoder();
         LSL.setRunMode(Motor.RunMode.RawPower);
         LSR.setRunMode(Motor.RunMode.RawPower);
         controller = new PIDFController(P, I, D, F);

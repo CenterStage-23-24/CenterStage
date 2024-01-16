@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Auto.V2Trajectories;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Auto.Detector;
@@ -14,6 +15,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Odometry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
+@Autonomous
 public class Blue_Close extends LinearOpMode {
 
     //TODO: Field Tuning Variables
@@ -46,25 +48,25 @@ public class Blue_Close extends LinearOpMode {
      * Robot Constant Variables
      */
     //LEFT
-    private double yellowLeftX = 40.0;
+    private double yellowLeftX = 50.0;
     private double yellowLeftY = 29.0;
-    private double purpleLeftX = 0.0;
-    private double purpleLeftY = 0.0;
+    private double purpleLeftX = 36.0;
+    private double purpleLeftY = 23.0;
     private double purpleLeftAngle = 180.0; //degree value of angle
 
     //CENTER
-    private double yellowCenterX = 40.0;
+    private double yellowCenterX = 50.0;
     private double yellowCenterY = 35.0;
-    private double purpleCenterX = 0.0;
-    private double purpleCenterY = 0.0;
-    private double purpleCenterAngle = .0; //degree value of angle
+    private double purpleCenterX = 24.0;
+    private double purpleCenterY = 23.0;
+    private double purpleCenterAngle = 225.0; //degree value of angle
 
     //RIGHT
-    private double yellowRightX = 40.0;
+    private double yellowRightX = 50.0;
     private double yellowRightY = 41.0;
-    private double purpleRightX = 0.0;
-    private double purpleRightY = 0.0;
-    private double purpleRightAngle = 0.0; //degree value of angle
+    private double purpleRightX = 12.0;
+    private double purpleRightY = 23.0;
+    private double purpleRightAngle = 180.0; //degree value of angle
 
 
     /**
@@ -77,7 +79,7 @@ public class Blue_Close extends LinearOpMode {
     private double yellowPixelY = 0.0; //Preload yellow pixel Y deposit backdrop
     private double yellowPixelXOffset = 0.0; //Preload yellow pixel X Offset
     private double yellowPixelYOffset = 0.0; //Preload yellow pixel Y Offset
-    private double yellowPixelAngle = 90.0; //Preloaded yellow pixel Angle
+    private double yellowPixelAngle = 0.0; //Preloaded yellow pixel Angle
     private double yellowPixelAngleOffset = 0.0; //Preloaded yellow pixel Angle
     private double purplePixelX = 0.0; //Preload purple pixel X deposit spike mark
     private double purplePixelY = 0.0; //Preload purple pixel Y deposit spike mark
@@ -137,7 +139,6 @@ public class Blue_Close extends LinearOpMode {
             telemetry.addData("y", detector.getY());
             telemetry.addData("contour areas: ", detector.getContourAreas());
             telemetry.update();
-
         }
 
 
@@ -146,7 +147,7 @@ public class Blue_Close extends LinearOpMode {
          */
         propPosition = detector.getPosition();
 
-        if (propPosition == "LEFT") {
+        if (propPosition.equals("LEFT")) {
             //Setting Robot Constants
             yellowPixelX = yellowLeftX;
             yellowPixelY = yellowLeftY;
@@ -163,7 +164,7 @@ public class Blue_Close extends LinearOpMode {
             purplePixelAngleOffset = purpleLeftAngleOff;
         }
 
-        if (propPosition == "CENTER") {
+        if (propPosition.equals("CENTER")) {
             //Setting Robot Constants
             yellowPixelX = yellowCenterX;
             yellowPixelY = yellowCenterY;
@@ -180,7 +181,7 @@ public class Blue_Close extends LinearOpMode {
             purplePixelAngleOffset = purpleCenterAngleOff;
         }
 
-        if (propPosition == "RIGHT") {
+        if (propPosition.equals("RIGHT")) {
             //Setting Robot Constants
             yellowPixelX = yellowRightX;
             yellowPixelY = yellowRightY;
@@ -197,7 +198,7 @@ public class Blue_Close extends LinearOpMode {
             purplePixelAngleOffset = purpleRightAngleOff;
         }
 
-        /**
+        /*
          * Creating Trajectory
          */
 
@@ -207,35 +208,52 @@ public class Blue_Close extends LinearOpMode {
         drive.setExternalHeading(startHeading);
         TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(startX, startY, startHeading))
 
+                //.splineTo(new Vector2d(50, 35), Math.toRadians(0))
+
                 //Depositing Yellow Pixel
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     while (!transferController.extend("BACKDROP")) {
                         slides.pid(true);
                         arm.updatePos();
-                        changeheighttoindexrow1
+                        //changeheighttoindexrow1
                     }
                 })
-                .splineTo(new Vector2d(), Math.toRadians(yellowPixelAngle + yellowPixelAngleOffset))
+                .splineTo(new Vector2d(yellowPixelX + yellowPixelXOffset, yellowPixelY + yellowPixelYOffset), Math.toRadians(yellowPixelAngle + yellowPixelAngleOffset))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseRight();
                 })
+                .waitSeconds(0.5)
 
                 //Depositing Purple Pixel
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
-                    gripper.releaseRight();
+                /*.UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     while (!transferController.extend("SPIKE")) {
                         slides.pid(true);
                         arm.updatePos();
-                        changeheightto0
+                        //changeheightto0
                     }
                 })
                 .splineToLinearHeading(new Pose2d(purplePixelX + purplePixelXOffset, purplePixelY + purplePixelYOffset, Math.toRadians(purplePixelAngle + purplePixelAngleOffset)), Math.toRadians(270))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
                 })
+                .waitSeconds(0.5)
 
                 //Parking
-                .splineToLinearHeading(new Pose2d(parkX, parkY, Math.toRadians(90)), Math.toRadians(270))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    while (!transferController.retract()) {
+                        slides.pid(true);
+                        arm.updatePos();
+                    }
+                })
+                .splineToLinearHeading(new Pose2d(parkX, parkY, Math.toRadians(90)), Math.toRadians(270))*/
                 .build();
+
+        drive.followTrajectorySequenceAsync(trajectory);
+
+        while (opModeIsActive()) {
+            drive.update();
+            slides.pid(true);
+            arm.updatePos();
+        }
     }
 }
