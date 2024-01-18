@@ -58,6 +58,10 @@ public class Blue_Left extends LinearOpMode {
     public static double aprilTagAngleCompensation;
     public static double backDistance;
     public static double leftCompensation;
+    private final int camOffset = 5; //Tune
+    private double x_correction;
+    private double yaw_correction;
+    private int id;
     private static final double P = 0.035, I = 0, D = 0;
 
     @Override
@@ -73,6 +77,7 @@ public class Blue_Left extends LinearOpMode {
         detector = new Detector(hardwareMap, telemetry);
         fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
         odometry = new Odometry(hwMap);
+        CVRelocalizer cvRelocalizer = new CVRelocalizer(hardwareMap);
 
         //CODE STARTS HERE
         propPosition = "LEFT";
@@ -98,22 +103,25 @@ public class Blue_Left extends LinearOpMode {
             dropPositionCompensationX = 0.001;
             dropPositionCompensationY = 3;
             turnAngleSpike = 0;
-            aprilTagReadingPosition = 20;
+            aprilTagReadingPosition = 20 - camOffset;
             backDistance = 3;
+            id = 2;
 
         } else if (propPosition == "LEFT") {
             dropPosition = 40;
             dropPositionCompensationX = 1;
             dropPositionCompensationY = 2;
             turnAngleSpike = 60;
-            aprilTagReadingPosition = 14;
+            aprilTagReadingPosition = 14 - camOffset;
             leftCompensation = 1;
+            id = 1;
         } else {
             dropPosition = 40;
             dropPositionCompensationX = -1;
             dropPositionCompensationY = 2;
             turnAngleSpike = -75;
-            aprilTagReadingPosition = 26;
+            aprilTagReadingPosition = 26 - camOffset;
+            id = 3;
         }
 
         startX += startXOff;
@@ -156,6 +164,22 @@ public class Blue_Left extends LinearOpMode {
                 .turn(Math.toRadians(90))
                 .lineToConstantHeading(new Vector2d(startX + 28, 60))
                 .strafeRight(aprilTagReadingPosition)
+
+                //CV Relocalization Corrections
+                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                    x_correction = cvRelocalizer.getX(id);
+                    if(x_correction <= 1 && x_correction >= -1);{
+                        x_correction = 0;
+                    }
+
+                    yaw_correction = cvRelocalizer.getYaw(id);
+                    if(yaw_correction <= 1.5 && yaw_correction >= 0){
+                        yaw_correction = 0;
+                    }
+                })
+
+                //.lineToConstantHeading(new Vector2d(startX + 28, 60 + x_correction))
+                //.turn(yaw_correction)
 
                 //Delivery
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
