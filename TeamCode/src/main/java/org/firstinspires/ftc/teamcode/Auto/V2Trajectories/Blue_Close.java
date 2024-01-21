@@ -211,7 +211,7 @@ public class Blue_Close extends LinearOpMode {
 
         TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(startX, startY, Math.toRadians(startHeading)))
 
-                //Depositing Yellow Pixel
+/*                //Depositing Yellow Pixel
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     while(!transferController.extend("BACKDROP")){
                         slides.pid(true);
@@ -224,8 +224,9 @@ public class Blue_Close extends LinearOpMode {
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseRight();
                 })
-                .waitSeconds(0.5)
-                .back(5)
+                .waitSeconds(0.5)*/
+
+
                 //Depositing Purple Pixel
                 .UNSTABLE_addTemporalMarkerOffset(1, () -> {
                     while (!transferController.extend("SPIKE")) {
@@ -233,7 +234,7 @@ public class Blue_Close extends LinearOpMode {
                         arm.updatePos();
                     }
                 })
-                .waitSeconds(5)
+                .splineToLinearHeading(new Pose2d(purplePixelX + purplePixelXOffset, purplePixelY + purplePixelYOffset, Math.toRadians(purplePixelAngle + purplePixelAngleOffset)), Math.toRadians(270))
                 .lineToLinearHeading(new Pose2d(purplePixelX + purplePixelXOffset, purplePixelY + purplePixelYOffset, Math.toRadians(purplePixelAngle + purplePixelAngleOffset)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
