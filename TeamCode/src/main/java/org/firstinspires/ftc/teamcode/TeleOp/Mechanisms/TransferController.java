@@ -53,10 +53,6 @@ public class TransferController {
             notStarted = true;
             inRetract = false;
 
-            if (extended) {
-                return true;
-            }
-
             //Refactored Area 1 - Needs Testing
             if (slideIndexPos >= RETRACT_SAFE_HEIGHT) {
                 TRANSFER_PHASES[3] = true;
@@ -99,7 +95,6 @@ public class TransferController {
         TRANSFER_PHASES[3] = false;
         TRANSFER_PHASES[4] = false;
         notStarted = false;
-        extended = true;
         return true;
     }
 
