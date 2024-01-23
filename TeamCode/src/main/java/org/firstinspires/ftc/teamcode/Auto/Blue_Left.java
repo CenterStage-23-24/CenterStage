@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Auto.RoadRunner.MotorPowerVector;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Odometry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
+import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 
 
 @Autonomous(name = "Blue Left")
@@ -59,10 +61,19 @@ public class Blue_Left extends LinearOpMode {
     public static double backDistance;
     public static double leftCompensation;
     private final int camOffset = 5; //Tune
-    private double x_correction;
-    private double yaw_correction;
+    // xCorrection, yCorrection, and yawCorrection are relative to the camera CV, not RoadRunner
+    private double xCorrection;
+    private double yCorrection;
+    private double yawCorrection;
+    private final double CV_TARGET_Y_DISTANCE = 4.0;
+    private final double CV_CORRECTION_SPEED = 1.0;
+    private final double CV_VERTICAL_TO_BACKDROP_TIME = 5.0;
+
+    private MotorPowerVector forwardVector = new MotorPowerVector(1.0, 1.0, 1.0, 1.0);
+
     private int id;
     private static final double P = 0.035, I = 0, D = 0;
+
 
     @Override
     public void runOpMode() {
@@ -166,8 +177,23 @@ public class Blue_Left extends LinearOpMode {
                 .strafeRight(aprilTagReadingPosition)
 
                 //CV Relocalization Corrections
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    x_correction = cvRelocalizer.getX(id);
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    ElapsedTime timer = new ElapsedTime();
+
+                    while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
+                        AprilTagPoseFtc ftcPose = cvRelocalizer.getFtcPose(id);
+
+                        if (ftcPose == null) {
+                            telemetry.addLine("[BRUH]: April Tag was not detected.");
+                            return;
+                        }
+
+                        // Uses percent error formula
+                        double yError = (CV_TARGET_Y_DISTANCE - ftcPose.range) / CV_TARGET_Y_DISTANCE;
+                        setMotorPowersDestructured(forwardVector.scale(-yError * CV_CORRECTION_SPEED));
+                    }
+
+                    /*x_correction = cvRelocalizer.getX(id);
                     if(x_correction <= 1 && x_correction >= -1);{
                         x_correction = 0;
                     }
@@ -175,8 +201,9 @@ public class Blue_Left extends LinearOpMode {
                     yaw_correction = cvRelocalizer.getYaw(id);
                     if(yaw_correction <= 1.5 && yaw_correction >= 0){
                         yaw_correction = 0;
-                    }
+                    }*/
                 })
+                .waitSeconds(CV_VERTICAL_TO_BACKDROP_TIME)
 
                 //.lineToConstantHeading(new Vector2d(startX + 28, 60 + x_correction))
                 //.turn(yaw_correction)
@@ -221,5 +248,14 @@ public class Blue_Left extends LinearOpMode {
             slides.pid(true);
             arm.updatePos();
         }
+    }
+
+    private void setMotorPowersDestructured(MotorPowerVector vector)  {
+        drive.setMotorPowers(
+                vector.getLeftFrontPower(),
+                vector.getLeftBackPower(),
+                vector.getRightBackPower(),
+                vector.getRightFrontPower()
+        );
     }
 }

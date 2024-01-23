@@ -37,7 +37,16 @@ public class CVRelocalizeTest extends LinearOpMode {
 
         waitForStart();
 
+        double lastValue = 0.0;
         while(opModeIsActive()){
+            telemetry.addData("last range seen", lastValue);
+            if (lastValue < 4.0) {
+                telemetry.addLine("####################");
+                telemetry.addLine("WENT LESS THAN 4.0 INCHES FROM APRIL TAG!!!");
+                telemetry.addLine("####################");
+            }
+            // 3.44, 3.74, 3.734, 3.642
+
             if(tagProcessor.getDetections().size() != 0){
                 AprilTagDetection tag = tagProcessor.getDetections().get(0);
                 telemetry.addData("x", tag.ftcPose.x);
@@ -46,11 +55,13 @@ public class CVRelocalizeTest extends LinearOpMode {
                 telemetry.addData("roll", tag.ftcPose.roll);
                 telemetry.addData("pitch", tag.ftcPose.pitch);
                 telemetry.addData("yaw", tag.ftcPose.yaw);
+                lastValue = tag.ftcPose.range;
                 telemetry.addData("range", tag.ftcPose.range);
                 telemetry.addData("bearing", tag.ftcPose.bearing);
                 telemetry.addData("elevation", tag.ftcPose.elevation);
                 telemetry.addData("tag ID", tag.id);
             }
+
 
             telemetry.addData("tags", tagProcessor.getDetections());
             telemetry.update();
