@@ -67,7 +67,7 @@ public class Blue_Left extends LinearOpMode {
     private double yawCorrection;
     private final double CV_TARGET_Y_DISTANCE = 4.0;
     private final double CV_CORRECTION_SPEED = 1.0;
-    private final double CV_VERTICAL_TO_BACKDROP_TIME = 5.0;
+    private final double CV_VERTICAL_TO_BACKDROP_TIME = 4.0;
 
     private MotorPowerVector forwardVector = new MotorPowerVector(1.0, 1.0, 1.0, 1.0);
 
@@ -175,22 +175,32 @@ public class Blue_Left extends LinearOpMode {
                 .turn(Math.toRadians(90))
                 .lineToConstantHeading(new Vector2d(startX + 28, 60))
                 .strafeRight(aprilTagReadingPosition)
+                .waitSeconds(2)
 
                 //CV Relocalization Corrections
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     ElapsedTime timer = new ElapsedTime();
-
+                    int i = 0;
                     while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
+                        telemetry.addData(">", "Running CV Vertical Correction");
                         AprilTagPoseFtc ftcPose = cvRelocalizer.getFtcPose(id);
 
                         if (ftcPose == null) {
                             telemetry.addLine("[BRUH]: April Tag was not detected.");
-                            return;
+                            setMotorPowersDestructured(forwardVector.scale(0.0));
+                        } else {
+                            // Uses percent error formula
+                            double yError = (CV_TARGET_Y_DISTANCE - ftcPose.range) / CV_TARGET_Y_DISTANCE;
+                            setMotorPowersDestructured(forwardVector.scale(-yError * CV_CORRECTION_SPEED));
                         }
 
-                        // Uses percent error formula
-                        double yError = (CV_TARGET_Y_DISTANCE - ftcPose.range) / CV_TARGET_Y_DISTANCE;
-                        setMotorPowersDestructured(forwardVector.scale(-yError * CV_CORRECTION_SPEED));
+                        telemetry.update();
+                    }
+
+                    while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME + 0.5) {
+                        telemetry.addData(">", "Running CV Grace Period");
+                        setMotorPowersDestructured(forwardVector.scale(0.2));
+                        telemetry.update();
                     }
 
                     /*x_correction = cvRelocalizer.getX(id);
@@ -203,7 +213,7 @@ public class Blue_Left extends LinearOpMode {
                         yaw_correction = 0;
                     }*/
                 })
-                .waitSeconds(CV_VERTICAL_TO_BACKDROP_TIME)
+                // .waitSeconds(CV_VERTICAL_TO_BACKDROP_TIME)
 
                 //.lineToConstantHeading(new Vector2d(startX + 28, 60 + x_correction))
                 //.turn(yaw_correction)
