@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
 @Autonomous
 @Config
-public class Blue_Close extends LinearOpMode {
+public class Blue_Close_New extends LinearOpMode {
 
     //TODO: Field Tuning Variables
     //LEFT
@@ -53,24 +53,24 @@ public class Blue_Close extends LinearOpMode {
      */
     //LEFT
     public static double yellowLeftX = 50.0;
-    public static double yellowLeftY = 44.0;
-    public static double purpleLeftX = 36.0;
-    public static double purpleLeftY = 35.0;
-    public static double purpleLeftAngle = 180.0; //degree value of angle
+    public static double yellowLeftY = 42.0;
+    public static double purpleLeftX = 12.0;
+    public static double purpleLeftY = 32.0;
+    public static double purpleLeftAngle = 190.0; //degree value of angle
 
     //CENTER
     public static double yellowCenterX = 50.0;
-    public static double yellowCenterY = 40.0;
-    public static double purpleCenterX = 24.0;
-    public static double purpleCenterY = 35.0;
-    public static double purpleCenterAngle = 225; //degree value of angle
+    public static double yellowCenterY = 38.0;
+    public static double purpleCenterX = 12.0;
+    public static double purpleCenterY = 38.0;
+    public static double purpleCenterAngle = 270.0; //degree value of angle
 
     //RIGHT
     public static double yellowRightX = 50.0;
-    public static double yellowRightY = 34.0;
-    public static double purpleRightX = 12.0;
-    public static double purpleRightY = 35.0;
-    public static double purpleRightAngle = 180.0; //degree value of angle
+    public static double yellowRightY = 32.0;
+    public static double purpleRightX = 18.0;
+    public static double purpleRightY = 32.0;
+    public static double purpleRightAngle = 270.0; //degree value of angle
 
 
     /**
@@ -221,6 +221,7 @@ public class Blue_Close extends LinearOpMode {
                         arm.updatePos();
                     }
                 })
+                .waitSeconds(2)
                 .setTangent(Math.toRadians(270))
                 .splineToSplineHeading(new Pose2d(yellowPixelX + yellowPixelXOffset, yellowPixelY + yellowPixelYOffset, Math.toRadians(yellowPixelAngle + yellowPixelAngleOffset)), Math.toRadians(0))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -229,13 +230,15 @@ public class Blue_Close extends LinearOpMode {
                 .waitSeconds(0.5)
 
                 //Depositing Purple Pixel
-                .UNSTABLE_addTemporalMarkerOffset(1, () -> {
+                .lineToLinearHeading(new Pose2d(40, 50, Math.toRadians(0)))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     while (!transferController.extend("SPIKE")) {
                         slides.pid(true);
                         arm.updatePos();
                     }
                 })
-                .lineToLinearHeading(new Pose2d(purplePixelX + purplePixelXOffset, purplePixelY + purplePixelYOffset, Math.toRadians(purplePixelAngle + purplePixelAngleOffset)))
+                .waitSeconds(2)
+                .lineToLinearHeading(new Pose2d(purplePixelX + purplePixelXOffset, yellowPixelY + yellowPixelYOffset, Math.toRadians(purplePixelAngle + purplePixelAngleOffset)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
                 })
@@ -248,8 +251,9 @@ public class Blue_Close extends LinearOpMode {
                         arm.updatePos();
                     }
                 })
+                .waitSeconds(2)
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(parkX, parkY, Math.toRadians(180)), Math.toRadians(0))
+                .splineToLinearHeading(new Pose2d(parkX, parkY, Math.toRadians(0)), Math.toRadians(0))
                 .build();
         drive.followTrajectorySequenceAsync(trajectory);
 
