@@ -74,7 +74,7 @@ public class Blue_Left extends LinearOpMode {
     private double yCorrection;
     private double yawCorrection;
     private final double CV_TARGET_Y_DISTANCE = 4.0;
-    private final double CV_CORRECTION_SPEED = 1.0;
+    private final double CV_CORRECTION_SPEED = 0.3;
     private final double CV_VERTICAL_TO_BACKDROP_TIME = 4.0;
     private CVRelocalizer cvRelocalizer;
 
@@ -107,17 +107,10 @@ public class Blue_Left extends LinearOpMode {
         odometry.extendOdo();
         sleep(2000);
 
+
         tagProcessor = AprilTagProcessor.easyCreateWithDefaults();
         visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), tagProcessor);
         while (!isStarted() && !isStopRequested()) {
-            telemetry.addData(">", "Running CV Vertical Correction");
-            if(tagProcessor.getDetections().size() == 0){
-                telemetry.addData(">", "NO TAG");
-            }
-            else{
-                telemetry.addData("ID: ", tagProcessor.getDetections().get(0).id);
-            }
-            telemetry.update();
             /*
             detector.detect();
             telemetry.addData("-", "INIT DONE");
@@ -201,11 +194,20 @@ public class Blue_Left extends LinearOpMode {
 
                 //CV Relocalization Corrections
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-
                     ElapsedTime timer = new ElapsedTime();
                     timer.reset();
                     int i = 0;
                     while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
+                        /*
+                        telemetry.addData(">", "Running CV Vertical Correction");
+                        if(tagProcessor.getDetections().size() == 0){
+                            telemetry.addData(">", "NO TAG");
+                        }
+                        else{
+                            telemetry.addData("ID: ", tagProcessor.getDetections().get(0).id);
+                        }
+                        telemetry.update();
+                         */
                         /*
                         double x_correction = cvRelocalizer.getX(id);
                         if(x_correction == 0){
@@ -219,7 +221,6 @@ public class Blue_Left extends LinearOpMode {
                             yaw_correction = 0;
                         }
                          */
-
                         telemetry.addData(">", "Running CV Vertical Correction");
                         telemetry.addData("ID: ", id);
                         AprilTagPoseFtc ftcPose = getFtcPose(id);
@@ -234,7 +235,6 @@ public class Blue_Left extends LinearOpMode {
                             double yError = (CV_TARGET_Y_DISTANCE - ftcPose.range) / CV_TARGET_Y_DISTANCE;
                             setMotorPowersDestructured(forwardVector.scale(-yError * CV_CORRECTION_SPEED));
                         }
-
                         telemetry.update();
                     }
 
