@@ -1,12 +1,17 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
+import android.util.Size;
+
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.MotorPowerVector;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.TrajectorySequence;
@@ -17,7 +22,10 @@ import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Odometry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 
 @Autonomous(name = "Blue Left")
@@ -68,12 +76,14 @@ public class Blue_Left extends LinearOpMode {
     private final double CV_TARGET_Y_DISTANCE = 4.0;
     private final double CV_CORRECTION_SPEED = 1.0;
     private final double CV_VERTICAL_TO_BACKDROP_TIME = 4.0;
+    private CVRelocalizer cvRelocalizer;
 
     private MotorPowerVector forwardVector = new MotorPowerVector(1.0, 1.0, 1.0, 1.0);
 
     private int id;
     private static final double P = 0.035, I = 0, D = 0;
-
+    AprilTagProcessor tagProcessor;
+    VisionPortal visionPortal;
 
     @Override
     public void runOpMode() {
@@ -85,19 +95,30 @@ public class Blue_Left extends LinearOpMode {
         slides = new Slides(hwMap, telemetry);
         transferController = new TransferController(arm, slides);
         gripper = new Gripper(hwMap);
-        detector = new Detector(hardwareMap, telemetry);
+        //detector = new Detector(hardwareMap, telemetry);
         fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
         odometry = new Odometry(hwMap);
-        CVRelocalizer cvRelocalizer = new CVRelocalizer(hardwareMap);
-
+        //cvRelocalizer = new CVRelocalizer(hardwareMap);
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         //CODE STARTS HERE
-        propPosition = "LEFT";
+        propPosition = "CENTER";
         gripper.gripLeft();
         gripper.gripRight();
         odometry.extendOdo();
         sleep(2000);
 
+        tagProcessor = AprilTagProcessor.easyCreateWithDefaults();
+        visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), tagProcessor);
         while (!isStarted() && !isStopRequested()) {
+            telemetry.addData(">", "Running CV Vertical Correction");
+            if(tagProcessor.getDetections().size() == 0){
+                telemetry.addData(">", "NO TAG");
+            }
+            else{
+                telemetry.addData("ID: ", tagProcessor.getDetections().get(0).id);
+            }
+            telemetry.update();
+            /*
             detector.detect();
             telemetry.addData("-", "INIT DONE");
             telemetry.addData("POSITION: ", detector.getPosition());
@@ -106,9 +127,10 @@ public class Blue_Left extends LinearOpMode {
             telemetry.addData("y", detector.getY());
             telemetry.addData("contour areas: ", detector.getContourAreas());
             telemetry.update();
+             */
         }
 
-        propPosition = detector.getPosition();
+        //propPosition = detector.getPosition();
         if (propPosition == "CENTER") {
             dropPosition = 36.5;
             dropPositionCompensationX = 0.001;
@@ -179,16 +201,35 @@ public class Blue_Left extends LinearOpMode {
 
                 //CV Relocalization Corrections
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+
                     ElapsedTime timer = new ElapsedTime();
+                    timer.reset();
                     int i = 0;
                     while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
+                        /*
+                        double x_correction = cvRelocalizer.getX(id);
+                        if(x_correction == 0){
+                            telemetry.addData(">", "NO APRIL TAG");
+                        }
+                        if(x_correction <= 1 && x_correction >= -1);{
+                            x_correction = 0;
+                        }
+                        double yaw_correction = cvRelocalizer.getYaw(id);
+                        if(yaw_correction <= 1.5 && yaw_correction >= 0){
+                            yaw_correction = 0;
+                        }
+                         */
+
                         telemetry.addData(">", "Running CV Vertical Correction");
-                        AprilTagPoseFtc ftcPose = cvRelocalizer.getFtcPose(id);
+                        telemetry.addData("ID: ", id);
+                        AprilTagPoseFtc ftcPose = getFtcPose(id);
 
                         if (ftcPose == null) {
                             telemetry.addLine("[BRUH]: April Tag was not detected.");
                             setMotorPowersDestructured(forwardVector.scale(0.0));
                         } else {
+                            telemetry.addLine("April Tag was detected.");
+
                             // Uses percent error formula
                             double yError = (CV_TARGET_Y_DISTANCE - ftcPose.range) / CV_TARGET_Y_DISTANCE;
                             setMotorPowersDestructured(forwardVector.scale(-yError * CV_CORRECTION_SPEED));
@@ -202,16 +243,6 @@ public class Blue_Left extends LinearOpMode {
                         setMotorPowersDestructured(forwardVector.scale(0.2));
                         telemetry.update();
                     }
-
-                    /*x_correction = cvRelocalizer.getX(id);
-                    if(x_correction <= 1 && x_correction >= -1);{
-                        x_correction = 0;
-                    }
-
-                    yaw_correction = cvRelocalizer.getYaw(id);
-                    if(yaw_correction <= 1.5 && yaw_correction >= 0){
-                        yaw_correction = 0;
-                    }*/
                 })
                 // .waitSeconds(CV_VERTICAL_TO_BACKDROP_TIME)
 
@@ -253,6 +284,7 @@ public class Blue_Left extends LinearOpMode {
 
         while (opModeIsActive()) {
             telemetry.addData("IMU", HWMap.readFromIMU());
+            telemetry.addData("April Tag Detects: ", tagProcessor.getDetections().size());
             telemetry.update();
             drive.update();
             slides.pid(true);
@@ -267,5 +299,16 @@ public class Blue_Left extends LinearOpMode {
                 vector.getRightBackPower(),
                 vector.getRightFrontPower()
         );
+    }
+
+    public AprilTagPoseFtc getFtcPose(int id) {
+        AprilTagDetection aprilTag;
+        for(AprilTagDetection tag : tagProcessor.getDetections()){
+            if(tag.id == id){
+                aprilTag = tag;
+                return aprilTag.ftcPose;
+            }
+        }
+        return null;
     }
 }
