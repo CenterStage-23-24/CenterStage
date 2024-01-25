@@ -54,23 +54,23 @@ public class Blue_Close_New extends LinearOpMode {
     //LEFT
     public static double yellowLeftX = 50.0;
     public static double yellowLeftY = 42.0;
-    public static double purpleLeftX = 12.0;
-    public static double purpleLeftY = 32.0;
-    public static double purpleLeftAngle = 190.0; //degree value of angle
+    public static double purpleLeftX = 18.0;
+    public static double purpleLeftY = 40.0;
+    public static double purpleLeftAngle = 270.0; //degree value of angle
 
     //CENTER
     public static double yellowCenterX = 50.0;
     public static double yellowCenterY = 38.0;
     public static double purpleCenterX = 12.0;
-    public static double purpleCenterY = 38.0;
+    public static double purpleCenterY = 35.0;
     public static double purpleCenterAngle = 270.0; //degree value of angle
 
     //RIGHT
     public static double yellowRightX = 50.0;
     public static double yellowRightY = 32.0;
-    public static double purpleRightX = 18.0;
+    public static double purpleRightX = 11.0;
     public static double purpleRightY = 32.0;
-    public static double purpleRightAngle = 270.0; //degree value of angle
+    public static double purpleRightAngle = 190.0; //degree value of angle
 
 
     /**
@@ -143,7 +143,7 @@ public class Blue_Close_New extends LinearOpMode {
             telemetry.addData("FILTER CONTOUR NUM: ", detector.getFilterContourNum());
             telemetry.addData("x", detector.getX());
             telemetry.addData("y", detector.getY());
-            telemetry.addData("contour areas: ", detector.getContourAreas());
+            //telemetry.addData("contour areas: ", detector.getContourAreas());
             telemetry.update();
         }
 
@@ -230,15 +230,13 @@ public class Blue_Close_New extends LinearOpMode {
                 .waitSeconds(0.5)
 
                 //Depositing Purple Pixel
-                .lineToLinearHeading(new Pose2d(40, 50, Math.toRadians(0)))
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> {
                     while (!transferController.extend("SPIKE")) {
                         slides.pid(true);
                         arm.updatePos();
                     }
                 })
-                .waitSeconds(2)
-                .lineToLinearHeading(new Pose2d(purplePixelX + purplePixelXOffset, yellowPixelY + yellowPixelYOffset, Math.toRadians(purplePixelAngle + purplePixelAngleOffset)))
+                .lineToLinearHeading(new Pose2d(purplePixelX + purplePixelXOffset, purplePixelY + purplePixelAngleOffset, Math.toRadians(purplePixelAngle + purplePixelAngleOffset)))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
                 })
@@ -251,7 +249,7 @@ public class Blue_Close_New extends LinearOpMode {
                         arm.updatePos();
                     }
                 })
-                .waitSeconds(2)
+                .waitSeconds(1.5)
                 .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(new Pose2d(parkX, parkY, Math.toRadians(0)), Math.toRadians(0))
                 .build();
