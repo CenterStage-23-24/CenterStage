@@ -1,0 +1,23 @@
+/*
+                        telemetry.addData(">", "Running CV Vertical Correction");
+                        if(tagProcessor.getDetections().size() == 0){
+                            telemetry.addData(">", "NO TAG");
+                        }
+                        else{
+                            telemetry.addData("ID: ", tagProcessor.getDetections().get(0).id);
+                        }
+                        telemetry.update();
+                         */
+                        /*
+                        double x_correction = cvRelocalizer.getX(id);
+                        if(x_correction == 0){
+                            telemetry.addData(">", "NO APRIL TAG");
+                        }
+                        if(x_correction <= 1 && x_correction >= -1);{
+                            x_correction = 0;
+                        }
+                        double yaw_correction = cvRelocalizer.getYaw(id);
+                        if(yaw_correction <= 1.5 && yaw_correction >= 0){
+                            yaw_correction = 0;
+                        }
+                         */

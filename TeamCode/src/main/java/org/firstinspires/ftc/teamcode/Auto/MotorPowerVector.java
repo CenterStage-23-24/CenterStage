@@ -1,4 +1,6 @@
-package org.firstinspires.ftc.teamcode.Auto.RoadRunner;
+package org.firstinspires.ftc.teamcode.Auto;
+
+import androidx.annotation.NonNull;
 
 public class MotorPowerVector {
     
@@ -39,5 +41,13 @@ public class MotorPowerVector {
 
     public double getRightFrontPower() {
         return rightFrontPower;
+    }
+
+    @NonNull
+    public String toString() {
+        return "leftFrontPower: " + leftFrontPower
+                + "\nleftBackPower: " + leftBackPower
+                + "\nrightBackPower: " + rightBackPower
+                + "\nrightFrontPower: " + rightFrontPower;
     }
 }
