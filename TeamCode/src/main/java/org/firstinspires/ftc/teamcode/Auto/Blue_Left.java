@@ -25,7 +25,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 
-@Autonomous(name = "Blue Left")
+@Autonomous(name = "Blue Left 1:35PM")
 @Config
 public class Blue_Left extends LinearOpMode {
 
@@ -72,8 +72,9 @@ public class Blue_Left extends LinearOpMode {
     private double yawCorrection;
     private final double CV_TARGET_Y_DISTANCE = 4.0;
     private final double CV_CAMERA_TO_BACKDROP_DIST = 17.0;
-    private final double CV_CORRECTION_SPEED = 0.3;
+    private final double CV_CORRECTION_SPEED = 1.0;
     private final double CV_VERTICAL_TO_BACKDROP_TIME = 4.0;
+    double lastRange = 0.0;
     private CVRelocalizer cvRelocalizer;
 
     private MotorPowerVector forwardVector = new MotorPowerVector(1.0, 1.0, 1.0, 1.0);
@@ -184,34 +185,56 @@ public class Blue_Left extends LinearOpMode {
                 //Reset to Original Position
                 .lineToConstantHeading(new Vector2d(startX+leftCompensation, 60))
 
-                //Approach to Backdrop
+                // Align with backdrop horizontally
                 .turn(Math.toRadians(90))
                 .lineToConstantHeading(new Vector2d(startX + 28, 60))
                 .strafeRight(aprilTagReadingPosition)
                 .waitSeconds(2)
 
-                //CV Relocalization Corrections
+                // Extend Arm
+                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                    gripper.gripRight();
+                    telemetry.addLine("Gripping right");
+                    telemetry.update();
+                })
+                .waitSeconds(1)
+                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                    while (!transferController.extend("BACKDROP")) {
+                        slides.pid(true);
+                        arm.updatePos();
+                        telemetry.addLine("Extending arm");
+                        telemetry.update();
+                    }
+                })
+                .waitSeconds(1)
+
+                // Align with backdrop vertically with CV
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     ElapsedTime timer = new ElapsedTime();
                     timer.reset();
 
                     while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
-                        telemetry.addData(">", "Running CV Vertical Correction");
+                        telemetry.addLine("Running CV Vertical Correction");
                         telemetry.addData("ID: ", id);
                         AprilTagPoseFtc ftcPose = getFtcPose(id);
 
                         MotorPowerVector motorPowers;
                         if (ftcPose == null) {
-                            telemetry.addLine("[BRUH]: April Tag was not detected.");
+                            telemetry.addLine("April Tag was not detected.");
+
                             motorPowers = forwardVector.scale(0.0);
                         } else {
-                            telemetry.addLine("April Tag was detected.");
-
                             // Uses percent error formula
                             double yError = (CV_TARGET_Y_DISTANCE - ftcPose.range) / (CV_CAMERA_TO_BACKDROP_DIST - CV_TARGET_Y_DISTANCE);
                             telemetry.addData("yError", yError);
+
+                            lastRange = ftcPose.range;
+                            telemetry.addData("ftcPose.range", ftcPose.range);
+
                             motorPowers = forwardVector.scale(-yError * CV_CORRECTION_SPEED);
                         }
+
+                        telemetry.addData("lastRange", lastRange);
 
                         setMotorPowersDestructured(motorPowers);
                         telemetry.addData("motorPowers:", motorPowers);
@@ -219,37 +242,22 @@ public class Blue_Left extends LinearOpMode {
                         telemetry.update();
                     }
 
-//                    while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME + 0.5) {
-//                        telemetry.addData(">", "Running CV Grace Period");
-//                        setMotorPowersDestructured(forwardVector.scale(0.2));
-//                        telemetry.update();
-//                    }
-                })
-                // .waitSeconds(CV_VERTICAL_TO_BACKDROP_TIME)
-
-                //.lineToConstantHeading(new Vector2d(startX + 28, 60 + x_correction))
-                //.turn(yaw_correction)
-
-                //Delivery
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    gripper.gripRight();
+                    /*while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME + 0.5) {
+                        telemetry.addLine("Running CV Grace Period");
+                        setMotorPowersDestructured(forwardVector.scale(0.2));
+                        telemetry.update();
+                    }*/
                 })
                 .waitSeconds(1)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
-                    while (!transferController.extend("BACKDROP")) {
-                        slides.pid(true);
-                        arm.updatePos();
-                    }
-                })
-                .waitSeconds(2)
-                .forward(13)
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.releaseRight();
+                    telemetry.addData("lastRange", lastRange);
+                    telemetry.addLine("Releasing right motor");
+                    telemetry.update();
                 })
-                .waitSeconds(0.5)
-                .back(4)
+                .waitSeconds(1)
 
-                //Reset for TeleOp
+                /*//Reset for TeleOp
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.retract()) {
                         slides.pid(true);
@@ -259,14 +267,14 @@ public class Blue_Left extends LinearOpMode {
                 .UNSTABLE_addTemporalMarkerOffset(0, ()->{
                     odometry.retractOdo();
                 })
-                .waitSeconds(1)
+                .waitSeconds(1)*/
                 .build();
         drive.followTrajectorySequenceAsync(trajectory);
 
         while (opModeIsActive()) {
-            telemetry.addData("IMU", HWMap.readFromIMU());
-            telemetry.addData("April Tag Detects: ", tagProcessor.getDetections().size());
-            telemetry.update();
+//            telemetry.addData("IMU", HWMap.readFromIMU());
+//            telemetry.addData("April Tag Detects: ", tagProcessor.getDetections().size());
+//            telemetry.update();
             drive.update();
             slides.pid(true);
             arm.updatePos();
