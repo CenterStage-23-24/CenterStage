@@ -1,0 +1,9 @@
+ftcPose.range: 9.263
+real dist: about 8.750
+
+ftcPose.range: 9.500
+real dist: about 7.500
+
+ftcPose.range: 9.830
+real dist: about 7.250
+
