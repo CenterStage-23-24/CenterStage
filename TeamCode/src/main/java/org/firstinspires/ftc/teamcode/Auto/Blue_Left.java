@@ -72,12 +72,22 @@ public class Blue_Left extends LinearOpMode {
     private double yawCorrection;
     private final double CV_TARGET_Y_DISTANCE = 4.0;
     private final double CV_CAMERA_TO_BACKDROP_DIST = 17.0;
+
+    // For every 100% error in pose, there is 100% motor power;
     private final double CV_CORRECTION_SPEED = 1.0;
+
+    private final double CV_TRANSLATION_WEIGHT = 1.0;
+    private final double CV_HEADING_WEIGHT = 1.0;
+
     private final double CV_VERTICAL_TO_BACKDROP_TIME = 4.0;
     double lastRange = 0.0;
     private CVRelocalizer cvRelocalizer;
 
-    private MotorPowerVector forwardVector = new MotorPowerVector(1.0, 1.0, 1.0, 1.0);
+    private final PowerVector ZERO_VECTOR = new PowerVector(0.0, 0.0, 0.0, 0.0);
+
+    private PowerVector MAX_VECTOR = new PowerVector(1.0, 1.0, 1.0, 1.0);
+    private PowerVector FORWARD_VECTOR = new PowerVector(1.0, 1.0, 1.0, 1.0);
+    private PowerVector TURN_VECTOR = new PowerVector(-1.0, -1.0, 1.0, 1.0);
 
     private int id;
     private static final double P = 0.035, I = 0, D = 0;
@@ -218,35 +228,24 @@ public class Blue_Left extends LinearOpMode {
                         telemetry.addData("ID: ", id);
                         AprilTagPoseFtc ftcPose = getFtcPose(id);
 
-                        MotorPowerVector motorPowers;
                         if (ftcPose == null) {
                             telemetry.addLine("April Tag was not detected.");
-
-                            motorPowers = forwardVector.scale(0.0);
-                        } else {
-                            // Uses percent error formula
-                            double yError = (CV_TARGET_Y_DISTANCE - ftcPose.range) / (CV_CAMERA_TO_BACKDROP_DIST - CV_TARGET_Y_DISTANCE);
-                            telemetry.addData("yError", yError);
-
-                            lastRange = ftcPose.range;
-                            telemetry.addData("ftcPose.range", ftcPose.range);
-
-                            motorPowers = forwardVector.scale(-yError * CV_CORRECTION_SPEED);
+                            telemetry.update();
+                            setMotorPowersDestructured(new PowerVector(0, 0, 0, 0));
+                            break;
                         }
 
-                        telemetry.addData("lastRange", lastRange);
+                        PowerVector motorPowers = ZERO_VECTOR
+                                .add(verticalAlignment(ftcPose).scale(CV_TRANSLATION_WEIGHT))
+                                .add(headingAlignment(ftcPose).scale(CV_HEADING_WEIGHT))
+                                .limit(CV_CORRECTION_SPEED);
 
-                        setMotorPowersDestructured(motorPowers);
+                        telemetry.addData("lastRange", lastRange);
                         telemetry.addData("motorPowers:", motorPowers);
 
+                        setMotorPowersDestructured(motorPowers);
                         telemetry.update();
                     }
-
-                    /*while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME + 0.5) {
-                        telemetry.addLine("Running CV Grace Period");
-                        setMotorPowersDestructured(forwardVector.scale(0.2));
-                        telemetry.update();
-                    }*/
                 })
                 .waitSeconds(1)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
@@ -281,13 +280,31 @@ public class Blue_Left extends LinearOpMode {
         }
     }
 
-    private void setMotorPowersDestructured(MotorPowerVector vector)  {
+    private void setMotorPowersDestructured(PowerVector vector)  {
         drive.setMotorPowers(
                 vector.getLeftFrontPower(),
                 vector.getLeftBackPower(),
                 vector.getRightBackPower(),
                 vector.getRightFrontPower()
         );
+    }
+
+    private PowerVector verticalAlignment(AprilTagPoseFtc ftcPose) {
+        lastRange = ftcPose.range;
+        telemetry.addData("ftcPose.range", ftcPose.range);
+
+        // Uses percent error formula
+        double yError = (CV_TARGET_Y_DISTANCE - ftcPose.range) / (CV_CAMERA_TO_BACKDROP_DIST - CV_TARGET_Y_DISTANCE);
+        telemetry.addData("yError", yError);
+
+        return FORWARD_VECTOR.scale(-yError).limit(1.0);
+    }
+
+    private PowerVector headingAlignment(AprilTagPoseFtc ftcPose) {
+        double headingError = ftcPose.yaw / 180.0;
+        telemetry.addData("headingError", headingError);
+
+        return TURN_VECTOR.scale(-headingError).limit(1.0);
     }
 
     public AprilTagPoseFtc getFtcPose(int id) {
