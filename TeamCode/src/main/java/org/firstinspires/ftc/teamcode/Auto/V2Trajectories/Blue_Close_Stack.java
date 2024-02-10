@@ -5,22 +5,28 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.arcrobotics.ftclib.util.Timing;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Auto.Detector;
+import org.firstinspires.ftc.teamcode.Auto.RoadRunner.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.Auto.RoadRunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Axons.Arm;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Gripper;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.HWMap;
+import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Odometry;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.Slides;
 import org.firstinspires.ftc.teamcode.TeleOp.Mechanisms.TransferController;
 
+import java.util.Timer;
+import java.util.concurrent.TimeUnit;
+
 @Autonomous
 @Config
-public class Blue_Close_New extends LinearOpMode {
+public class Blue_Close_Stack extends LinearOpMode {
 
     //TODO: Field Tuning Variables
     //LEFT
@@ -105,6 +111,7 @@ public class Blue_Close_New extends LinearOpMode {
     private Arm arm;
     private Slides slides;
     private Gripper gripper;
+    private Intake intake;
     private Odometry odometry;
 
     /**
@@ -125,8 +132,10 @@ public class Blue_Close_New extends LinearOpMode {
         transferController = new TransferController(arm, slides);
         gripper = new Gripper(hwMap);
         detector = new Detector(hardwareMap, telemetry);
+        intake = new Intake(hwMap, telemetry);
         odometry = new Odometry(hwMap);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        Timing.Timer timer = new Timing.Timer(1000000000, TimeUnit.MILLISECONDS);
 
         /**
          * Starting point in program
@@ -222,7 +231,7 @@ public class Blue_Close_New extends LinearOpMode {
                     }
                 })
                 .waitSeconds(2)
-                .setTangent(Math.toRadians(270))
+                .setTangent(Math.toRadians(180))
                 .splineToSplineHeading(new Pose2d(yellowPixelX + yellowPixelXOffset, yellowPixelY + yellowPixelYOffset, Math.toRadians(yellowPixelAngle + yellowPixelAngleOffset)), Math.toRadians(0))
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseRight();
@@ -251,30 +260,49 @@ public class Blue_Close_New extends LinearOpMode {
                 })
                 .waitSeconds(1.5)
                 .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(parkX, parkY, Math.toRadians(0)), Math.toRadians(0))
+                .lineToLinearHeading(new Pose2d(12, 59, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(-24, 59, Math.toRadians(0)))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    intake.intake();
+                })
+                .splineToConstantHeading(new Vector2d(-60,36), Math.toRadians(180))
+                .waitSeconds(2)
+                .setTangent(0)
+                .splineToConstantHeading(new Vector2d(-36,59), Math.toRadians(0), SampleMecanumDrive.getVelocityConstraint(35.0, 2.5, DriveConstants.TRACK_WIDTH), SampleMecanumDrive.getAccelerationConstraint(30.0))
+                .splineToConstantHeading(new Vector2d(0, 58), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(40, 41), Math.toRadians(0))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    gripper.gripLeft();
+                    gripper.gripRight();
+                })
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    while (!transferController.extend("BACKDROP")) {
+                        slides.pid(true);
+                        arm.updatePos();
+                    }
+                })
+                .waitSeconds(2)
+                .splineToConstantHeading(new Vector2d(50, 34), Math.toRadians(0))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    gripper.releaseLeft();
+                })
+                .waitSeconds(0.5)
+                .splineToConstantHeading(new Vector2d(45, 34), Math.toRadians(0))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    while (!transferController.retract()) {
+                        slides.pid(true);
+                        arm.updatePos();
+                    }
+                })
                 .build();
         drive.followTrajectorySequenceAsync(trajectory);
 
         while (opModeIsActive()) {
+            timer.start();
             drive.update();
-            if (backDropExtend) {
-                if (transferController.extend("BACKDROP")) {
-                    backDropExtend = false;
-                }
-            }
-            if (spikeExtend) {
-                if (transferController.extend("SPIKE")) {
-                    spikeExtend = false;
-                }
-            }
-            if (retract) {
-                if (transferController.retract()) {
-                    retract = false;
-                }
-            }
             slides.pid(true);
             arm.updatePos();
-
+            telemetry.addData("looptime", timer.elapsedTime());
             telemetry.update();
         }
     }
