@@ -68,7 +68,7 @@ public class PowerVector {
     }
 
     public PowerVector limit(double maxMagnitude) {
-        if (maxMagnitude > maxMagnitudeValue())
+        if (maxMagnitudeValue() > maxMagnitude)
             return normalize(maxMagnitude);
         else
             return this;
