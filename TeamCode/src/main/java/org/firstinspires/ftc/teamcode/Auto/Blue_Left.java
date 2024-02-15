@@ -29,7 +29,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.concurrent.TimeUnit;
 
 
-@Autonomous(name = "Blue Left 4:15PM")
+@Autonomous(name = "Blue Left 16:51")
 @Config
 public class Blue_Left extends LinearOpMode {
 
@@ -70,21 +70,22 @@ public class Blue_Left extends LinearOpMode {
     public static double backDistance;
     public static double leftCompensation;
     private final int camOffset = 5; //Tune
-    // xCorrection, yCorrection, and yawCorrection are relative to the camera CV, not RoadRunner
-    private double xCorrection;
-    private double yCorrection;
-    private double yawCorrection;
+
     private final double CV_TARGET_Y_DISTANCE = 4.0;
     private final double CV_CAMERA_TO_BACKDROP_DIST = 17.0;
 
-    // For every 100% error in pose, there is 100% motor power;
     private final double CV_CORRECTION_SPEED = 1.0;
 
     private final double CV_TRANSLATION_WEIGHT = 0.5;
     private final double CV_HEADING_WEIGHT = 10.0;
 
+    private final double CV_HEADING_CORRECTION_TIME = 4.0;
     private final double CV_VERTICAL_TO_BACKDROP_TIME = 4.0;
-    double lastRange = 0.0;
+
+    double currentHeading = 0.0;
+    double currentHeadingError = 0.0;
+    double currentVertical = 0.0;
+    double currentVerticalError = 0.0;
     private CVRelocalizer cvRelocalizer;
 
     private final PowerVector ZERO_VECTOR = new PowerVector(0.0, 0.0, 0.0, 0.0);
@@ -238,9 +239,12 @@ public class Blue_Left extends LinearOpMode {
                 .waitSeconds(1)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.extend("BACKDROP")) {
+                        telemetry.addLine("Extending arm");
+
                         slides.pid(true);
                         arm.updatePos();
-                        telemetry.addLine("Extending arm");
+
+                        processDebugInfo();
                         telemetry.update();
                     }
                 })
@@ -252,7 +256,7 @@ public class Blue_Left extends LinearOpMode {
 
                     while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
                         telemetry.addLine("Running CV Heading Correction");
-                        telemetry.addData("ID: ", id);
+                        telemetry.addData("ID", id);
                         AprilTagPoseFtc ftcPose = getFtcPose(id);
 
                         if (ftcPose == null) {
@@ -262,13 +266,14 @@ public class Blue_Left extends LinearOpMode {
                             continue;
                         }
 
+                        double timeScaling = 1.0 - (timer.time() / CV_HEADING_CORRECTION_TIME);
                         PowerVector motorPowers = ZERO_VECTOR
-                                .add(headingAlignment(ftcPose).scale(CV_HEADING_WEIGHT * (1.0 - (timer.time() / CV_VERTICAL_TO_BACKDROP_TIME))))
+                                .add(headingAlignment(ftcPose).scale(CV_HEADING_WEIGHT * timeScaling))
                                 .limit(CV_CORRECTION_SPEED);
 
                         telemetry.addData("timer.time()", timer.time());
-                        telemetry.addData("lastRange", lastRange);
                         telemetry.addData("motorPowers", motorPowers);
+                        printDebugInfo();
 
                         setMotorPowersDestructured(motorPowers);
                         telemetry.update();
@@ -283,7 +288,7 @@ public class Blue_Left extends LinearOpMode {
 
                     while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
                         telemetry.addLine("Running CV Vertical Correction");
-                        telemetry.addData("ID: ", id);
+                        telemetry.addData("ID", id);
                         AprilTagPoseFtc ftcPose = getFtcPose(id);
 
                         if (ftcPose == null) {
@@ -293,27 +298,76 @@ public class Blue_Left extends LinearOpMode {
                             continue;
                         }
 
+                        double timeScaling = 1.0 - (timer.time() / CV_HEADING_CORRECTION_TIME);
                         PowerVector motorPowers = ZERO_VECTOR
-                                .add(headingAlignment(ftcPose).scale(CV_HEADING_WEIGHT / 5 * (1.0 - (timer.time() / CV_VERTICAL_TO_BACKDROP_TIME))))
-                                .add(verticalAlignment(ftcPose).scale(CV_TRANSLATION_WEIGHT))
+                                .add(headingAlignment(ftcPose).scale(CV_HEADING_WEIGHT / 5 * timeScaling))
+                                .add(forwardAlignment(ftcPose).scale(CV_TRANSLATION_WEIGHT))
                                 .limit(CV_CORRECTION_SPEED);
 
                         telemetry.addData("timer.time()", timer.time());
-                        telemetry.addData("lastRange", lastRange);
                         telemetry.addData("motorPowers", motorPowers);
+                        printDebugInfo();
 
                         setMotorPowersDestructured(motorPowers);
                         telemetry.update();
+                    }
+
+                    timer.reset();
+                    while (timer.time() < 0.1) {
+                        setMotorPowersDestructured(FORWARD_VECTOR.scale(CV_TRANSLATION_WEIGHT));
                     }
                 })
                 .waitSeconds(1)
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.releaseRight();
-                    telemetry.addData("lastRange", lastRange);
                     telemetry.addLine("Releasing right motor");
+                    processDebugInfo();
                     telemetry.update();
                 })
                 .waitSeconds(1)
+
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                    ElapsedTime timer = new ElapsedTime();
+                    timer.reset();
+
+                    boolean aprilTagDetected = false;
+                    while (!aprilTagDetected) {
+                        AprilTagPoseFtc ftcPose = getFtcPose(id);
+
+                        if (ftcPose != null) {
+                            aprilTagDetected = true;
+                        }
+
+                        setMotorPowersDestructured(FORWARD_VECTOR.scale(-1).scale(CV_TRANSLATION_WEIGHT));
+                    }
+
+
+                    while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
+                        telemetry.addLine("Running CV Vertical Correction");
+                        telemetry.addData("ID", id);
+                        AprilTagPoseFtc ftcPose = getFtcPose(id);
+
+                        if (ftcPose == null) {
+                            telemetry.addLine("April Tag was not detected.");
+                            telemetry.update();
+                            setMotorPowersDestructured(new PowerVector(0, 0, 0, 0));
+                            continue;
+                        }
+
+                        double timeScaling = 1.0 - (timer.time() / CV_HEADING_CORRECTION_TIME);
+                        PowerVector motorPowers = ZERO_VECTOR
+                                .add(headingAlignment(ftcPose).scale(CV_HEADING_WEIGHT / 5 * timeScaling))
+                                .add(backwardAlignment(ftcPose).scale(CV_TRANSLATION_WEIGHT))
+                                .limit(CV_CORRECTION_SPEED);
+
+                        telemetry.addData("timer.time()", timer.time());
+                        telemetry.addData("motorPowers", motorPowers);
+                        printDebugInfo();
+
+                        setMotorPowersDestructured(motorPowers);
+                        telemetry.update();
+                    }
+                })
 
                 /*//Reset for TeleOp
                 .UNSTABLE_addTemporalMarkerOffset(0, () ->{
@@ -348,22 +402,66 @@ public class Blue_Left extends LinearOpMode {
         );
     }
 
-    private PowerVector verticalAlignment(AprilTagPoseFtc ftcPose) {
-        lastRange = ftcPose.range;
-        telemetry.addData("ftcPose.range", ftcPose.range);
+    private double getBackwardError(AprilTagPoseFtc ftcPose) {
+        double verticalError = (CV_CAMERA_TO_BACKDROP_DIST - ftcPose.y) / (CV_CAMERA_TO_BACKDROP_DIST - CV_TARGET_Y_DISTANCE);
 
-        // Uses percent error formula
-        double yError = (CV_TARGET_Y_DISTANCE - ftcPose.range) / (CV_CAMERA_TO_BACKDROP_DIST - CV_TARGET_Y_DISTANCE);
-        telemetry.addData("yError", yError);
+        currentVertical = ftcPose.y;
+        currentVerticalError = verticalError;
 
-        return FORWARD_VECTOR.scale(-yError).limit(1.0);
+        return verticalError;
+    }
+
+    private PowerVector backwardAlignment(AprilTagPoseFtc ftcPose) {
+        double verticalError = getBackwardError(ftcPose);
+        return FORWARD_VECTOR.scale(-verticalError).limit(1.0);
+    }
+
+    private double getForwardError(AprilTagPoseFtc ftcPose) {
+        double verticalError = (CV_TARGET_Y_DISTANCE - ftcPose.y) / (CV_CAMERA_TO_BACKDROP_DIST - CV_TARGET_Y_DISTANCE);
+
+        currentVertical = ftcPose.y;
+        currentVerticalError = verticalError;
+
+        return verticalError;
+    }
+
+    private PowerVector forwardAlignment(AprilTagPoseFtc ftcPose) {
+        double verticalError = getForwardError(ftcPose);
+        return FORWARD_VECTOR.scale(-verticalError).limit(1.0);
+    }
+
+    private double getHeadingError(AprilTagPoseFtc ftcPose) {
+        double headingError = ftcPose.yaw / 180.0;
+
+        currentHeading = ftcPose.yaw;
+        currentHeadingError = headingError;
+
+        return headingError;
     }
 
     private PowerVector headingAlignment(AprilTagPoseFtc ftcPose) {
-        double headingError = ftcPose.yaw / 180.0;
-        telemetry.addData("headingError", headingError);
-
+        double headingError = getHeadingError(ftcPose);
         return TURN_VECTOR.scale(-headingError).limit(1.0);
+    }
+
+    private void printDebugInfo() {
+        telemetry.addData("currentHeading", currentHeading);
+        telemetry.addData("currentHeadingError", currentHeadingError);
+        telemetry.addData("currentVertical", currentVertical);
+        telemetry.addData("currentVerticalError", currentVerticalError);
+    }
+
+    private void processDebugInfo() {
+        AprilTagPoseFtc ftcPose = getFtcPose(id);
+
+        if (ftcPose == null) {
+            telemetry.addLine("April Tag was not detected.");
+            return;
+        }
+
+        getHeadingError(ftcPose);
+        getForwardError(ftcPose);
+        printDebugInfo();
     }
 
     public AprilTagPoseFtc getFtcPose(int id) {
