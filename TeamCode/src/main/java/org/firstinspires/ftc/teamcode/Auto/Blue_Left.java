@@ -58,6 +58,7 @@ public class Blue_Left extends LinearOpMode {
     private FieldCentricDrive fieldCentricDrive;
     private Detector detector;
     private Odometry odometry;
+    private CVRelocalizer relocalizer;
 
     //Variables for spike mark
     private String propPosition;
@@ -71,12 +72,16 @@ public class Blue_Left extends LinearOpMode {
     public static double leftCompensation;
     private final int camOffset = 5; //Tune
 
+    private final double CV_HEADING_INITIAL_DIFFERENCE_FROM_BACKDROP = 0.0;
+    private final double CV_VERTICAL_INITIAL_DISTANCE_FROM_BACKDROP = 17.0;
+    private final double CV_HORIZONTAL_INITIAL_DISTANCE_FROM_BACKDROP = 0.0;
+
     private final double CV_CORRECTION_SPEED = 1.0;
 
     private final double CV_HEADING_CORRECTION_TIME = 4.0;
+    private final double CV_HEADING_CORRECTION_TARGET_HEADING = 0.0;
     private final double CV_HEADING_CORRECTION_HEADING_WEIGHT = 10.0;
-
-    private final double CV_VERTICAL_INITIAL_DISTANCE_FROM_BACKDROP = 17.0;
+    private final double CV_HEADING_CORRECTION_TRANSLATION_WEIGHT = 0.0;
 
     private final double CV_FORWARD_TIME = 4.0;
     private final double CV_FORWARD_TARGET_DISTANCE_FROM_BACKDROP = 4.0;
@@ -123,34 +128,15 @@ public class Blue_Left extends LinearOpMode {
         gripper.gripLeft();
         gripper.gripRight();
         odometry.extendOdo();
+
+        relocalizer = new CVRelocalizer(this, drive, "Webcam 1");
         sleep(2000);
 
-
-        tagProcessor = AprilTagProcessor.easyCreateWithDefaults();
-        visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(WebcamName.class, "Webcam 1"), tagProcessor);
-
-        // Exposure stuffs
-        // Wait for the camera to be open
-        if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
-            telemetry.addData("Camera", "Waiting");
-            telemetry.update();
-            while (!isStopRequested() && (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
-                sleep(20);
-            }
-            telemetry.addData("Camera", "Ready");
-            telemetry.update();
-        }
-        ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
-        if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
-            exposureControl.setMode(ExposureControl.Mode.Manual);
-            sleep(50);
-        }
-        exposureControl.setExposure((long)1, TimeUnit.MILLISECONDS);
-        sleep(20);
-
-        GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
-        gainControl.setGain(255);
-        sleep(20);
+        relocalizer.init(new CVRelocalizer.Pose(
+                CV_HEADING_INITIAL_DIFFERENCE_FROM_BACKDROP,
+                CV_VERTICAL_INITIAL_DISTANCE_FROM_BACKDROP,
+                CV_HORIZONTAL_INITIAL_DISTANCE_FROM_BACKDROP
+        ));
 
         while (!isStarted() && !isStopRequested()) {
             /*
@@ -255,71 +241,28 @@ public class Blue_Left extends LinearOpMode {
                 .waitSeconds(1)
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    ElapsedTime timer = new ElapsedTime();
-                    timer.reset();
-
-                    while (timer.time() < CV_HEADING_CORRECTION_TIME) {
-                        telemetry.addLine("Running CV Heading Correction");
-                        telemetry.addData("ID", id);
-                        AprilTagPoseFtc ftcPose = getFtcPose(id);
-
-                        if (ftcPose == null) {
-                            telemetry.addLine("April Tag was not detected.");
-                            telemetry.update();
-                            setMotorPowersDestructured(new PowerVector(0, 0, 0, 0));
-                            continue;
-                        }
-
-                        double timeScaling = 1.0 - (timer.time() / CV_HEADING_CORRECTION_TIME);
-                        PowerVector motorPowers = ZERO_VECTOR
-                                .add(headingAlignment(ftcPose).scale(CV_HEADING_CORRECTION_HEADING_WEIGHT * timeScaling))
-                                .limit(CV_CORRECTION_SPEED);
-
-                        telemetry.addData("timer.time()", timer.time());
-                        telemetry.addData("motorPowers", motorPowers);
-                        printDebugInfo();
-
-                        setMotorPowersDestructured(motorPowers);
-                        telemetry.update();
-                    }
+                    relocalizer.moveToTarget(new CVRelocalizer.MoveDescription(
+                            CV_HEADING_CORRECTION_TIME, new CVRelocalizer.Pose(
+                                    CV_HEADING_CORRECTION_TARGET_HEADING,
+                                    CV_VERTICAL_INITIAL_DISTANCE_FROM_BACKDROP,
+                                    CV_HORIZONTAL_INITIAL_DISTANCE_FROM_BACKDROP
+                            ),
+                            CV_HEADING_CORRECTION_HEADING_WEIGHT,
+                            CV_HEADING_CORRECTION_TRANSLATION_WEIGHT,
+                            CV_CORRECTION_SPEED,
+                            true,
+                            "CV Heading Correction"
+                    );
                 })
                 .waitSeconds(1)
 
                 // Align with backdrop vertically with CV
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    ElapsedTime timer = new ElapsedTime();
-                    timer.reset();
+                    relocalizer.moveToTarget(new CVRelocalizer.MoveDescription(
+                            CV_FORWARD_TIME, new CVRelocalizer.Pose(
 
-                    while (timer.time() < CV_FORWARD_TIME) {
-                        telemetry.addLine("Running CV Vertical Correction");
-                        telemetry.addData("ID", id);
-                        AprilTagPoseFtc ftcPose = getFtcPose(id);
-
-                        if (ftcPose == null) {
-                            telemetry.addLine("April Tag was not detected.");
-                            telemetry.update();
-                            setMotorPowersDestructured(new PowerVector(0, 0, 0, 0));
-                            continue;
-                        }
-
-                        double timeScaling = 1.0 - (timer.time() / CV_FORWARD_TIME);
-                        PowerVector motorPowers = ZERO_VECTOR
-                                .add(headingAlignment(ftcPose).scale(CV_FORWARD_HEADING_WEIGHT * timeScaling))
-                                .add(forwardAlignment(ftcPose).scale(CV_FORWARD_TRANSLATION_WEIGHT))
-                                .limit(CV_CORRECTION_SPEED);
-
-                        telemetry.addData("timer.time()", timer.time());
-                        telemetry.addData("motorPowers", motorPowers);
-                        printDebugInfo();
-
-                        setMotorPowersDestructured(motorPowers);
-                        telemetry.update();
-                    }
-
-//                    timer.reset();
-//                    while (timer.time() < 0.01) {
-//                        setMotorPowersDestructured(FORWARD_VECTOR.scale(CV_FORWARD_TRANSLATION_WEIGHT));
-//                    }
+                            ),
+                    ));
                 })
                 .waitSeconds(1)
                 /*.UNSTABLE_addTemporalMarkerOffset(0, () ->{

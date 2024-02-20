@@ -88,14 +88,14 @@ public class CVRelocalizer {
         public double horizontal;
         public double vertical;
 
-        public Pose(double heading, double horizontal, double vertical) {
+        public Pose(double heading, double vertical, double horizontal) {
             this.heading = heading;
-            this.horizontal = horizontal;
             this.vertical = vertical;
+            this.horizontal = horizontal;
         }
 
         public Pose clone() {
-            return new Pose(heading, horizontal, vertical);
+            return new Pose(heading, vertical, horizontal);
         }
     }
 
@@ -163,6 +163,8 @@ public class CVRelocalizer {
             setMotorPowersDestructured(motorPowers);
             telemetry.update();
         }
+
+        initialPose = targetPose.clone();
     }
 
     private double getHeadingError(double target, AprilTagPoseFtc ftcPose) {
