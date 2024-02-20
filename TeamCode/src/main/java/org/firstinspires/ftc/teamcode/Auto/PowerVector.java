@@ -24,6 +24,15 @@ public class PowerVector {
         return Math.max(max, Math.abs(rightFrontPower));
     }
 
+    public PowerVector clone() {
+        return new PowerVector(
+                leftFrontPower,
+                leftBackPower,
+                rightBackPower,
+                rightFrontPower
+        );
+    }
+
     public PowerVector add(PowerVector other) {
         return new PowerVector(
                 leftFrontPower + other.getLeftFrontPower(),

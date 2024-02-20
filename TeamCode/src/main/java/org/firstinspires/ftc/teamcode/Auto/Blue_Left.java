@@ -71,22 +71,27 @@ public class Blue_Left extends LinearOpMode {
     public static double leftCompensation;
     private final int camOffset = 5; //Tune
 
-    private final double CV_TARGET_Y_DISTANCE = 4.0;
-    private final double CV_CAMERA_TO_BACKDROP_DIST = 17.0;
-
     private final double CV_CORRECTION_SPEED = 1.0;
 
-    private final double CV_TRANSLATION_WEIGHT = 0.5;
-    private final double CV_HEADING_WEIGHT = 10.0;
-
     private final double CV_HEADING_CORRECTION_TIME = 4.0;
-    private final double CV_VERTICAL_TO_BACKDROP_TIME = 4.0;
+    private final double CV_HEADING_CORRECTION_HEADING_WEIGHT = 10.0;
+
+    private final double CV_VERTICAL_INITIAL_DISTANCE_FROM_BACKDROP = 17.0;
+
+    private final double CV_FORWARD_TIME = 4.0;
+    private final double CV_FORWARD_TARGET_DISTANCE_FROM_BACKDROP = 4.0;
+    private final double CV_FORWARD_HEADING_WEIGHT = 2.0;
+    private final double CV_FORWARD_TRANSLATION_WEIGHT = 0.5;
+
+    private final double CV_BACKWARD_TIME = 4.0;
+    private final double CV_BACKWARD_TARGET_DISTANCE_FROM_BACKDROP = 17.0;
+    private final double CV_BACKWARD_HEADING_WEIGHT = 2.0;
+    private final double CV_BACKWARD_TRANSLATION_WEIGHT = 0.5;
 
     double currentHeading = 0.0;
     double currentHeadingError = 0.0;
     double currentVertical = 0.0;
     double currentVerticalError = 0.0;
-    private CVRelocalizer cvRelocalizer;
 
     private final PowerVector ZERO_VECTOR = new PowerVector(0.0, 0.0, 0.0, 0.0);
 
@@ -112,7 +117,6 @@ public class Blue_Left extends LinearOpMode {
         //detector = new Detector(hardwareMap, telemetry);
         fieldCentricDrive = new FieldCentricDrive(hwMap, telemetry);
         odometry = new Odometry(hwMap);
-        //cvRelocalizer = new CVRelocalizer(hardwareMap);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         //CODE STARTS HERE
         propPosition = "CENTER";
@@ -195,12 +199,12 @@ public class Blue_Left extends LinearOpMode {
         TrajectorySequence trajectory = drive.trajectorySequenceBuilder(new Pose2d(startX, startY, startHeading))
 
                 //Extension for Spike Mark Delivery
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                /*.UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     while (!transferController.extend("SPIKE")) {
                         slides.pid(true);
                         arm.updatePos();
                     }
-                })
+                })*/
                 .waitSeconds(1)
 
                 //Approach to Spike Mark
@@ -208,16 +212,16 @@ public class Blue_Left extends LinearOpMode {
 
                 //Spike Mark Compensation and Delivery
                 .lineToLinearHeading(new Pose2d(startX + dropPositionCompensationX, dropPosition + dropPositionCompensationY, startHeading + Math.toRadians(turnAngleSpike)))
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                /*.UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     gripper.releaseLeft();
-                })
+                })*/
                 .waitSeconds(0.5)
-                .UNSTABLE_addTemporalMarkerOffset(0, () -> {
+                /*.UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     while (!transferController.retract()) {
                         slides.pid(true);
                         arm.updatePos();
                     }
-                })
+                })*/
                 .waitSeconds(2)
                 .lineToLinearHeading(new Pose2d(startX+1, dropPosition+backDistance, startHeading))
 
@@ -231,13 +235,13 @@ public class Blue_Left extends LinearOpMode {
                 .waitSeconds(2)
 
                 // Extend Arm
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                /*.UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.gripRight();
                     telemetry.addLine("Gripping right");
                     telemetry.update();
-                })
+                })*/
                 .waitSeconds(1)
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                /*.UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     while (!transferController.extend("BACKDROP")) {
                         telemetry.addLine("Extending arm");
 
@@ -247,14 +251,14 @@ public class Blue_Left extends LinearOpMode {
                         processDebugInfo();
                         telemetry.update();
                     }
-                })
+                })*/
                 .waitSeconds(1)
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     ElapsedTime timer = new ElapsedTime();
                     timer.reset();
 
-                    while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
+                    while (timer.time() < CV_HEADING_CORRECTION_TIME) {
                         telemetry.addLine("Running CV Heading Correction");
                         telemetry.addData("ID", id);
                         AprilTagPoseFtc ftcPose = getFtcPose(id);
@@ -268,7 +272,7 @@ public class Blue_Left extends LinearOpMode {
 
                         double timeScaling = 1.0 - (timer.time() / CV_HEADING_CORRECTION_TIME);
                         PowerVector motorPowers = ZERO_VECTOR
-                                .add(headingAlignment(ftcPose).scale(CV_HEADING_WEIGHT * timeScaling))
+                                .add(headingAlignment(ftcPose).scale(CV_HEADING_CORRECTION_HEADING_WEIGHT * timeScaling))
                                 .limit(CV_CORRECTION_SPEED);
 
                         telemetry.addData("timer.time()", timer.time());
@@ -286,7 +290,7 @@ public class Blue_Left extends LinearOpMode {
                     ElapsedTime timer = new ElapsedTime();
                     timer.reset();
 
-                    while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
+                    while (timer.time() < CV_FORWARD_TIME) {
                         telemetry.addLine("Running CV Vertical Correction");
                         telemetry.addData("ID", id);
                         AprilTagPoseFtc ftcPose = getFtcPose(id);
@@ -298,10 +302,10 @@ public class Blue_Left extends LinearOpMode {
                             continue;
                         }
 
-                        double timeScaling = 1.0 - (timer.time() / CV_HEADING_CORRECTION_TIME);
+                        double timeScaling = 1.0 - (timer.time() / CV_FORWARD_TIME);
                         PowerVector motorPowers = ZERO_VECTOR
-                                .add(headingAlignment(ftcPose).scale(CV_HEADING_WEIGHT / 5 * timeScaling))
-                                .add(forwardAlignment(ftcPose).scale(CV_TRANSLATION_WEIGHT))
+                                .add(headingAlignment(ftcPose).scale(CV_FORWARD_HEADING_WEIGHT * timeScaling))
+                                .add(forwardAlignment(ftcPose).scale(CV_FORWARD_TRANSLATION_WEIGHT))
                                 .limit(CV_CORRECTION_SPEED);
 
                         telemetry.addData("timer.time()", timer.time());
@@ -312,18 +316,18 @@ public class Blue_Left extends LinearOpMode {
                         telemetry.update();
                     }
 
-                    timer.reset();
-                    while (timer.time() < 0.1) {
-                        setMotorPowersDestructured(FORWARD_VECTOR.scale(CV_TRANSLATION_WEIGHT));
-                    }
+//                    timer.reset();
+//                    while (timer.time() < 0.01) {
+//                        setMotorPowersDestructured(FORWARD_VECTOR.scale(CV_FORWARD_TRANSLATION_WEIGHT));
+//                    }
                 })
                 .waitSeconds(1)
-                .UNSTABLE_addTemporalMarkerOffset(0, () ->{
+                /*.UNSTABLE_addTemporalMarkerOffset(0, () ->{
                     gripper.releaseRight();
                     telemetry.addLine("Releasing right motor");
                     processDebugInfo();
                     telemetry.update();
-                })
+                })*/
                 .waitSeconds(1)
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
@@ -338,11 +342,11 @@ public class Blue_Left extends LinearOpMode {
                             aprilTagDetected = true;
                         }
 
-                        setMotorPowersDestructured(FORWARD_VECTOR.scale(-1).scale(CV_TRANSLATION_WEIGHT));
+                        setMotorPowersDestructured(FORWARD_VECTOR.scale(-1).scale(CV_BACKWARD_TRANSLATION_WEIGHT));
                     }
 
 
-                    while (timer.time() < CV_VERTICAL_TO_BACKDROP_TIME) {
+                    while (timer.time() < CV_BACKWARD_TIME) {
                         telemetry.addLine("Running CV Vertical Correction");
                         telemetry.addData("ID", id);
                         AprilTagPoseFtc ftcPose = getFtcPose(id);
@@ -354,10 +358,9 @@ public class Blue_Left extends LinearOpMode {
                             continue;
                         }
 
-                        double timeScaling = 1.0 - (timer.time() / CV_HEADING_CORRECTION_TIME);
+                        double timeScaling = 1.0 - (timer.time() / CV_BACKWARD_TIME);
                         PowerVector motorPowers = ZERO_VECTOR
-                                .add(headingAlignment(ftcPose).scale(CV_HEADING_WEIGHT / 5 * timeScaling))
-                                .add(backwardAlignment(ftcPose).scale(CV_TRANSLATION_WEIGHT))
+                                .add(backwardAlignment(ftcPose).scale(CV_BACKWARD_TRANSLATION_WEIGHT))
                                 .limit(CV_CORRECTION_SPEED);
 
                         telemetry.addData("timer.time()", timer.time());
@@ -403,7 +406,7 @@ public class Blue_Left extends LinearOpMode {
     }
 
     private double getBackwardError(AprilTagPoseFtc ftcPose) {
-        double verticalError = (CV_CAMERA_TO_BACKDROP_DIST - ftcPose.y) / (CV_CAMERA_TO_BACKDROP_DIST - CV_TARGET_Y_DISTANCE);
+        double verticalError = (CV_BACKWARD_TARGET_DISTANCE_FROM_BACKDROP - ftcPose.y) / Math.abs(CV_BACKWARD_TARGET_DISTANCE_FROM_BACKDROP - CV_FORWARD_TARGET_DISTANCE_FROM_BACKDROP);
 
         currentVertical = ftcPose.y;
         currentVerticalError = verticalError;
@@ -417,7 +420,7 @@ public class Blue_Left extends LinearOpMode {
     }
 
     private double getForwardError(AprilTagPoseFtc ftcPose) {
-        double verticalError = (CV_TARGET_Y_DISTANCE - ftcPose.y) / (CV_CAMERA_TO_BACKDROP_DIST - CV_TARGET_Y_DISTANCE);
+        double verticalError = (CV_FORWARD_TARGET_DISTANCE_FROM_BACKDROP - ftcPose.y) / Math.abs(CV_FORWARD_TARGET_DISTANCE_FROM_BACKDROP - CV_VERTICAL_INITIAL_DISTANCE_FROM_BACKDROP);
 
         currentVertical = ftcPose.y;
         currentVerticalError = verticalError;
