@@ -252,7 +252,7 @@ public class Blue_Left extends LinearOpMode {
                             CV_CORRECTION_SPEED,
                             true,
                             "CV Heading Correction"
-                    );
+                    ));
                 })
                 .waitSeconds(1)
 
@@ -260,8 +260,15 @@ public class Blue_Left extends LinearOpMode {
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
                     relocalizer.moveToTarget(new CVRelocalizer.MoveDescription(
                             CV_FORWARD_TIME, new CVRelocalizer.Pose(
-
+                                CV_HEADING_CORRECTION_TARGET_HEADING,
+                                CV_FORWARD_TARGET_DISTANCE_FROM_BACKDROP,
+                                CV_HORIZONTAL_INITIAL_DISTANCE_FROM_BACKDROP
                             ),
+                            CV_FORWARD_HEADING_WEIGHT,
+                            CV_FORWARD_TRANSLATION_WEIGHT,
+                            CV_CORRECTION_SPEED,
+                            true,
+                            "CV Vertical Correction"
                     ));
                 })
                 .waitSeconds(1)
@@ -274,45 +281,18 @@ public class Blue_Left extends LinearOpMode {
                 .waitSeconds(1)
 
                 .UNSTABLE_addTemporalMarkerOffset(0, () -> {
-                    ElapsedTime timer = new ElapsedTime();
-                    timer.reset();
-
-                    boolean aprilTagDetected = false;
-                    while (!aprilTagDetected) {
-                        AprilTagPoseFtc ftcPose = getFtcPose(id);
-
-                        if (ftcPose != null) {
-                            aprilTagDetected = true;
-                        }
-
-                        setMotorPowersDestructured(FORWARD_VECTOR.scale(-1).scale(CV_BACKWARD_TRANSLATION_WEIGHT));
-                    }
-
-
-                    while (timer.time() < CV_BACKWARD_TIME) {
-                        telemetry.addLine("Running CV Vertical Correction");
-                        telemetry.addData("ID", id);
-                        AprilTagPoseFtc ftcPose = getFtcPose(id);
-
-                        if (ftcPose == null) {
-                            telemetry.addLine("April Tag was not detected.");
-                            telemetry.update();
-                            setMotorPowersDestructured(new PowerVector(0, 0, 0, 0));
-                            continue;
-                        }
-
-                        double timeScaling = 1.0 - (timer.time() / CV_BACKWARD_TIME);
-                        PowerVector motorPowers = ZERO_VECTOR
-                                .add(backwardAlignment(ftcPose).scale(CV_BACKWARD_TRANSLATION_WEIGHT))
-                                .limit(CV_CORRECTION_SPEED);
-
-                        telemetry.addData("timer.time()", timer.time());
-                        telemetry.addData("motorPowers", motorPowers);
-                        printDebugInfo();
-
-                        setMotorPowersDestructured(motorPowers);
-                        telemetry.update();
-                    }
+                    relocalizer.moveToTarget(new CVRelocalizer.MoveDescription(
+                            CV_BACKWARD_TIME, new CVRelocalizer.Pose(
+                                    CV_HEADING_CORRECTION_TARGET_HEADING,
+                                    CV_BACKWARD_TARGET_DISTANCE_FROM_BACKDROP,
+                                    CV_HORIZONTAL_INITIAL_DISTANCE_FROM_BACKDROP
+                            ),
+                            CV_BACKWARD_HEADING_WEIGHT,
+                            CV_BACKWARD_TRANSLATION_WEIGHT,
+                            CV_CORRECTION_SPEED,
+                            true,
+                            "CV Horizontal Correction"
+                    ));
                 })
 
                 /*//Reset for TeleOp
